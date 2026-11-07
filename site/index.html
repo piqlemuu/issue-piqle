@@ -154,6 +154,7 @@ h1,h2{font-weight:800}
 .rside .big.fresh{color:var(--hot)}
 .rside small{display:block;color:var(--sub);font-size:.7rem}
 @media (max-width:380px){.rcard{grid-template-columns:60px 1fr auto;gap:9px}.rthumb{width:60px;height:46px}}
+.rk .rowlink{display:grid;grid-template-columns:2.2em 1fr auto;column-gap:8px;align-items:baseline;padding:11px 2px;text-decoration:none;color:inherit}
 </style>
 </head>
 <body>
@@ -192,7 +193,7 @@ h1,h2{font-weight:800}
 
 <!-- ① 지금 뜨는 이슈 -->
 <section id="sec-top">
-  <div class="sh"><div><h2>실시간 이슈 순위</h2><p id="top-desc">여러 언론사가 동시에 다룬 이슈부터 보여드려요 · 누르면 관련 기사</p></div></div>
+  <div class="sh"><div><h2>실시간 이슈 순위</h2><p id="top-desc">여러 언론사가 동시에 다룬 이슈부터 보여드려요 · 누르면 자세히</p></div></div>
   <ol class="rk" id="top"></ol>
   <button class="more" id="top-more">실시간 이슈 순위 더 보기</button>
 </section>
@@ -276,13 +277,13 @@ function korNum(n) {
 const newsList = arr => `<ul class="news">${arr.map(n => `<li><a href="${esc(url(n.link))}" target="_blank" rel="noopener nofollow">${esc(n.title)}</a><small>${esc(n.source)}${n.time ? " · " + ago(n.time) : ""}</small></li>`).join("")}</ul>`;
 
 // 순위 한 줄: "01. 키워드   61°" / "온도 61도 · 대표 기사 제목"
-function row(it, i, line2) {
-  return `<li class="${heat(it.temp)}"><details><summary>
+function row(it, i, line2) {               // 누르면 이슈 상세 페이지로
+  return `<li class="${heat(it.temp)}"><a class="rowlink" href="issue.html?k=${encodeURIComponent(it.keyword)}">
     <span class="num">${pad(i)}.</span>
     <span class="ttl">${esc(it.keyword)}${badge(it.change)}</span>
     <span class="deg">${it.temp}°</span>
     <span class="ln2">${line2 ?? esc(it.headline)}</span>
-  </summary>${newsList(it.news)}</details></li>`;
+  </a></li>`;
 }
 const emptyMsg = '<li class="empty">아직 모은 이슈가 없어요. 잠시 후 다시 확인해 주세요.</li>';
 
@@ -311,7 +312,7 @@ function renderRising() {
         ? `<div class="big">${it.ratio}배</div><small>3시간 전보다</small>`
         : `<div class="big">${it.last3 ?? it.recent}건</div><small>최근 3시간</small>`;
     const t = it.temp ?? 50;
-    return `<a class="rcard" href="${esc(url(it.news[0]?.link))}" target="_blank" rel="noopener nofollow">
+    return `<a class="rcard" href="issue.html?k=${encodeURIComponent(it.keyword)}">
       <div class="rthumb">${thumb}</div>
       <div class="rbody"><p class="k">${esc(it.keyword)}</p><div class="h">${esc(it.headline)}</div>
         <div class="m"><b>${t}도 ${tempWord(t)}</b> · ${it.latest ? ago(it.latest) : ""} · 매체 ${it.sources}곳</div></div>
@@ -377,16 +378,16 @@ function renderHero() {
   const S = [];
   const t = (DATA.top || [])[0];
   if (t) S.push({badge: "🏆 지금 1위 이슈", title: t.keyword, desc: t.headline, img: findThumb(t.keyword), art: `${t.temp}°`,
-    meta: `<b>${t.temp}도 ${tempWord(t.temp)}</b> · 매체 ${t.sources}곳 · 기사 ${t.articles}건`, href: "#sec-top"});
+    meta: `<b>${t.temp}도 ${tempWord(t.temp)}</b> · 매체 ${t.sources}곳 · 기사 ${t.articles}건`, href: "issue.html?k=" + encodeURIComponent(t.keyword)});
   const r = (DATA.rising || [])[0];
   if (r) S.push({badge: "🚀 급부상 1위", title: r.keyword, desc: r.headline, img: findThumb(r.keyword), art: "막 뜨는 중",
-    meta: `<b>최근 2시간 기사 ${r.recent}건</b> · 매체 ${r.sources}곳`, href: "#sec-rising"});
+    meta: `<b>최근 2시간 기사 ${r.recent}건</b> · 매체 ${r.sources}곳`, href: "issue.html?k=" + encodeURIComponent(r.keyword)});
   const v = (DATA.videos || [])[0];
   if (v) S.push({badge: "🎬 지금 1위 영상", title: v.title, desc: v.channel, img: v.thumb, ext: true, href: url(v.link),
     meta: v.gain != null ? `<b>+${korNum(v.gain)}·${v.hrs}시간</b> · 조회수 ${korNum(v.views)}회` : `조회수 ${korNum(v.views)}회`});
   const p = (DATA.people || [])[0];
   if (p) S.push({badge: "🙋 화제의 인물 1위", title: p.keyword, desc: p.headline, img: findThumb(p.keyword), art: "화제의 인물",
-    meta: `<b>언급 ${p.articles}건</b> · 매체 ${p.sources}곳`, href: "#sec-people"});
+    meta: `<b>언급 ${p.articles}건</b> · 매체 ${p.sources}곳`, href: "issue.html?k=" + encodeURIComponent(p.keyword)});
   const m = EXTRA.meme;
   if (m) S.push({badge: "🥒 오늘의 밈절임", title: m.word, desc: m.meaning, img: m.page ? m.page.replace(/\.html$/, ".svg") : "", art: "밈절임",
     meta: `<b>요즘 뜨는 밈</b> · ${esc(m.date)}`, href: m.page && /^[\w.-]+\.html$/.test(m.page) ? m.page : "memes.html"});

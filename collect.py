@@ -258,35 +258,48 @@ def old_rank_map(lst, key="keyword"):
 
 
 def rising(scored, now):
-    """최근 RISING_HOURS 시간에 기사가 몰린 이슈"""
+    """최근 RISING_HOURS 시간에 기사가 몰린 이슈. 모자라면 최근 기사 증가가 큰 순으로 채움"""
     recent_cut = (now - timedelta(hours=RISING_HOURS)).isoformat()
-    cand = []
+    c3 = (now - timedelta(hours=3)).isoformat()
+    c6 = (now - timedelta(hours=6)).isoformat()
+
+    def metrics(arts):
+        last3 = sum(1 for a in arts if a["time"] >= c3)
+        prev3 = sum(1 for a in arts if c6 <= a["time"] < c3)
+        return last3, prev3
+
+    strict, loose = [], []
     for score, kw, n_art, n_src, arts in scored[:80]:
         recent = [a for a in arts if a["time"] >= recent_cut]
+        last3, prev3 = metrics(arts)
         if len(recent) >= 2 and len(recent) / n_art >= 0.5:
-            cand.append((len(recent) * 3 + n_src, kw, n_art, n_src, arts, len(recent)))
-    cand.sort(key=lambda x: (-x[0], x[1]))
+            strict.append((len(recent) * 3 + n_src, kw, n_art, n_src, arts, len(recent), False))
+        elif last3 >= 1:                                   # 채우기 후보: 최근 3시간 증가가 큰 순
+            loose.append(((last3 - prev3) * 3 + last3 * 2 + n_src, kw, n_art, n_src, arts, len(recent), True))
+    strict.sort(key=lambda x: (-x[0], x[1]))
+    loose.sort(key=lambda x: (-x[0], x[1]))
+
     out, used = [], []
-    for s, kw, n_art, n_src, arts, n_recent in cand:
+    for s, kw, n_art, n_src, arts, n_recent, filled in strict + loose:
         ids = {a["link"] for a in arts}
         if any(len(ids & u) / len(ids) > 0.7 for u in used):
             continue
         used.append(ids)
         news = sorted(arts, key=lambda a: a["time"], reverse=True)
-        # 상승 표시: 최근 3시간 기사 수 ÷ 그 전 3시간 기사 수 (그 전에 없었으면 '방금 뜸')
-        c3 = (now - timedelta(hours=3)).isoformat()
-        c6 = (now - timedelta(hours=6)).isoformat()
-        last3 = sum(1 for a in arts if a["time"] >= c3)
-        prev3 = sum(1 for a in arts if c6 <= a["time"] < c3)
+        last3, prev3 = metrics(arts)
         out.append({"keyword": kw, "recent": n_recent, "articles": n_art, "sources": n_src,
                     "headline": news[0]["title"], "latest": news[0]["time"], "score": s,
-                    "is_new": prev3 == 0, "ratio": round(last3 / prev3, 1) if prev3 else None,
+                    "filled": filled, "last3": last3,
+                    # '방금' 표시는 조건을 통과한 이슈 중 3시간 전에 기사가 없던 것만
+                    "is_new": (not filled) and prev3 == 0,
+                    "ratio": round(last3 / prev3, 1) if prev3 else None,
                     "news": news[:NEWS_PER_ISSUE]})
         if len(out) >= RISING_N:
             break
-    top = out[0]["score"] if out else 1
-    for it in out:                                       # 온도 (급부상 안에서 비교, 30~100도)
-        it["temp"] = round(30 + 70 * it.pop("score") / top)
+    n = len(out)
+    for i, it in enumerate(out):                         # 온도: 순서대로 100도 → 40도
+        it.pop("score")
+        it["temp"] = round(100 - i * 60 / max(n - 1, 1))
     return out
 
 

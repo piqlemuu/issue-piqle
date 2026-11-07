@@ -62,6 +62,12 @@ STOPWORDS = set("""
 정치 사회 세계 스포츠 국회 대통령 장관 의원 주요 전국 지역 서울 사실 문제 추진
 피해 사태 사고 조사 착수 수용 상정 불발 공방 활약 참석 주연 출연 발매 매진 시작 급증 급등
 급락 상승 하락 증가 감소 신제품 이용자 첫방송 방송 소식 입장 반응 의혹 혐의 체포 구속 사망
+개최 국민 제정 지원 요청 수상 확대 촉구 사업 송치 VS 의장 여성 위기 강화 추가 개선 협력
+선정 운영 참여 마련 실시 도입 점검 대응 논의 합의 반대 찬성 비판 지적 강조 주장 제안 검토
+출범 개막 개장 오픈 기념 행사 축제 설명 판결 선고 기소 수사 조사 압수수색 혐의 재판 처리
+통과 의결 가결 부결 경신 기록 달성 유지 전환 변경 연장 중단 재개 완료 성공 실패 공식
+이유 방법 모습 의미 효과 영향 우려 가운데 사이 직후 직전 당일 연속 이틀 사흘 매년 처음
+청년 시민 주민 학생 아이 부모 노인 어린이 가족 남성 여성 국민들 업계 기업 회사 단체
 씨 등 것 수 때 중
 """.split())
 
@@ -74,6 +80,12 @@ TITLES_BEFORE = set("배우 가수 감독 선수 개그맨 개그우먼 방송�
 NOT_PEOPLE = set("""
 국회 여당 야당 민주당 국민의힘 정부 대통령실 현직 전직 신임 차기 당시 미국 중국 일본 북한
 서울시 경기도 부산시 법원 검찰 경찰 기업 삼성 현대 국가대표 대표팀 한국 우리 각국 여야
+""".split())
+# 호칭 뒤에 오는 이름(김OO 의원)은 흔한 성씨로 시작하는 3글자만 사람으로 봄
+SURNAMES = set("""
+김 이 박 최 정 강 조 윤 장 임 한 오 서 신 권 황 안 송 류 유 전 홍 고 문 양 손 배 백 허 남 심 노
+하 곽 성 차 주 우 구 민 진 나 지 엄 채 원 천 방 공 현 함 변 염 여 추 도 소 석 선 설 마 길 연 위
+표 명 기 반 왕 금 옥 육 인 맹 제 모 탁 국 어 은 편 용 예 경 봉 사 부 피 감 태 승 범 탄
 """.split())
 # 이런 글자로 끝나면 사람이 아니라 기관·회사로 봄
 ORG_SUFFIX = ("증권", "전자", "은행", "그룹", "공사", "재단", "협회", "위원회", "카드", "보험",
@@ -196,8 +208,11 @@ def pick(scored, n, old_ranks):
     issues, used = [], []
     for score, kw, n_art, n_src, arts in scored:
         ids = {a["link"] for a in arts}
-        if any(len(ids & u) / len(ids) > 0.7 for u in used):
+        if any(len(ids & u) / len(ids) > 0.6 for u in used):
             continue                       # 이미 뽑힌 이슈와 기사가 거의 같음 → 같은 이슈
+        if any((kw in it["keyword"] or it["keyword"] in kw)
+               and len(ids & {a["link"] for a in it["_arts"]}) / len(ids) > 0.3 for it in issues):
+            continue                       # '의장' 과 '국회의장' 처럼 겹치는 단어 → 하나만
         used.append(ids)
         news = sorted(arts, key=lambda a: a["time"], reverse=True)[:NEWS_PER_ISSUE]
         issues.append({"keyword": kw, "score": score, "articles": n_art, "sources": n_src,
@@ -257,9 +272,11 @@ def find_people(articles):
         ws = [strip_josa(w) for w in tokens(a["title"])]
         for i, w in enumerate(ws):
             if w in TITLES_AFTER and i > 0:
-                cand = ws[i - 1]
+                cand = ws[i - 1]     # 김OO 의원 → 성씨로 시작하는 3글자만
+                if not (len(cand) == 3 and cand[0] in SURNAMES):
+                    continue
             elif w in TITLES_BEFORE and i + 1 < len(ws):
-                cand = ws[i + 1]
+                cand = ws[i + 1]     # 배우 OOO → 예명도 허용
             else:
                 continue
             if (re.fullmatch(r"[가-힣]{2,4}", cand) and cand not in NOT_PEOPLE

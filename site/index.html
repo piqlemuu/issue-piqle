@@ -115,6 +115,45 @@ footer nav a{margin-right:12px;text-decoration:underline}
 h1,h2,h3,.logo,.ttl,.kw,.k,.w,.t,.gain,.deg,.rk,.num{letter-spacing:-.03em}
 .logo{font-weight:900;letter-spacing:-.05em}
 h1,h2{font-weight:800}
+
+/* 대표 슬라이드 */
+.hero{position:relative;margin:12px 0 4px}
+.hero[hidden]{display:none}
+.hs{display:flex;overflow-x:auto;scroll-snap-type:x mandatory;scrollbar-width:none;border-radius:20px}
+.hs::-webkit-scrollbar{display:none}
+.slide{flex:0 0 100%;scroll-snap-align:start;background:linear-gradient(135deg,var(--card),var(--soft));border:1px solid var(--line);border-radius:20px;padding:12px;display:grid;grid-template-columns:1fr;gap:12px;text-decoration:none;color:inherit;box-sizing:border-box}
+.sl-img{position:relative;aspect-ratio:16/9;border-radius:14px;overflow:hidden;background:var(--soft)}
+.sl-img img{width:100%;height:100%;object-fit:cover;display:block}
+.sl-art{width:100%;height:100%;display:flex;align-items:center;justify-content:center;flex-direction:column;background:radial-gradient(circle at 30% 20%,rgba(126,154,99,.35),transparent 60%),var(--text);color:var(--bg);text-align:center;padding:16px;box-sizing:border-box}
+.sl-art b{font-size:2rem;font-weight:900;letter-spacing:-.05em;line-height:1.15;word-break:keep-all}
+.sl-art small{color:var(--hot);font-weight:800;margin-top:6px;font-size:1rem}
+.badge-top{position:absolute;left:10px;top:10px;background:var(--card);color:var(--text);font-weight:800;font-size:.8rem;padding:5px 11px;border-radius:999px;box-shadow:0 1px 4px rgba(0,0,0,.12)}
+.sl-txt{padding:0 4px 4px}
+.sl-txt h3{margin:0 0 6px;font-size:1.25rem;font-weight:900;letter-spacing:-.04em;line-height:1.3}
+.sl-txt p{margin:0 0 6px;color:var(--text);font-size:.92rem;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.sl-txt .mt{color:var(--sub);font-size:.8rem}
+.sl-txt .mt b{color:var(--hot)}
+.hcount{position:absolute;right:12px;bottom:12px;background:rgba(17,17,17,.72);color:#fff;font-size:.74rem;font-weight:800;padding:4px 10px;border-radius:999px}
+.harr{position:absolute;top:30%;width:34px;height:34px;border-radius:50%;border:1px solid var(--line);background:var(--card);cursor:pointer;font-size:1rem;line-height:1;display:none}
+.harr.l{left:-6px}.harr.r{right:-6px}
+@media (min-width:640px){.slide{grid-template-columns:1.1fr 1fr;align-items:center}.harr{display:block}}
+
+/* 급부상 이슈 카드 목록 */
+.rl{display:grid;gap:10px}
+.rcard{display:grid;grid-template-columns:76px 1fr auto;gap:12px;align-items:center;background:var(--card);border:1px solid var(--line);border-radius:16px;padding:12px;text-decoration:none;color:inherit}
+.rthumb{width:76px;height:56px;border-radius:10px;overflow:hidden;background:var(--soft)}
+.rthumb img{width:100%;height:100%;object-fit:cover;display:block}
+.rthumb .ra{width:100%;height:100%;display:flex;align-items:center;justify-content:center;background:radial-gradient(circle at 30% 20%,rgba(126,154,99,.45),transparent 65%),var(--text);color:var(--bg);font-weight:900;font-size:1.25rem;letter-spacing:-.05em}
+.rbody{min-width:0}
+.rbody .k{font-weight:800;font-size:1rem;letter-spacing:-.03em;margin:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.rbody .h{color:var(--text);opacity:.8;font-size:.84rem;margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.rbody .m{color:var(--sub);font-size:.76rem;margin-top:3px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.rbody .m b{color:var(--hot)}
+.rside{text-align:right;white-space:nowrap}
+.rside .big{font-weight:900;font-size:1.05rem;color:var(--cool);letter-spacing:-.03em}
+.rside .big.fresh{color:var(--hot)}
+.rside small{display:block;color:var(--sub);font-size:.7rem}
+@media (max-width:380px){.rcard{grid-template-columns:60px 1fr auto;gap:9px}.rthumb{width:60px;height:46px}}
 </style>
 </head>
 <body>
@@ -135,6 +174,14 @@ h1,h2{font-weight:800}
     </div>
   </div>
 </header>
+
+<!-- ⓪ 대표 슬라이드: 1위 이슈 · 급부상 1위 · 1위 영상 · 인물 1위 · 밈절임 -->
+<div class="hero" id="hero" hidden>
+  <div class="hs" id="hs"></div>
+  <button class="harr l" data-d="-1" aria-label="이전">‹</button>
+  <button class="harr r" data-d="1" aria-label="다음">›</button>
+  <span class="hcount" id="hcount"></span>
+</div>
 
 <!-- ⑥ 급상승 영상 -->
 <section id="sec-videos">
@@ -157,8 +204,8 @@ h1,h2{font-weight:800}
 <!-- ② 급부상 이슈 -->
 <section id="sec-rising">
   <div class="sh"><div><h2>급부상 이슈</h2><p>최근 2시간 사이 기사가 몰리기 시작한 이슈</p></div>
-    <div class="arrows" data-rail="rising"><button data-d="-1" aria-label="이전">‹</button><button data-d="1" aria-label="다음">›</button></div></div>
-  <div class="rail" id="rising"></div>
+    <div class="arrows" id="rpage"><button data-d="-1" aria-label="이전">‹</button><button data-d="1" aria-label="다음">›</button></div></div>
+  <div class="rl" id="rising"></div>
 </section>
 
 
@@ -251,15 +298,27 @@ function renderTop() {
   $("top-more").textContent = topOpen ? "접기" : `실시간 이슈 순위 ${list.length}위까지 보기`;
 }
 
+let rPage = 0;
+const R_PER = 4;                                   // 한 번에 보여줄 카드 수
 function renderRising() {
   const r = DATA.rising || [];
   $("sec-rising").hidden = !r.length;
-  $("rising").innerHTML = r.map(it => `
-    <a class="rc" href="${esc(url(it.news[0]?.link))}" target="_blank" rel="noopener nofollow">
-      <span class="pill">최근 ${it.recent}건 ↑</span>
-      <div class="k">${esc(it.keyword)}</div>
-      <div class="h">${esc(it.headline)}</div>
-    </a>`).join("");
+  const pages = Math.max(1, Math.ceil(r.length / R_PER));
+  rPage = Math.min(rPage, pages - 1);
+  $("rpage").hidden = pages < 2;
+  $("rising").innerHTML = r.slice(rPage * R_PER, rPage * R_PER + R_PER).map(it => {
+    const th = findThumb(it.keyword);
+    const thumb = th ? `<img src="${esc(th)}" alt="" loading="lazy">` : `<div class="ra">${esc([...it.keyword][0] || "")}</div>`;
+    const side = it.is_new || it.ratio == null
+      ? `<div class="big fresh">↑ 방금</div><small>막 뜨는 중</small>`
+      : `<div class="big">${it.ratio}배</div><small>3시간 전보다</small>`;
+    const t = it.temp ?? 50;
+    return `<a class="rcard" href="${esc(url(it.news[0]?.link))}" target="_blank" rel="noopener nofollow">
+      <div class="rthumb">${thumb}</div>
+      <div class="rbody"><p class="k">${esc(it.keyword)}</p><div class="h">${esc(it.headline)}</div>
+        <div class="m"><b>${t}도 ${tempWord(t)}</b> · ${it.latest ? ago(it.latest) : ""} · 매체 ${it.sources}곳</div></div>
+      <div class="rside">${side}</div></a>`;
+  }).join("");
 }
 
 function renderPeople() {
@@ -300,9 +359,67 @@ function renderVideos() {
     </a>`).join("");
 }
 
+
+let EXTRA = {videos: [], meme: null};
+const tempWord = t => t >= 80 ? "뜨거움" : t >= 60 ? "들썩임" : t >= 40 ? "따끈함" : "잔잔함";
+function findThumb(word) {                 // 관련 유튜브 썸네일 (뉴스 사진은 저작권 때문에 안 써요)
+  const w = String(word || "").toLowerCase();
+  const v = EXTRA.videos.find(x => x.title && x.title.toLowerCase().includes(w));
+  return v ? v.thumb : "";
+}
+function slideHTML(o) {
+  const src = /^https?:\/\//.test(o.img || "") || /^[\w.-]+\.svg$/.test(o.img || "") ? o.img : "";
+  const img = src ? `<img src="${esc(src)}" alt="" loading="lazy">`
+    : `<div class="sl-art"><b>${esc(o.title)}</b>${o.art ? `<small>${esc(o.art)}</small>` : ""}</div>`;
+  return `<a class="slide" href="${esc(o.href)}" ${o.ext ? 'target="_blank" rel="noopener"' : ""}>
+    <div class="sl-img">${img}<span class="badge-top">${o.badge}</span></div>
+    <div class="sl-txt"><h3>${esc(o.title)}</h3>${o.desc ? `<p>${esc(o.desc)}</p>` : ""}<div class="mt">${o.meta}</div></div></a>`;
+}
+let heroTimer = null, heroIdx = 0;
+function renderHero() {
+  const S = [];
+  const t = (DATA.top || [])[0];
+  if (t) S.push({badge: "🏆 지금 1위 이슈", title: t.keyword, desc: t.headline, img: findThumb(t.keyword), art: `${t.temp}°`,
+    meta: `<b>${t.temp}도 ${tempWord(t.temp)}</b> · 매체 ${t.sources}곳 · 기사 ${t.articles}건`, href: "#sec-top"});
+  const r = (DATA.rising || [])[0];
+  if (r) S.push({badge: "🚀 급부상 1위", title: r.keyword, desc: r.headline, img: findThumb(r.keyword), art: "막 뜨는 중",
+    meta: `<b>최근 2시간 기사 ${r.recent}건</b> · 매체 ${r.sources}곳`, href: "#sec-rising"});
+  const v = (DATA.videos || [])[0];
+  if (v) S.push({badge: "🎬 지금 1위 영상", title: v.title, desc: v.channel, img: v.thumb, ext: true, href: url(v.link),
+    meta: v.gain != null ? `<b>+${korNum(v.gain)}·${v.hrs}시간</b> · 조회수 ${korNum(v.views)}회` : `조회수 ${korNum(v.views)}회`});
+  const p = (DATA.people || [])[0];
+  if (p) S.push({badge: "🙋 화제의 인물 1위", title: p.keyword, desc: p.headline, img: findThumb(p.keyword), art: "화제의 인물",
+    meta: `<b>언급 ${p.articles}건</b> · 매체 ${p.sources}곳`, href: "#sec-people"});
+  const m = EXTRA.meme;
+  if (m) S.push({badge: "🥒 오늘의 밈절임", title: m.word, desc: m.meaning, img: m.page ? m.page.replace(/\.html$/, ".svg") : "", art: "밈절임",
+    meta: `<b>요즘 뜨는 밈</b> · ${esc(m.date)}`, href: m.page && /^[\w.-]+\.html$/.test(m.page) ? m.page : "memes.html"});
+  $("hero").hidden = !S.length;
+  $("hs").innerHTML = S.map(slideHTML).join("");
+  heroIdx = Math.min(heroIdx, Math.max(S.length - 1, 0));
+  updateCount();
+  clearInterval(heroTimer);
+  if (S.length > 1) heroTimer = setInterval(() => goHero(1), 5000);   // 5초마다 넘김
+}
+function updateCount() {
+  const n = $("hs").children.length;
+  $("hcount").textContent = n ? `${heroIdx + 1} / ${n}` : "";
+}
+function goHero(d) {
+  const n = $("hs").children.length; if (!n) return;
+  heroIdx = (heroIdx + d + n) % n;
+  $("hs").scrollTo({left: heroIdx * $("hs").clientWidth, behavior: "smooth"});
+  updateCount();
+}
+async function loadExtra() {               // 썸네일 찾기용 영상 목록 + 최신 밈절임
+  try { const c = await (await fetch("content.json?t=" + Date.now())).json(); EXTRA.videos = c.youtube || []; } catch (e) {}
+  try { const m = await (await fetch("memes.json?t=" + Date.now())).json(); EXTRA.meme = (m.dictionary || [])[0] || null; } catch (e) {}
+  if (window.__EXTRA__) EXTRA = window.__EXTRA__;
+  if (DATA) { renderHero(); renderRising(); }
+}
+
 function render() {
   if (!DATA) return;
-  renderTop(); renderRising(); renderPeople(); renderCats(); renderSearch(); renderVideos();
+  renderHero(); renderTop(); renderRising(); renderPeople(); renderCats(); renderSearch(); renderVideos();
 }
 
 async function load() {
@@ -318,9 +435,20 @@ async function load() {
 }
 
 // 버튼 동작
+$("rpage").onclick = e => {
+  const b = e.target.closest("button"); if (!b) return;
+  const pages = Math.max(1, Math.ceil((DATA.rising || []).length / R_PER));
+  rPage = (rPage + (+b.dataset.d) + pages) % pages; renderRising();
+};
+document.querySelectorAll(".harr").forEach(b => b.onclick = () => { goHero(+b.dataset.d); clearInterval(heroTimer); });
+$("hs").addEventListener("scroll", () => {          // 손으로 넘겼을 때 번호 맞추기
+  const i = Math.round($("hs").scrollLeft / $("hs").clientWidth);
+  if (i !== heroIdx) { heroIdx = i; updateCount(); }
+}, {passive: true});
+$("hs").addEventListener("touchstart", () => clearInterval(heroTimer), {passive: true});
 $("top-more").onclick = () => { topOpen = !topOpen; renderTop(); };
 $("chips").onclick = e => { const b = e.target.closest("button"); if (b) { curCat = b.dataset.id; renderCats(); } };
-document.querySelectorAll(".arrows").forEach(a => a.onclick = e => {
+document.querySelectorAll(".arrows[data-rail]").forEach(a => a.onclick = e => {
   const b = e.target.closest("button"); if (!b) return;
   const rail = $(a.dataset.rail); rail.scrollBy({left: b.dataset.d * rail.clientWidth * .8, behavior: "smooth"});
 });
@@ -340,6 +468,7 @@ pref("theme", "data-theme", matchMedia("(prefers-color-scheme: dark)").matches ?
 pref("fsize", "data-fs", "m");
 
 load();
+loadExtra();
 setInterval(load, 10 * 60 * 1000);   // 화면을 켜 두면 10분마다 새로고침
 </script>
 <script>/* 스팸 봇이 이메일을 못 긁어 가도록, 누를 때만 주소를 만듭니다 */

@@ -1,4 +1,4 @@
-# 이슈레이더: 나만의 이슈 순위 사이트
+# 이슈피클: 나만의 이슈 순위 사이트
 
 30분마다 뉴스·검색어·영상을 자동으로 모아 한 화면에 보여주는 실시간 이슈 사이트예요.
 
@@ -10,6 +10,9 @@
 | 분야별 이슈 (정치·경제·사회·연예·스포츠·IT·과학·세계) | 구글 뉴스 분야별 | 없음 |
 | 검색 급상승 | 구글 트렌드 | 없음 |
 | 지금 뜨는 영상 | YouTube | 무료 API 키 (5단계) |
+| 콘텐츠 랭킹 › 유튜브 TOP 100 (분야별) | YouTube | 같은 키 (5단계) |
+| 콘텐츠 랭킹 › 박스오피스 | 영화진흥위원회 | 무료 API 키 (6단계) |
+| 콘텐츠 랭킹 › 넷플릭스 TOP 10 | 넷플릭스 공식 주간 순위 | 없음 |
 
 화면 밝기(밝게/편하게/어둡게)와 글자 크기 조절도 들어 있어요.
 서버나 유료 서비스 없이 **GitHub 하나로 무료 운영**할 수 있어요. (도메인 구입만 선택 사항)
@@ -25,6 +28,7 @@
 | `collect.py` | 뉴스를 모아 순위를 계산하는 프로그램 |
 | `.github/workflows/update.yml` | 30분마다 `collect.py` 를 실행하고 사이트를 갱신하는 자동 설정 |
 | `site/index.html` | 사이트 메인 화면 |
+| `site/content.html` | 콘텐츠 랭킹 (유튜브 · 박스오피스 · 넷플릭스) |
 | `site/data.json` | 수집 결과 (자동으로 바뀌니 건드리지 마세요) |
 | `site/about.html`, `copyright.html`, `privacy.html`, `terms.html` | 소개·저작권 정책·개인정보처리방침·이용약관 (애드센스 승인에 필요) |
 | `site/ads.txt` | 애드센스 인증 파일 |
@@ -56,8 +60,8 @@
 
 ## 2단계: 내 것으로 꾸미기
 
-- **사이트 이름**: `site/` 안의 html 파일들에서 `이슈레이더` 를 원하는 이름으로 바꾸기
-- **문의 이메일**: `contact@example.com` 을 내 이메일로 바꾸기 (index, about, copyright, privacy, terms 파일)
+- **사이트 이름**: `site/` 안의 html 파일들에서 `이슈피클` 을 원하는 이름으로 바꾸기
+- **문의 이메일**: 스팸 방지를 위해 주소를 거꾸로 적어 숨겨 두었어요 (`data-u`, `data-d`). 바꾸고 싶으면 Claude에게 부탁하세요.
 - **이슈人에 엉뚱한 단어가 뜰 때**: `collect.py` 의 `NOT_PEOPLE` 에 추가 / 빠진 인물은 `PEOPLE_EXTRA` 에 추가
 - **분야 바꾸기**: `collect.py` 의 `CATEGORIES` 에서 줄을 지우거나 추가 (화면은 자동 반영)
 - **이상한 키워드가 순위에 뜰 때**: `collect.py` 의 `STOPWORDS` 에 그 단어를 띄어쓰기로 추가
@@ -119,6 +123,27 @@ https://adfit.kakao.com 에서 신청하면 국내 사이트는 비교적 빨리
 하루 무료 사용량(10,000) 중 하루 48번 정도만 쓰니 요금 걱정은 없어요.
 
 > API 키는 비밀번호와 같아요. 파일에 직접 쓰지 말고 꼭 위의 Secret 에만 넣으세요.
+
+---
+
+## 6단계: 박스오피스 켜기 (무료, 약 10분)
+
+1. https://www.kobis.or.kr/kobisopenapi 에 들어가 회원가입 후 로그인
+2. 위 메뉴 `키 발급/관리` → `키 발급` → 사용 목적에 '개인 웹사이트 영화 순위 표시' 정도로 적고 발급
+3. 발급된 키(영문+숫자 32자리) 복사
+4. GitHub 저장소 → `Settings` → `Secrets and variables` → `Actions` → `New repository secret`
+   - Name: `KOBIS_API_KEY`
+   - Secret: 복사한 키 → `Add secret`
+
+어제 하루 관객 수 기준 1~10위가 나와요. (오늘 집계는 다음 날 나와요)
+
+---
+
+## 7단계: 밈절임 교차 확인 (선택)
+
+- **커뮤니티 추가**: `sources.txt` 에 `사이트 이름 | RSS 주소` 한 줄을 추가해요. 사이트가 직접 공개한 RSS만 넣어요.
+- **네이버 검색량 확인**: https://developers.naver.com 에서 '애플리케이션 등록' → 사용 API에 **데이터랩(검색어 트렌드)** 선택 → 받은 Client ID / Client Secret 을
+  GitHub Secrets 에 `NAVER_CLIENT_ID`, `NAVER_CLIENT_SECRET` 으로 넣어요. (하루 무료 1,000회 중 약 20회만 써요)
 
 ---
 

@@ -61,6 +61,9 @@ YT_CATS = {"1": "영화·애니", "10": "음악", "17": "스포츠", "20": "게�
 # 비밀 키 (GitHub Secrets 에 넣으면 자동으로 들어와요. 없으면 그 섹션만 빠져요)
 YOUTUBE_KEY = os.environ.get("YOUTUBE_API_KEY", "").strip()
 KOBIS_KEY = os.environ.get("KOBIS_API_KEY", "").strip()
+NAVER_ID = os.environ.get("NAVER_CLIENT_ID", "").strip()          # 네이버 데이터랩 (선택)
+NAVER_SECRET = os.environ.get("NAVER_CLIENT_SECRET", "").strip()
+DATALAB_EVERY_H = 3   # 네이버 데이터랩 확인 간격(시간)
 
 # 순위에서 뺄 흔한 단어 (이상한 키워드가 순위에 뜨면 여기에 추가하세요)
 STOPWORDS = set("""
@@ -113,6 +116,7 @@ KST = timezone(timedelta(hours=9))
 ROOT = Path(__file__).resolve().parent
 OUT = ROOT / "site" / "data.json"
 CONTENT_OUT = ROOT / "site" / "content.json"
+MEME_OUT = ROOT / "site" / "memes.json"
 
 
 def fetch(url):
@@ -338,7 +342,7 @@ def collect_youtube(state, now):
         return [], state
     items, token = [], None
     try:
-        for _ in range(4):                                   # 50개씩 4번 = 200개
+        for _ in range(4):                                   # 전체 인기: 50개씩 4번 = 200개
             p = dict(part="snippet,statistics", chart="mostPopular", regionCode="KR", maxResults=50)
             if token:
                 p["pageToken"] = token
@@ -385,6 +389,7 @@ def collect_youtube(state, now):
             "thumb": (thumbs.get("medium") or thumbs.get("default") or {}).get("url", ""),
             "views": views, "gain": gain, "hrs": max(1, round(hrs)) if hrs is not None else None,
             "link": f"https://www.youtube.com/watch?v={vid}", "_est": est,
+            "_tags": sn.get("tags", [])[:20],                # 밈 후보 찾기에만 쓰고 저장 안 함
         })
     vids.sort(key=lambda x: -x.pop("_est"))
     for i, x in enumerate(vids, 1):
@@ -393,7 +398,14 @@ def collect_youtube(state, now):
                        old_ranks[x["id"]] - i if x["id"] in old_ranks else "new")
 
     keep = (now - timedelta(hours=YT_WINDOW_H + 1)).isoformat()
-    snaps = [s_ for s_ in snaps if s_["t"] >= keep]
+    thinned = []                                             # 기록은 약 1시간 간격으로만 보관 (파일 크기 줄이기)
+    for s_ in snaps:
+        if s_["t"] < keep:
+            continue
+        if thinned and (datetime.fromisoformat(s_["t"]) - datetime.fromisoformat(thinned[-1]["t"])) < timedelta(minutes=50):
+            continue
+        thinned.append(s_)
+    snaps = thinned
     snaps.append({"t": now.isoformat(timespec="minutes"), "v": {x["id"]: x["views"] for x in vids}})
     return vids, {"snaps": snaps, "ranks": {x["id"]: x["rank"] for x in vids}}
 
@@ -460,6 +472,217 @@ def collect_netflix(cache, now):
     return out
 
 
+# ───────────── 트렌드 밈 ─────────────
+MEME_STOP = set("""
+SHORTS SHORT MV M/V OFFICIAL LIVE EP VLOG FULL HD 4K TEASER TRAILER HIGHLIGHTS HIGHLIGHT
+REACTION ENG SUB KOR VS FT FEAT THE AND FOR WITH YOU OF TO IN ON MY ME IS
+쇼츠 숏츠 영상 브이로그 하이라이트 풀버전 예고 티저 리액션 라이브 공식 직캠 무대 노래 커버
+모음 레전드 리뷰 먹방 일상 실황 플레이 생방송 다시보기 클립 편집 최초 공개 반응 근황 진짜
+처음 오늘 이번 역대 최고 미친 대박 ㅋㅋ ㅋㅋㅋ ㅎㅎ 구독 좋아요 알림 채널 시즌 회차 방송
+꿀팁 여행 정리 토크 예능 뮤직비디오 애니메이션 신작 요리 게임 음악 스포츠 뉴스 드라마 영화 애니
+경기 주요 모습 장면 순간 이야기 사람 친구 엄마 아빠 한국 일본 미국 중국 세계 리그 시리즈
+""".split())
+MEME_KEEP_DAYS = 10
+MEME_N = 15
+
+
+def meme_words(text):
+    """제목·해시태그·태그에서 단어 뽑기 (해시태그는 통째로)"""
+    out = set()
+    for h in re.findall(r"#([0-9A-Za-z가-힣_]{2,20})", text):
+        out.add(h.upper() if h.isascii() else h)
+    text = re.sub(r"#[0-9A-Za-z가-힣_]+", " ", text)
+    for w in tokens(text):
+        if not w.endswith("이"):                 # '플레이' 같은 말이 '플레' 로 잘리지 않게
+            w = strip_josa(w)
+        if len(w) < 2 or len(w) > 12 or re.match(r"^\d", w):
+            continue
+        w = w.upper() if w.isascii() else w
+        if w in STOPWORDS or w in MEME_STOP:
+            continue
+        out.add(w)
+    return out
+
+
+def read_sources():
+    """sources.txt 에 적힌 커뮤니티 RSS 목록 읽기"""
+    path = ROOT / "sources.txt"
+    out = []
+    if path.exists():
+        for ln in path.read_text(encoding="utf-8").splitlines():
+            ln = ln.strip()
+            if ln and not ln.startswith("#") and "|" in ln:
+                name, url = (x.strip() for x in ln.split("|", 1))
+                if url.startswith("http"):
+                    out.append((name, url))
+    return out
+
+
+def collect_community(now):
+    """커뮤니티 공식 RSS 에서 최근 글 제목만 모으기 (본문은 저장 안 함)"""
+    posts, cutoff = [], (now - timedelta(hours=MAX_AGE_HOURS)).isoformat()
+    for name, url in read_sources():
+        try:
+            items = parse_news(fetch(url))
+            got = 0
+            for a in items:
+                if a["time"] >= cutoff:
+                    posts.append({"title": a["title"], "link": a["link"], "channel": name, "src": name})
+                    got += 1
+            print(f"[커뮤니티] {name}: 글 {got}개 ({url})")
+        except Exception as e:
+            print(f"[커뮤니티] {name}: 실패 ({type(e).__name__}) {url}", file=sys.stderr)
+    return posts
+
+
+def datalab_check(words, state, now):
+    """네이버 데이터랩(공식 API)으로 후보 단어의 최근 검색량 변화 확인. 키가 없으면 건너뜀"""
+    state = dict(state or {})
+    if not (NAVER_ID and NAVER_SECRET) or not words:
+        return state
+    last = state.get("_checked", "")
+    if last >= (now - timedelta(hours=DATALAB_EVERY_H)).isoformat():
+        return state                                    # 무료 한도를 아끼려고 몇 시간에 한 번만
+    end = (now - timedelta(days=1)).strftime("%Y-%m-%d")
+    start = (now - timedelta(days=14)).strftime("%Y-%m-%d")
+    for i in range(0, len(words), 5):                   # 한 번에 5개씩
+        body = {"startDate": start, "endDate": end, "timeUnit": "date",
+                "keywordGroups": [{"groupName": w, "keywords": [w]} for w in words[i:i + 5]]}
+        try:
+            req = urllib.request.Request("https://openapi.naver.com/v1/datalab/search",
+                                         data=json.dumps(body).encode(), method="POST",
+                                         headers={"X-Naver-Client-Id": NAVER_ID,
+                                                  "X-Naver-Client-Secret": NAVER_SECRET,
+                                                  "Content-Type": "application/json"})
+            with urllib.request.urlopen(req, timeout=20) as r:
+                res = json.loads(r.read())
+        except Exception as e:
+            print(f"[경고] 네이버 데이터랩 실패 ({type(e).__name__})", file=sys.stderr)
+            return state
+        for g in res.get("results", []):
+            vals = [d["ratio"] for d in g.get("data", [])]
+            if len(vals) < 4:
+                state[g["title"]] = None                # 검색량이 너무 적어 데이터 없음
+                continue
+            recent, before = vals[-2:], vals[:-2]
+            b = sum(before) / len(before) if before else 0
+            state[g["title"]] = round(sum(recent) / 2 / b, 1) if b > 0 else None
+    state = {w: state.get(w) for w in words}            # 지금 후보 단어만 보관
+    state["_checked"] = now.isoformat(timespec="minutes")
+    return state
+
+
+def find_memes(vids, trends, articles, community, state, now):
+    """영상·검색어에서 갑자기 많이 쓰이는데 뉴스엔 잘 안 나오는 단어 = 밈 후보"""
+    state = state or {}
+    today = now.strftime("%Y-%m-%d")
+    docs = defaultdict(list)                       # 단어 → 그 단어가 나온 영상들
+    tagged = defaultdict(int)                      # 해시태그·태그로 쓰인 횟수 (밈일 가능성 ↑)
+    for v in vids:
+        words = meme_words(v["title"])
+        for h in re.findall(r"#([0-9A-Za-z가-힣_]{2,20})", v["title"]):
+            tagged[h.upper() if h.isascii() else h] += 1
+        for t in v.get("_tags", []):
+            t = re.sub(r"\s+", "", t)
+            if 2 <= len(t) <= 12 and not t.isdigit():
+                t = t.upper() if t.isascii() else t
+                if t not in STOPWORDS and t not in MEME_STOP:
+                    words.add(t)
+                    tagged[t] += 1
+        words -= {v["channel"], v["channel"].replace(" ", "")}   # 채널 이름은 빼기
+        for w in words:
+            docs[w].append({"title": v["title"], "link": v["link"], "channel": v["channel"], "src": "유튜브"})
+    for p in community:                            # 커뮤니티 글 제목
+        for w in meme_words(p["title"]):
+            docs[w].append(p)
+    for t in trends:
+        for w in meme_words(t["keyword"]) | {t["keyword"].replace(" ", "")}:
+            docs[w].append({"title": t["keyword"], "link": (t["news"][0]["link"] if t["news"] else
+                                                             "https://www.google.com/search?q=" + urllib.parse.quote(t["keyword"])),
+                            "channel": "구글 검색 급상승", "src": "구글 급상승"})
+    news_cnt = defaultdict(int)
+    for a in articles:
+        for w in meme_words(a["title"]):
+            news_cnt[w] += 1
+
+    days = {d: c for d, c in state.get("days", {}).items()
+            if d >= (now - timedelta(days=MEME_KEEP_DAYS)).strftime("%Y-%m-%d")}
+    past = [d for d in days if d != today]
+    first = dict(state.get("first", {}))
+
+    cands = []
+    for w, vs in docs.items():
+        n = len({x["link"] for x in vs})
+        if n < 3 or n > max(10, (len(vids) + len(community)) * 0.25):  # 너무 흔한 단어는 제외
+            continue
+        srcs = {x["src"] for x in vs}
+        if news_cnt[w] > n:                        # 뉴스에 더 많이 나오면 '밈' 보다는 '뉴스'
+            continue
+        hist = sum(days[d].get(w, 0) for d in past) / len(past) if past else 0
+        novelty = n / (1 + hist)
+        if past and novelty < 2:                  # 예전부터 늘 많이 쓰이던 단어는 제외
+            continue
+        first.setdefault(w, today)
+        # 화제성 점수: 새로움 + 쓰인 곳 수 + 해시태그 + 여러 출처에서 동시에(교차) - 뉴스 비중
+        cands.append((novelty * 2 + n + min(tagged[w], n) * 2 + (len(srcs) - 1) * 4 - news_cnt[w] * 0.5,
+                      w, n, vs))
+    cands.sort(key=lambda x: (-x[0], x[1]))
+
+    out, used = [], []
+    for score, w, n, vs in cands:
+        links = {x["link"] for x in vs}
+        if any(len(links & u) / len(links | u) > 0.6 for u in used):
+            continue                               # 거의 같은 영상들에서 나온 단어는 하나만
+        used.append(links)
+        by_src = defaultdict(int)
+        for x in vs:
+            by_src[x["src"]] += 1
+        picks, seen_src = [], set()                # 출처가 골고루 보이게 예시 고르기
+        for x in vs:
+            if x["src"] not in seen_src:
+                picks.append(x); seen_src.add(x["src"])
+        picks += [x for x in vs if x not in picks]
+        out.append({"word": w, "count": n, "news": news_cnt[w], "first": first[w],
+                    "sources": dict(sorted(by_src.items(), key=lambda kv: -kv[1])),
+                    "samples": [{"title": x["title"], "link": x["link"], "channel": x["channel"]}
+                                for x in picks[:4]]})
+        if len(out) >= MEME_N:
+            break
+
+    days[today] = {**days.get(today, {}),
+                   **{w: max(len({x["link"] for x in vs}), days.get(today, {}).get(w, 0))
+                      for w, vs in docs.items() if len(vs) >= 2}}
+    first = {w: d for w, d in first.items() if d >= min(days)}
+    return out, {"days": days, "first": first}
+
+
+def read_meme_dictionary():
+    """memes.md 에 직접 쓴 밈 사전을 읽어요. (## 단어 / 뜻: / 예문: / 유래: / 날짜: / 출처: / 글:)"""
+    path = ROOT / "memes.md"
+    if not path.exists():
+        return []
+    text = path.read_text(encoding="utf-8")
+    keys = {"뜻": "meaning", "예문": "example", "유래": "origin", "날짜": "date", "출처": "source", "글": "page"}
+    items = []
+    for block in re.split(r"^## ", text, flags=re.M)[1:]:
+        lines = block.strip().splitlines()
+        if not lines:
+            continue
+        it = {"word": lines[0].strip(), "meaning": "", "example": "", "origin": "", "date": "", "source": "", "page": ""}
+        cur = None
+        for ln in lines[1:]:
+            m = re.match(r"^\s*(뜻|예문|유래|날짜|출처|글)\s*[:：]\s*(.*)$", ln)
+            if m:
+                cur = keys[m.group(1)]
+                it[cur] = m.group(2).strip()
+            elif cur and ln.strip() and not ln.startswith("#"):
+                it[cur] += "\n" + ln.strip()
+        if it["word"] and it["meaning"] and not it["word"].startswith("("):
+            items.append(it)
+    items.sort(key=lambda x: x["date"], reverse=True)
+    return items
+
+
 # ───────────── 실행 ─────────────
 def main():
     now = datetime.now(KST)
@@ -509,7 +732,18 @@ def main():
     result["videos"] = vids[:10]
     result["_nf"] = collect_netflix(old.get("_nf"), now)
 
-    content = {"updated": result["updated"], "youtube": vids[:200],
+    community = collect_community(now)
+    memes, result["_meme"] = find_memes(vids, result["search"], articles, community, old.get("_meme"), now)
+    result["_dl"] = datalab_check([m["word"] for m in memes[:10]], old.get("_dl"), now)
+    for m in memes:
+        m["naver"] = result["_dl"].get(m["word"])          # 네이버 검색량 (최근 2일 / 그 전 평균)
+    for v in vids:
+        v.pop("_tags", None)
+    MEME_OUT.write_text(json.dumps({"updated": result["updated"], "candidates": memes,
+                                    "dictionary": read_meme_dictionary()},
+                                   ensure_ascii=False, separators=(",", ":")), encoding="utf-8")
+
+    content = {"updated": result["updated"], "youtube": vids,
                "youtube_hours": YT_WINDOW_H,
                "boxoffice": collect_boxoffice(now), "netflix": result["_nf"]}
 
@@ -519,7 +753,8 @@ def main():
     bo, nf = content["boxoffice"], content["netflix"]
     print(f"저장 완료: 이슈 {len(result['top'])} · 인물 {len(result['people'])} · "
           f"검색어 {len(result['search'])} · 영상 {len(vids)} · "
-          f"박스오피스 {len(bo['items']) if bo else 0} · 넷플릭스 {len(nf['tv']) + len(nf['films']) if nf else 0}")
+          f"박스오피스 {len(bo['items']) if bo else 0} · 넷플릭스 {len(nf['tv']) + len(nf['films']) if nf else 0} · "
+          f"밈 후보 {len(memes)}")
 
 
 if __name__ == "__main__":

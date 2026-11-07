@@ -3,10 +3,10 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>이슈레이더 - 지금 대한민국 이슈 온도</title>
+<title>이슈피클 - 지금 대한민국 이슈 온도</title>
 <meta name="description" content="뉴스·검색·영상 데이터를 모아 지금 한국에서 화제인 이슈를 30분마다 온도 순위로 보여드립니다. 실시간 이슈, 이슈 인물, 분야별 이슈, 검색 급상승, 뜨는 영상.">
 <meta name="keywords" content="실시간 이슈, 이슈 순위, 검색어 순위, 실검, 오늘 뉴스, 연예 이슈, 경제 이슈, 인기 영상">
-<meta property="og:title" content="이슈레이더 - 지금 대한민국 이슈 온도">
+<meta property="og:title" content="이슈피클 - 지금 대한민국 이슈 온도">
 <meta property="og:description" content="30분마다 갱신되는 실시간 이슈 온도 순위">
 <meta property="og:type" content="website">
 <!-- 검색엔진 주인 확인 (지우지 마세요) -->
@@ -17,14 +17,15 @@
 <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-0000000000000000" crossorigin="anonymous"></script>
 -->
 
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.min.css">
 <style>
-:root{--bg:#f5f6f8;--card:#fff;--text:#15171c;--sub:#6b7280;--line:#e6e8ec;--soft:#f0f1f4;--hot:#ff4d2e;--warm:#ff9a2e;--cool:#3b82f6;--fs:16px}
-html[data-theme=soft]{--bg:#f4efe6;--card:#fbf8f2;--text:#2b2620;--sub:#7a7062;--line:#e6dccb;--soft:#efe7d9}
-html[data-theme=dark]{--bg:#0f1115;--card:#181b21;--text:#eef0f3;--sub:#9aa1ad;--line:#2a2e36;--soft:#20242b}
+:root{--bg:#fafaf6;--card:#ffffff;--text:#111111;--sub:#86867f;--line:#e7e7e0;--soft:#eeeee8;--hot:#7e9a63;--warm:#a9b98f;--cool:#6e7f8d;--fs:16px}
+html[data-theme=soft]{--bg:#f3f0e6;--card:#faf8f1;--text:#1c1b17;--sub:#7d786b;--line:#e3ddcd;--soft:#ebe6d8}
+html[data-theme=dark]{--bg:#11120f;--card:#1a1b17;--text:#f2f2ec;--sub:#9c9c94;--line:#2b2c26;--soft:#22231e;--hot:#9db883;--warm:#7f8f68;--cool:#8fa0ad}
 html[data-fs=s]{--fs:14px}html[data-fs=l]{--fs:18px}
 *{box-sizing:border-box}
 html{font-size:var(--fs)}
-body{padding-bottom:72px;margin:0;background:var(--bg);color:var(--text);font-family:-apple-system,BlinkMacSystemFont,"Apple SD Gothic Neo","Noto Sans KR","Malgun Gothic",sans-serif;line-height:1.55;-webkit-text-size-adjust:100%}
+body{padding-bottom:72px;margin:0;background:var(--bg);color:var(--text);font-family:"Pretendard Variable",Pretendard,-apple-system,BlinkMacSystemFont,"Apple SD Gothic Neo","Noto Sans KR","Malgun Gothic",sans-serif;line-height:1.55;-webkit-text-size-adjust:100%}
 a{color:inherit}
 button{font:inherit;color:inherit}
 .wrap{max-width:760px;margin:0 auto;padding:0 16px}
@@ -39,7 +40,7 @@ header{padding:18px 0 6px;display:flex;justify-content:space-between;align-items
 .seg button{border:0;background:none;padding:5px 10px;font-size:.78rem;cursor:pointer;color:var(--sub)}
 .seg button.on{background:var(--text);color:var(--bg)}
 .status{display:flex;align-items:center;gap:6px;color:var(--sub);font-size:.8rem;margin:4px 0 0}
-.dot{width:7px;height:7px;border-radius:50%;background:#22c55e;box-shadow:0 0 0 3px rgba(34,197,94,.2)}
+.dot{width:7px;height:7px;border-radius:50%;background:var(--hot);box-shadow:0 0 0 3px rgba(126,154,99,.22)}
 
 /* 섹션 공통 */
 section{background:var(--card);border:1px solid var(--line);border-radius:18px;padding:18px 16px;margin:14px 0}
@@ -78,13 +79,13 @@ section{scroll-margin-top:12px}
 .news a:hover{text-decoration:underline}
 .news small{display:block;color:var(--sub);font-size:.75rem}
 
-/* 가로 카드 (치고 올라오는 이슈, 영상) */
+/* 가로 카드 (급부상 이슈, 영상) */
 .rail{display:flex;gap:10px;overflow-x:auto;scroll-snap-type:x mandatory;scrollbar-width:none;padding-bottom:2px}
 .rail::-webkit-scrollbar{display:none}
 .rc{flex:0 0 78%;max-width:280px;scroll-snap-align:start;border:1px solid var(--line);border-radius:14px;padding:14px;background:var(--soft);text-decoration:none;display:block}
 .rc .k{font-weight:800;font-size:1.05rem;margin:4px 0}
 .rc .h{color:var(--sub);font-size:.84rem;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
-.pill{display:inline-block;font-size:.72rem;font-weight:700;color:var(--hot);background:rgba(255,77,46,.1);padding:2px 8px;border-radius:999px}
+.pill{display:inline-block;font-size:.72rem;font-weight:700;color:var(--hot);background:rgba(126,154,99,.14);padding:2px 8px;border-radius:999px}
 .vc{flex:0 0 62%;max-width:240px;scroll-snap-align:start;text-decoration:none}
 .vc img{width:100%;aspect-ratio:16/9;object-fit:cover;border-radius:12px;background:var(--soft);display:block}
 .vc .t{font-weight:700;font-size:.9rem;margin:6px 0 2px;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
@@ -111,6 +112,9 @@ footer{padding:22px 0 48px;color:var(--sub);font-size:.8rem}
 footer nav a{margin-right:12px;text-decoration:underline}
 @media (max-width:420px){.sg{grid-template-columns:1fr}}
 .more[hidden]{display:none}
+h1,h2,h3,.logo,.ttl,.kw,.k,.w,.t,.gain,.deg,.rk,.num{letter-spacing:-.03em}
+.logo{font-weight:900;letter-spacing:-.05em}
+h1,h2{font-weight:800}
 </style>
 </head>
 <body>
@@ -118,8 +122,8 @@ footer nav a{margin-right:12px;text-decoration:underline}
 
 <header>
   <div>
-    <h1 class="logo">이슈<span>레이더</span></h1>
-    <div class="tag">지금 대한민국 이슈 온도계</div>
+    <h1 class="logo">이슈<span>피클</span></h1>
+    <div class="tag">지금 뜨는 이슈, 톡 쏘게 한눈에</div>
     <div class="status"><i class="dot"></i><span id="updated">연결 중…</span></div>
   </div>
   <div class="ctrl">
@@ -132,9 +136,17 @@ footer nav a{margin-right:12px;text-decoration:underline}
   </div>
 </header>
 
+<!-- ⑥ 급상승 영상 -->
+<section id="sec-videos">
+  <div class="sh"><div><h2>급상승 영상</h2><p id="vid-desc">조회수가 가파르게 오르고 있는 유튜브 영상</p></div>
+    <div class="arrows" data-rail="videos"><button data-d="-1" aria-label="이전">‹</button><button data-d="1" aria-label="다음">›</button></div></div>
+  <div class="rail" id="videos"></div>
+  <a class="more" href="content.html" style="text-align:center;text-decoration:none">콘텐츠 랭킹 더 보기 ›</a>
+</section>
+
 <!-- ① 지금 뜨는 이슈 -->
 <section id="sec-top">
-  <div class="sh"><div><h2>지금 대한민국에서 뜨는 이슈</h2><p id="top-desc">여러 언론사가 함께 다룬 이슈 순위예요 · 눌러서 기사 보기</p></div></div>
+  <div class="sh"><div><h2>실시간 이슈 순위</h2><p id="top-desc">여러 언론사가 동시에 다룬 이슈부터 보여드려요 · 누르면 관련 기사</p></div></div>
   <ol class="rk" id="top"></ol>
   <button class="more" id="top-more">실시간 이슈 순위 더 보기</button>
 </section>
@@ -142,23 +154,23 @@ footer nav a{margin-right:12px;text-decoration:underline}
 <!-- ▼ [광고 설정 2] 첫 번째 광고: 애드센스 광고 단위 코드를 이 div 안에 붙여넣으세요 -->
 <div class="ad-slot" id="ad-1"></div>
 
-<!-- ② 치고 올라오는 이슈 -->
+<!-- ② 급부상 이슈 -->
 <section id="sec-rising">
-  <div class="sh"><div><h2>치고 올라오는 이슈</h2><p>최근 2시간 동안 기사가 빠르게 늘고 있는 이슈예요</p></div>
+  <div class="sh"><div><h2>급부상 이슈</h2><p>최근 2시간 사이 기사가 몰리기 시작한 이슈</p></div>
     <div class="arrows" data-rail="rising"><button data-d="-1" aria-label="이전">‹</button><button data-d="1" aria-label="다음">›</button></div></div>
   <div class="rail" id="rising"></div>
 </section>
 
-<!-- ③ 이슈人 -->
+<!-- ③ 화제의 인물 -->
 <section id="sec-people">
-  <div class="sh"><div><h2>이슈人</h2><p>최근 24시간 뉴스 언급 순위예요 · 언급 건수와 매체 수를 함께 반영</p></div></div>
+  <div class="sh"><div><h2>화제의 인물</h2><p>하루 동안 뉴스 제목에 가장 자주 오른 사람들</p></div></div>
   <ol class="rk" id="people"></ol>
-  <p class="note">인기 순위가 아니라 기사 제목에 이름이 나온 횟수와 매체 수로 정한 언급량 순위예요. 옮겨 실은 기사와 포토 기사는 빼고 셉니다.</p>
+  <p class="note">호감도와는 상관없이, 기사 제목에 이름이 나온 횟수와 다룬 매체 수만으로 매긴 순서예요. 같은 기사를 옮겨 실은 것과 사진 기사는 세지 않아요.</p>
 </section>
 
 <!-- ④ 분야별 이슈 -->
 <section id="sec-cat">
-  <div class="sh"><div><h2>분야별 이슈</h2><p>분야를 골라 보세요 — 옆으로 넘겨도 돼요</p></div></div>
+  <div class="sh"><div><h2>분야별 이슈</h2><p>관심 있는 분야만 골라서 보세요</p></div></div>
   <div class="chips" id="chips"></div>
   <ol class="rk" id="cat"></ol>
 </section>
@@ -168,34 +180,29 @@ footer nav a{margin-right:12px;text-decoration:underline}
 
 <!-- ⑤ 검색 급상승 -->
 <section id="sec-search" hidden>
-  <div class="sh"><div><h2>검색 급상승</h2><p>검색량이 확 뛴 키워드예요 · 구글 트렌드 기준</p></div></div>
+  <div class="sh"><div><h2>검색 급상승</h2><p>구글에서 갑자기 검색이 몰린 키워드 · 구글 트렌드</p></div></div>
   <ol class="sg" id="search"></ol>
 </section>
 
-<!-- ⑥ 지금 뜨는 영상 -->
-<section id="sec-videos">
-  <div class="sh"><div><h2>지금 뜨는 영상</h2><p id="vid-desc">최근 조회수가 가장 빨리 늘어난 영상이에요</p></div>
-    <div class="arrows" data-rail="videos"><button data-d="-1" aria-label="이전">‹</button><button data-d="1" aria-label="다음">›</button></div></div>
-  <div class="rail" id="videos"></div>
-  <a class="more" href="content.html" style="text-align:center;text-decoration:none">콘텐츠 랭킹 더 보기 ›</a>
-</section>
+
 
 <!-- ▼ [광고 설정 4] 세 번째 광고 -->
 <div class="ad-slot" id="ad-3"></div>
 
 <footer>
-  <p><b>이슈레이더</b> — 뉴스 · 검색 · 영상 데이터를 모아 30분마다 자동 갱신해요.<br>
+  <p><b>이슈피클</b> — 언론사 기사, 구글 검색어, 유튜브 영상을 30분 간격으로 다시 모아 순위를 새로 매겨요.<br>
   기사 제목과 링크만 보여드리며, 기사 저작권은 각 언론사에 있습니다.</p>
-  <nav><a href="about.html">이슈레이더란?</a><a href="copyright.html">저작권 정책</a><a href="privacy.html">개인정보처리방침</a><a href="terms.html">이용약관</a><a href="#" class="mail" data-u="etis+uumelqip" data-d="moc.liamg">문의</a></nav>
-  <p>© 2026 이슈레이더</p>
+  <nav><a href="about.html">이슈피클이란?</a><a href="copyright.html">저작권 정책</a><a href="privacy.html">개인정보처리방침</a><a href="terms.html">이용약관</a><a href="#" class="mail" data-u="etis+uumelqip" data-d="moc.liamg">문의</a></nav>
+  <p>© 2026 이슈피클</p>
 </footer>
 </div>
 
 <nav class="bnav">
   <a href="index.html" class="on"><svg viewBox="0 0 24 24"><path d="M3 11l9-7 9 7v9a1 1 0 0 1-1 1h-5v-6H9v6H4a1 1 0 0 1-1-1z"/></svg>홈</a>
   <a href="#sec-top"><svg viewBox="0 0 24 24"><path d="M6 20V10M12 20V4M18 20v-7"/></svg>이슈 랭킹</a>
-  <a href="#sec-people"><svg viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M4 21c1-4 4-6 8-6s7 2 8 6"/></svg>이슈人</a>
-  <a href="content.html"><svg viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="M10 9l5 3-5 3z"/></svg>콘텐츠 랭킹</a>
+  <a href="#sec-people"><svg viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M4 21c1-4 4-6 8-6s7 2 8 6"/></svg>인물</a>
+  <a href="content.html"><svg viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="M10 9l5 3-5 3z"/></svg>콘텐츠</a>
+  <a href="memes.html"><svg viewBox="0 0 24 24"><path d="M4 5h16v11H9l-5 4z"/><path d="M8 10h.01M12 10h.01M16 10h.01"/></svg>밈절임</a>
 </nav>
 
 <script>
@@ -229,7 +236,7 @@ function row(it, i, line2) {
     <span class="num">${pad(i)}.</span>
     <span class="ttl">${esc(it.keyword)}${badge(it.change)}</span>
     <span class="deg">${it.temp}°</span>
-    <span class="ln2">${line2 ?? `온도 ${it.temp}도 · ${esc(it.headline)}`}</span>
+    <span class="ln2">${line2 ?? esc(it.headline)}</span>
   </summary>${newsList(it.news)}</details></li>`;
 }
 const emptyMsg = '<li class="empty">아직 모은 이슈가 없어요. 잠시 후 다시 확인해 주세요.</li>';
@@ -279,11 +286,10 @@ function renderSearch() {
 
 function renderVideos() {
   const v = DATA.videos || [];
-  $("videos").hidden = !v.length;
-  document.querySelector("#sec-videos .arrows").hidden = !v.length;
+  $("sec-videos").hidden = !v.length;
   const hasGain = v.some(x => x.gain != null);
   $("vid-desc").textContent = !v.length ? "유튜브 · 박스오피스 · 넷플릭스 순위를 한 곳에서 볼 수 있어요"
-    : hasGain ? "최근 조회수가 가장 빨리 늘어난 영상이에요" : "지금 한국 유튜브 인기 영상이에요";
+    : hasGain ? "조회수가 가파르게 오르고 있는 유튜브 영상" : "지금 한국 유튜브 인기 영상";
   $("videos").innerHTML = v.map(x => `
     <a class="vc" href="${esc(url(x.link))}" target="_blank" rel="noopener">
       <img src="${esc(url(x.thumb))}" alt="" loading="lazy">

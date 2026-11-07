@@ -1,15 +1,22 @@
 <!DOCTYPE html>
 <html lang="ko"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
-<title>이슈레이더란? - 이슈레이더</title>
-<style>body{margin:0;font-family:-apple-system,"Apple SD Gothic Neo","Noto Sans KR",sans-serif;line-height:1.7;background:#f6f7f9;color:#16181d}
-@media (prefers-color-scheme:dark){body{background:#0f1115;color:#eef0f3}a{color:#8ab4ff}}
-.wrap{max-width:720px;margin:0 auto;padding:24px 16px 48px}h1{font-size:24px}h2{font-size:17px;margin-top:28px}</style>
-</head><body><div class="wrap"><p><a href="index.html">← 이슈레이더 홈</a></p><h1>이슈레이더란?</h1>
-<p>이슈레이더는 여러 언론사의 최신 기사 제목을 모아, 지금 한국에서 많이 이야기되는 이슈를 30분마다 순위로 보여주는 서비스예요. 실시간 이슈, 치고 올라오는 이슈, 이슈 인물(이슈人), 분야별 이슈, 검색 급상승, 지금 뜨는 영상을 한 화면에서 볼 수 있어요.</p>
+<title>이슈피클이란? - 이슈피클</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.min.css">
+<style>body{margin:0;font-family:"Pretendard Variable",Pretendard,-apple-system,BlinkMacSystemFont,"Apple SD Gothic Neo","Noto Sans KR","Malgun Gothic",sans-serif;line-height:1.7;background:#fafaf6;color:#111111}
+a{color:#5f7a47}
+@media (prefers-color-scheme:dark){body{background:#11120f;color:#f2f2ec}a{color:#9db883}}
+.wrap{max-width:720px;margin:0 auto;padding:24px 16px 48px}h1{font-size:24px;font-weight:800;letter-spacing:-.03em}h2{font-size:17px;margin-top:28px}</style>
+</head><body><div class="wrap"><p><a href="index.html">← 이슈피클 홈</a></p><h1>이슈피클이란?</h1>
+<p>이슈피클은 여러 언론사의 최신 기사 제목을 모아, 지금 한국에서 많이 이야기되는 이슈를 30분마다 순위로 보여주는 서비스예요. 실시간 이슈, 급부상 이슈, 화제의 인물, 분야별 이슈, 검색 급상승, 급상승 영상, 콘텐츠 랭킹, 밈절임(요즘 뜨는 밈)까지 한곳에서 볼 수 있어요.</p>
 <h2>온도는 어떻게 계산하나요?</h2>
 <p>최근 24시간 동안 기사 제목에 같은 키워드가 등장한 기사 수와, 그 키워드를 다룬 언론사 수를 합쳐 점수를 매겨요. 가장 높은 이슈를 100°로 두고 나머지를 비교해 온도로 보여드립니다.</p>
 <ul><li>인기나 호감 순위가 아니라 언급량 순위예요.</li><li>같은 기사를 옮겨 실은 기사와 포토 기사는 빼고 셉니다.</li><li>한 언론사만 다룬 키워드는 순위에 넣지 않아요.</li></ul>
 <h2>기사 저작권</h2>
-<p>이슈레이더는 기사 제목, 언론사 이름, 원문 링크만 보여드려요. 기사 본문은 싣지 않으며, 모든 기사의 저작권은 해당 언론사에 있습니다.</p>
-<h2>문의</h2><p>이메일: <a href="mailto:contact@example.com">contact@example.com</a></p>
-</div></body></html>
+<p>이슈피클은 기사 제목, 언론사 이름, 원문 링크만 보여드려요. 기사 본문은 싣지 않으며, 모든 기사의 저작권은 해당 언론사에 있습니다.</p>
+<h2>문의</h2><p>이메일: <a href="#" class="mail" data-u="etis+uumelqip" data-d="moc.liamg">이메일 주소 보기</a></p>
+</div><script>/* 스팸 봇이 이메일을 못 긁어 가도록, 누를 때만 주소를 만듭니다 */
+document.querySelectorAll("a.mail").forEach(function(a){a.onclick=function(e){
+var m=a.dataset.u.split("").reverse().join("")+"@"+a.dataset.d.split("").reverse().join("");
+if(a.dataset.shown){return true;} e.preventDefault(); a.textContent=m; a.href="mailto:"+m; a.dataset.shown=1;};});
+</script>
+</body></html>

@@ -3,10 +3,10 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>콘텐츠 랭킹 - 유튜브 인기 급상승 · 박스오피스 · 넷플릭스 순위 | 이슈레이더</title>
+<title>콘텐츠 랭킹 - 유튜브 인기 급상승 · 박스오피스 · 넷플릭스 순위 | 이슈피클</title>
 <meta name="description" content="지금 조회수가 가장 빨리 오르는 유튜브 영상 TOP 100, 어제 박스오피스 순위, 이번 주 한국 넷플릭스 TOP 10을 한 곳에서.">
 <meta name="keywords" content="유튜브 인기 급상승, 유튜브 순위, 박스오피스 순위, 영화 순위, 넷플릭스 순위, 넷플릭스 TOP 10">
-<meta property="og:title" content="콘텐츠 랭킹 - 이슈레이더">
+<meta property="og:title" content="콘텐츠 랭킹 - 이슈피클">
 <meta property="og:description" content="유튜브 · 박스오피스 · 넷플릭스 순위를 한 곳에서">
 <meta property="og:type" content="website">
 
@@ -14,14 +14,15 @@
 <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-0000000000000000" crossorigin="anonymous"></script>
 -->
 
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.min.css">
 <style>
-:root{--bg:#f5f6f8;--card:#fff;--text:#15171c;--sub:#6b7280;--line:#e6e8ec;--soft:#f0f1f4;--hot:#ff4d2e;--cool:#3b82f6;--fs:16px}
-html[data-theme=soft]{--bg:#f4efe6;--card:#fbf8f2;--text:#2b2620;--sub:#7a7062;--line:#e6dccb;--soft:#efe7d9}
-html[data-theme=dark]{--bg:#0f1115;--card:#181b21;--text:#eef0f3;--sub:#9aa1ad;--line:#2a2e36;--soft:#20242b}
+:root{--bg:#fafaf6;--card:#ffffff;--text:#111111;--sub:#86867f;--line:#e7e7e0;--soft:#eeeee8;--hot:#7e9a63;--warm:#a9b98f;--cool:#6e7f8d;--fs:16px}
+html[data-theme=soft]{--bg:#f3f0e6;--card:#faf8f1;--text:#1c1b17;--sub:#7d786b;--line:#e3ddcd;--soft:#ebe6d8}
+html[data-theme=dark]{--bg:#11120f;--card:#1a1b17;--text:#f2f2ec;--sub:#9c9c94;--line:#2b2c26;--soft:#22231e;--hot:#9db883;--warm:#7f8f68;--cool:#8fa0ad}
 html[data-fs=s]{--fs:14px}html[data-fs=l]{--fs:18px}
 *{box-sizing:border-box}
 html{font-size:var(--fs)}
-body{margin:0;background:var(--bg);color:var(--text);font-family:-apple-system,BlinkMacSystemFont,"Apple SD Gothic Neo","Noto Sans KR","Malgun Gothic",sans-serif;line-height:1.5;-webkit-text-size-adjust:100%;padding-bottom:72px}
+body{margin:0;background:var(--bg);color:var(--text);font-family:"Pretendard Variable",Pretendard,-apple-system,BlinkMacSystemFont,"Apple SD Gothic Neo","Noto Sans KR","Malgun Gothic",sans-serif;line-height:1.5;-webkit-text-size-adjust:100%;padding-bottom:72px}
 a{color:inherit;text-decoration:none}
 button{font:inherit;color:inherit}
 .wrap{max-width:760px;margin:0 auto;padding:0 16px}
@@ -34,7 +35,7 @@ header{padding:18px 0 6px;display:flex;justify-content:space-between;align-items
 .seg button{border:0;background:none;padding:5px 10px;font-size:.78rem;cursor:pointer;color:var(--sub)}
 .seg button.on{background:var(--text);color:var(--bg)}
 .status{display:flex;justify-content:flex-end;align-items:center;gap:6px;color:var(--sub);font-size:.8rem;margin:10px 0}
-.dot{width:8px;height:8px;border-radius:50%;background:var(--hot);box-shadow:0 0 0 3px rgba(255,77,46,.18)}
+.dot{width:8px;height:8px;border-radius:50%;background:var(--hot);box-shadow:0 0 0 3px rgba(126,154,99,.22)}
 
 /* 큰 탭 */
 .sticky{position:sticky;top:0;z-index:5;background:var(--bg);padding:6px 0 4px}
@@ -78,13 +79,16 @@ footer nav a{margin-right:12px;text-decoration:underline}
 .bnav a.on{color:var(--text);font-weight:700}
 .bnav svg{width:22px;height:22px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
 .more[hidden]{display:none}
+h1,h2,h3,.logo,.ttl,.kw,.k,.w,.t,.gain,.deg,.rk,.num{letter-spacing:-.03em}
+.logo{font-weight:900;letter-spacing:-.05em}
+h1,h2{font-weight:800}
 </style>
 </head>
 <body>
 <div class="wrap">
 
 <header>
-  <a href="index.html"><h1 class="logo">이슈<span>레이더</span></h1><div class="tag">지금 대한민국 이슈 온도계</div></a>
+  <a href="index.html"><h1 class="logo">이슈<span>피클</span></h1><div class="tag">지금 뜨는 이슈, 톡 쏘게 한눈에</div></a>
   <div class="ctrl">
     <div class="seg" id="theme"><button data-v="light">밝게</button><button data-v="soft">편하게</button><button data-v="dark">어둡게</button></div>
     <div class="seg" id="fsize"><button data-v="s" style="font-size:.7rem">가</button><button data-v="m">가</button><button data-v="l" style="font-size:.95rem">가</button></div>
@@ -111,17 +115,18 @@ footer nav a{margin-right:12px;text-decoration:underline}
 <div class="ad-slot" id="ad-2"></div>
 
 <footer>
-  <p><b>이슈레이더</b> — 유튜브 영상은 YouTube 공식 API, 박스오피스는 영화진흥위원회 통합전산망, 넷플릭스는 넷플릭스 공식 주간 TOP 10 자료를 바탕으로 해요.</p>
-  <nav><a href="about.html">이슈레이더란?</a><a href="copyright.html">저작권 정책</a><a href="privacy.html">개인정보처리방침</a><a href="terms.html">이용약관</a></nav>
-  <p>© 2026 이슈레이더</p>
+  <p><b>이슈피클</b> — 유튜브 영상은 YouTube 공식 API, 박스오피스는 영화진흥위원회 통합전산망, 넷플릭스는 넷플릭스 공식 주간 TOP 10 자료를 바탕으로 해요.</p>
+  <nav><a href="about.html">이슈피클이란?</a><a href="copyright.html">저작권 정책</a><a href="privacy.html">개인정보처리방침</a><a href="terms.html">이용약관</a><a href="#" class="mail" data-u="etis+uumelqip" data-d="moc.liamg">문의</a></nav>
+  <p>© 2026 이슈피클</p>
 </footer>
 </div>
 
 <nav class="bnav">
   <a href="index.html"><svg viewBox="0 0 24 24"><path d="M3 11l9-7 9 7v9a1 1 0 0 1-1 1h-5v-6H9v6H4a1 1 0 0 1-1-1z"/></svg>홈</a>
   <a href="index.html#sec-top"><svg viewBox="0 0 24 24"><path d="M6 20V10M12 20V4M18 20v-7"/></svg>이슈 랭킹</a>
-  <a href="index.html#sec-people"><svg viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M4 21c1-4 4-6 8-6s7 2 8 6"/></svg>이슈人</a>
-  <a href="content.html" class="on"><svg viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="M10 9l5 3-5 3z"/></svg>콘텐츠 랭킹</a>
+  <a href="index.html#sec-people"><svg viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M4 21c1-4 4-6 8-6s7 2 8 6"/></svg>인물</a>
+  <a href="content.html" class="on"><svg viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="M10 9l5 3-5 3z"/></svg>콘텐츠</a>
+  <a href="memes.html"><svg viewBox="0 0 24 24"><path d="M4 5h16v11H9l-5 4z"/><path d="M8 10h.01M12 10h.01M16 10h.01"/></svg>밈절임</a>
 </nav>
 
 <script>
@@ -155,15 +160,15 @@ function setTab(t) {
 function emptyBox(msg) { $("list").innerHTML = `<li class="empty">${msg}</li>`; $("more").hidden = true; }
 
 function renderYoutube() {
-  $("chips").innerHTML = YT_CHIPS.map(c => `<button class="${c === chip ? "on" : ""}" data-c="${c}">${c}</button>`).join("");
+  $("chips").innerHTML = "";          // 분야 버튼 없이 전체만 보여줌
   const all = (D.youtube || []);
   if (!all.length) return emptyBox("유튜브 순위를 준비 중이에요.<br>(운영자: README 5단계에서 유튜브 키를 넣어 주세요)");
-  const list = (chip === "전체" ? all.slice(0, 100) : all.filter(v => v.cat === chip));
-  $("desc").textContent = `최근 ${D.youtube_hours || 6}시간 동안 조회수가 가장 빨리 늘어난 한국 유튜브 영상이에요`;
+  const list = all.slice(0, 100);
+  $("desc").textContent = `최근 ${D.youtube_hours || 6}시간 사이 조회수가 많이 오른 순서예요 · 한국 유튜브 인기 영상 기준`;
   if (!list.length) return emptyBox("이 분야의 영상이 아직 없어요.");
   $("list").innerHTML = list.slice(0, limit).map((v, i) => `
     <li><a class="card" href="${esc(url(v.link))}" target="_blank" rel="noopener">
-      <div class="rk">${chip === "전체" ? v.rank : i + 1}</div>
+      <div class="rk">${v.rank}</div>
       <img class="th" src="${esc(url(v.thumb))}" alt="" loading="lazy">
       <div class="body"><div class="t">${esc(v.title)}</div>
         <div class="m">${esc(v.channel)}${v.subs ? " 구독 " + kn(v.subs) : ""} · ${esc(v.cat)}</div></div>
@@ -249,6 +254,11 @@ async function load() {
 setTab(location.hash.slice(1));
 load();
 setInterval(load, 10 * 60 * 1000);
+</script>
+<script>/* 스팸 봇이 이메일을 못 긁어 가도록, 누를 때만 주소를 만듭니다 */
+document.querySelectorAll("a.mail").forEach(function(a){a.onclick=function(e){
+var m=a.dataset.u.split("").reverse().join("")+"@"+a.dataset.d.split("").reverse().join("");
+if(a.dataset.shown){return true;} e.preventDefault(); a.textContent=m; a.href="mailto:"+m; a.dataset.shown=1;};});
 </script>
 </body>
 </html>

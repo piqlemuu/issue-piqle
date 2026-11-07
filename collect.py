@@ -29,7 +29,7 @@ TOP_N = 20            # '지금 뜨는 이슈' 개수
 CAT_N = 10            # 분야별 이슈 개수
 PEOPLE_N = 10         # 이슈人 개수
 RISING_N = 8          # 치고 올라오는 이슈 개수
-NEWS_PER_ISSUE = 5    # 이슈마다 보여줄 관련 기사 수
+NEWS_PER_ISSUE = 5    # 첫 화면에서 이슈마다 보여줄 관련 기사 수
 MAX_AGE_HOURS = 24    # 이 시간보다 오래된 기사는 버림
 RISING_HOURS = 2      # '최근' 으로 볼 시간 (치고 올라오는 이슈)
 
@@ -117,6 +117,7 @@ ROOT = Path(__file__).resolve().parent
 OUT = ROOT / "site" / "data.json"
 CONTENT_OUT = ROOT / "site" / "content.json"
 MEME_OUT = ROOT / "site" / "memes.json"
+ISSUES_OUT = ROOT / "site" / "issues.json"
 
 
 def fetch(url):
@@ -706,6 +707,90 @@ def read_meme_dictionary():
     return items
 
 
+# ───────────── 이슈 상세 페이지 데이터 ─────────────
+DETAIL_NEWS = 8      # 상세 페이지에 보여줄 관련 기사 수
+HIST_HOURS = 8       # 온도 추이 그래프에 남길 시간
+
+
+def traffic_score(t):
+    n = int(re.sub(r"[^0-9]", "", t or "") or 0)
+    return 100 if n >= 50000 else 80 if n >= 20000 else 65 if n >= 10000 else 50 if n >= 5000 else 35
+
+
+def build_details(result, kw_arts, vids, community, now, old_hist):
+    c3 = (now - timedelta(hours=3)).isoformat()
+    c6 = (now - timedelta(hours=6)).isoformat()
+    keep = (now - timedelta(hours=HIST_HOURS)).isoformat()
+    top_map = {it["keyword"]: it for it in result["top"]}
+    cat_map = {}
+    for cid, c in result["categories"].items():
+        for it in c["issues"]:
+            cat_map.setdefault(it["keyword"], (cid, c["name"], it["rank"]))
+    entries, hist = {}, {}
+
+    def add(it, kind):
+        kw = it["keyword"]
+        if kw in entries:
+            return
+        arts = kw_arts.get(kw) or it.get("_arts") or it.get("news") or []
+        if not arts:
+            return
+        news = sorted(arts, key=lambda a: a["time"], reverse=True)
+        src_cnt = defaultdict(int)
+        for a in arts:
+            src_cnt[a["source"]] += 1
+        last3 = sum(1 for a in arts if a["time"] >= c3)
+        prev3 = sum(1 for a in arts if c6 <= a["time"] < c3)
+        low = kw.lower()
+        vmatch = [v for v in vids if low in v["title"].lower()]
+        cmatch = [p for p in community if low in p["title"].lower()]
+        tmatch = [t for t in result["search"] if len(kw) >= 2 and (low in t["keyword"].lower() or t["keyword"].lower() in low)]
+        base = top_map.get(kw, it)
+        temp = base.get("temp", 50)
+        cat = cat_map.get(kw)
+        evidence = ([{"type": "커뮤니티", "title": p["title"], "link": p["link"], "src": p["channel"]} for p in cmatch[:3]]
+                    + [{"type": "검색", "title": f"구글 검색 급상승 '{t['keyword']}' ({t['traffic']})",
+                        "link": "https://www.google.com/search?q=" + urllib.parse.quote(t["keyword"]), "src": "구글 트렌드"}
+                       for t in tmatch[:1]]
+                    + [{"type": "영상", "title": v["title"], "link": v["link"], "src": v["channel"]} for v in vmatch[:2]])
+        entries[kw] = {
+            "keyword": kw, "kind": kind, "temp": temp, "headline": news[0]["title"],
+            "articles": len(arts), "sources": len(src_cnt),
+            "source_names": [k for k, _ in sorted(src_cnt.items(), key=lambda kv: -kv[1])[:3]],
+            "rank": base.get("rank") if kw in top_map else None,
+            "change": top_map[kw].get("change") if kw in top_map else None,
+            "cat": {"id": cat[0], "name": cat[1], "rank": cat[2]} if cat else None,
+            "last3": last3, "prev3": prev3, "ratio": round(last3 / prev3, 1) if prev3 else None,
+            "signals": {"news": min(100, round(len(src_cnt) * 7 + len(arts) * 2)),
+                        "search": traffic_score(tmatch[0]["traffic"]) if tmatch else None,
+                        "video": min(100, len(vmatch) * 25) if vmatch else None,
+                        "community": min(100, len(cmatch) * 15) if cmatch else None},
+            "evidence": evidence,
+            "news": [{"title": a["title"], "source": a["source"], "link": a["link"], "time": a["time"]}
+                     for a in news[:DETAIL_NEWS]],
+        }
+        h = [x for x in (old_hist or {}).get(kw, []) if x[0] >= keep]
+        stamp = now.isoformat(timespec="minutes")
+        if h and h[-1][0] == stamp:                      # 같은 시각에 두 번 돌면 마지막 값만
+            h.pop()
+        h.append([stamp, temp])
+        hist[kw] = h
+        entries[kw]["hist"] = h
+
+    for it in result["top"]:
+        add(it, "이슈")
+    for it in result["rising"]:
+        add(it, "이슈")
+    for c in result["categories"].values():
+        for it in c["issues"]:
+            add(it, "이슈")
+    for it in result["people"]:
+        add(it, "인물")
+    cats = {cid: {"name": c["name"], "list": [it["keyword"] for it in c["issues"]]}
+            for cid, c in result["categories"].items()}
+    return {"updated": result["updated"], "issues": entries, "cats": cats}, hist
+
+
 # ───────────── 실행 ─────────────
 def main():
     now = datetime.now(KST)
@@ -739,14 +824,14 @@ def main():
         "updated": now.isoformat(timespec="minutes"),
         "total_articles": len(articles),
         "total_sources": len({a["source"] for a in articles}),
-        "top": clean(pick(scored, TOP_N, old_rank_map(old.get("top")))),
+        "top": pick(scored, TOP_N, old_rank_map(old.get("top"))),
         "rising": rising(scored, now),
-        "people": clean(pick(score_terms(articles, find_people(articles)), PEOPLE_N,
-                             old_rank_map(old.get("people")))),
+        "people": pick(score_terms(articles, find_people(articles)), PEOPLE_N,
+                       old_rank_map(old.get("people"))),
         "categories": {
             cid: {"name": cat["name"],
-                  "issues": clean(pick(score_terms(per_cat[cid], keywords), CAT_N,
-                                       old_rank_map(old_cats.get(cid, {}).get("issues"))))}
+                  "issues": pick(score_terms(per_cat[cid], keywords), CAT_N,
+                                 old_rank_map(old_cats.get(cid, {}).get("issues")))}
             for cid, cat in CATEGORIES.items()
         },
         "search": collect_trends(),
@@ -762,6 +847,15 @@ def main():
         m["naver"] = result["_dl"].get(m["word"])          # 네이버 검색량 (최근 2일 / 그 전 평균)
     for v in vids:
         v.pop("_tags", None)
+
+    # 이슈 상세 페이지용 데이터 (issues.json) + 온도 기록
+    kw_arts = {kw: arts for _, kw, _, _, arts in scored}
+    details, result["_hist"] = build_details(result, kw_arts, vids, community, now, old.get("_hist"))
+    clean(result["top"]); clean(result["people"])
+    for c in result["categories"].values():
+        clean(c["issues"])
+    ISSUES_OUT.write_text(json.dumps(details, ensure_ascii=False, separators=(",", ":")), encoding="utf-8")
+
     MEME_OUT.write_text(json.dumps({"updated": result["updated"], "candidates": memes,
                                     "dictionary": read_meme_dictionary()},
                                    ensure_ascii=False, separators=(",", ":")), encoding="utf-8")

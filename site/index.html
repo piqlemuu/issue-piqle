@@ -9,6 +9,8 @@
 <meta property="og:title" content="이슈레이더 - 지금 대한민국 이슈 온도">
 <meta property="og:description" content="30분마다 갱신되는 실시간 이슈 온도 순위">
 <meta property="og:type" content="website">
+<!-- 검색엔진 주인 확인 (지우지 마세요) -->
+<meta name="google-site-verification" content="fFa15tCNDL9lGcycd2geDuBrjmq7XVXEo61L4eQZm0Y" />
 <!-- 네이버 서치어드바이저 인증 태그를 받으면 여기에 붙여넣으세요 -->
 
 <!-- ▼ [광고 설정 1] 애드센스 승인 후: 아래 주석 기호를 지우고 ca-pub-0000000000000000 을 내 번호로 바꾸세요
@@ -184,7 +186,7 @@ footer nav a{margin-right:12px;text-decoration:underline}
 <footer>
   <p><b>이슈레이더</b> — 뉴스 · 검색 · 영상 데이터를 모아 30분마다 자동 갱신해요.<br>
   기사 제목과 링크만 보여드리며, 기사 저작권은 각 언론사에 있습니다.</p>
-  <nav><a href="about.html">이슈레이더란?</a><a href="copyright.html">저작권 정책</a><a href="privacy.html">개인정보처리방침</a><a href="terms.html">이용약관</a><a href="mailto:contact@example.com">문의</a></nav>
+  <nav><a href="about.html">이슈레이더란?</a><a href="copyright.html">저작권 정책</a><a href="privacy.html">개인정보처리방침</a><a href="terms.html">이용약관</a><a href="#" class="mail" data-u="etis+uumelqip" data-d="moc.liamg">문의</a></nav>
   <p>© 2026 이슈레이더</p>
 </footer>
 </div>
@@ -331,6 +333,11 @@ pref("fsize", "data-fs", "m");
 
 load();
 setInterval(load, 10 * 60 * 1000);   // 화면을 켜 두면 10분마다 새로고침
+</script>
+<script>/* 스팸 봇이 이메일을 못 긁어 가도록, 누를 때만 주소를 만듭니다 */
+document.querySelectorAll("a.mail").forEach(function(a){a.onclick=function(e){
+var m=a.dataset.u.split("").reverse().join("")+"@"+a.dataset.d.split("").reverse().join("");
+if(a.dataset.shown){return true;} e.preventDefault(); a.textContent=m; a.href="mailto:"+m; a.dataset.shown=1;};});
 </script>
 </body>
 </html>

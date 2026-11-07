@@ -1,0 +1,320 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>이슈레이더 - 지금 대한민국 이슈 온도</title>
+<meta name="description" content="뉴스·검색·영상 데이터를 모아 지금 한국에서 화제인 이슈를 30분마다 온도 순위로 보여드립니다. 실시간 이슈, 이슈 인물, 분야별 이슈, 검색 급상승, 뜨는 영상.">
+<meta name="keywords" content="실시간 이슈, 이슈 순위, 검색어 순위, 실검, 오늘 뉴스, 연예 이슈, 경제 이슈, 인기 영상">
+<meta property="og:title" content="이슈레이더 - 지금 대한민국 이슈 온도">
+<meta property="og:description" content="30분마다 갱신되는 실시간 이슈 온도 순위">
+<meta property="og:type" content="website">
+<!-- 네이버 서치어드바이저 인증 태그를 받으면 여기에 붙여넣으세요 -->
+
+<!-- ▼ [광고 설정 1] 애드센스 승인 후: 아래 주석 기호를 지우고 ca-pub-0000000000000000 을 내 번호로 바꾸세요
+<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-0000000000000000" crossorigin="anonymous"></script>
+-->
+
+<style>
+:root{--bg:#f5f6f8;--card:#fff;--text:#15171c;--sub:#6b7280;--line:#e6e8ec;--soft:#f0f1f4;--hot:#ff4d2e;--warm:#ff9a2e;--cool:#3b82f6;--fs:16px}
+html[data-theme=soft]{--bg:#f4efe6;--card:#fbf8f2;--text:#2b2620;--sub:#7a7062;--line:#e6dccb;--soft:#efe7d9}
+html[data-theme=dark]{--bg:#0f1115;--card:#181b21;--text:#eef0f3;--sub:#9aa1ad;--line:#2a2e36;--soft:#20242b}
+html[data-fs=s]{--fs:14px}html[data-fs=l]{--fs:18px}
+*{box-sizing:border-box}
+html{font-size:var(--fs)}
+body{margin:0;background:var(--bg);color:var(--text);font-family:-apple-system,BlinkMacSystemFont,"Apple SD Gothic Neo","Noto Sans KR","Malgun Gothic",sans-serif;line-height:1.55;-webkit-text-size-adjust:100%}
+a{color:inherit}
+button{font:inherit;color:inherit}
+.wrap{max-width:760px;margin:0 auto;padding:0 16px}
+
+/* 헤더 */
+header{padding:18px 0 6px;display:flex;justify-content:space-between;align-items:flex-start;gap:12px;flex-wrap:wrap}
+.logo{margin:0;font-size:1.45rem;font-weight:800;letter-spacing:-.5px}
+.logo span{color:var(--hot)}
+.tag{color:var(--sub);font-size:.82rem}
+.ctrl{display:flex;gap:6px;flex-wrap:wrap}
+.seg{display:flex;border:1px solid var(--line);border-radius:999px;overflow:hidden;background:var(--card)}
+.seg button{border:0;background:none;padding:5px 10px;font-size:.78rem;cursor:pointer;color:var(--sub)}
+.seg button.on{background:var(--text);color:var(--bg)}
+.status{display:flex;align-items:center;gap:6px;color:var(--sub);font-size:.8rem;margin:4px 0 0}
+.dot{width:7px;height:7px;border-radius:50%;background:#22c55e;box-shadow:0 0 0 3px rgba(34,197,94,.2)}
+
+/* 섹션 공통 */
+section{background:var(--card);border:1px solid var(--line);border-radius:18px;padding:18px 16px;margin:14px 0}
+section[hidden]{display:none}
+.sh{display:flex;justify-content:space-between;align-items:flex-end;gap:8px;margin-bottom:10px}
+.sh h2{margin:0;font-size:1.15rem;letter-spacing:-.3px}
+.sh p{margin:2px 0 0;color:var(--sub);font-size:.82rem}
+.arrows{display:flex;gap:4px}
+.arrows button{width:30px;height:30px;border-radius:50%;border:1px solid var(--line);background:var(--card);cursor:pointer;font-size:1rem;line-height:1}
+.more{display:block;width:100%;margin-top:8px;padding:10px;border:1px solid var(--line);border-radius:12px;background:var(--soft);color:var(--text);cursor:pointer;font-size:.88rem;font-weight:600}
+
+/* 순위 목록 */
+.rk{list-style:none;margin:0;padding:0}
+.rk>li{border-top:1px solid var(--line)}
+.rk>li:first-child{border-top:0}
+.rk details>summary{list-style:none;cursor:pointer;padding:11px 2px;display:grid;grid-template-columns:2.2em 1fr auto;column-gap:8px;align-items:baseline}
+.rk details>summary::-webkit-details-marker{display:none}
+.num{font-weight:800;font-variant-numeric:tabular-nums;color:var(--sub)}
+.rk li:nth-child(-n+3) .num{color:var(--hot)}
+.ttl{font-weight:700;font-size:1.02rem}
+.ln2{grid-column:2/4;color:var(--sub);font-size:.84rem;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.deg{font-weight:800;font-variant-numeric:tabular-nums}
+.hot .deg{color:var(--hot)}.warm .deg{color:var(--warm)}.cool .deg{color:var(--cool)}
+.chg{font-size:.72rem;font-weight:700;margin-left:6px;vertical-align:2px}
+.up{color:var(--hot)}.down{color:var(--cool)}.same{color:var(--sub)}
+.new{color:#fff;background:var(--hot);padding:1px 6px;border-radius:6px}
+.news{list-style:none;margin:0 0 10px 2.2em;padding:8px 12px;background:var(--soft);border-radius:12px}
+.news li{padding:6px 0;border-top:1px solid var(--line);font-size:.9rem}
+.news li:first-child{border:0}
+.news a{text-decoration:none}
+.news a:hover{text-decoration:underline}
+.news small{display:block;color:var(--sub);font-size:.75rem}
+
+/* 가로 카드 (치고 올라오는 이슈, 영상) */
+.rail{display:flex;gap:10px;overflow-x:auto;scroll-snap-type:x mandatory;scrollbar-width:none;padding-bottom:2px}
+.rail::-webkit-scrollbar{display:none}
+.rc{flex:0 0 78%;max-width:280px;scroll-snap-align:start;border:1px solid var(--line);border-radius:14px;padding:14px;background:var(--soft);text-decoration:none;display:block}
+.rc .k{font-weight:800;font-size:1.05rem;margin:4px 0}
+.rc .h{color:var(--sub);font-size:.84rem;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.pill{display:inline-block;font-size:.72rem;font-weight:700;color:var(--hot);background:rgba(255,77,46,.1);padding:2px 8px;border-radius:999px}
+.vc{flex:0 0 62%;max-width:240px;scroll-snap-align:start;text-decoration:none}
+.vc img{width:100%;aspect-ratio:16/9;object-fit:cover;border-radius:12px;background:var(--soft);display:block}
+.vc .t{font-weight:700;font-size:.9rem;margin:6px 0 2px;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.vc small{color:var(--sub);font-size:.76rem}
+
+/* 분야 칩 */
+.chips{display:flex;gap:6px;overflow-x:auto;scrollbar-width:none;margin-bottom:6px;padding-bottom:2px}
+.chips::-webkit-scrollbar{display:none}
+.chips button{flex:0 0 auto;border:1px solid var(--line);background:var(--card);padding:6px 14px;border-radius:999px;font-size:.88rem;font-weight:600;cursor:pointer}
+.chips button.on{background:var(--text);color:var(--bg);border-color:var(--text)}
+
+/* 검색 급상승 */
+.sg{list-style:none;margin:0;padding:0;display:grid;grid-template-columns:1fr 1fr;gap:0 16px}
+.sg li{display:flex;gap:8px;align-items:baseline;padding:9px 0;border-top:1px solid var(--line);min-width:0}
+.sg a{text-decoration:none;font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;flex:1}
+.sg small{color:var(--sub);font-size:.72rem;white-space:nowrap}
+
+.ad-slot{margin:14px 0;min-height:90px;display:flex;align-items:center;justify-content:center;border:1px dashed var(--line);border-radius:14px;color:var(--sub);font-size:.8rem}
+.ad-slot:empty{display:none}
+.empty{color:var(--sub);text-align:center;padding:24px 0;font-size:.9rem}
+.note{color:var(--sub);font-size:.78rem;margin:10px 0 0}
+
+footer{padding:22px 0 48px;color:var(--sub);font-size:.8rem}
+footer nav a{margin-right:12px;text-decoration:underline}
+@media (max-width:420px){.sg{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<header>
+  <div>
+    <h1 class="logo">이슈<span>레이더</span></h1>
+    <div class="tag">지금 대한민국 이슈 온도계</div>
+    <div class="status"><i class="dot"></i><span id="updated">연결 중…</span></div>
+  </div>
+  <div class="ctrl">
+    <div class="seg" id="theme">
+      <button data-v="light">밝게</button><button data-v="soft">편하게</button><button data-v="dark">어둡게</button>
+    </div>
+    <div class="seg" id="fsize">
+      <button data-v="s" style="font-size:.7rem">가</button><button data-v="m">가</button><button data-v="l" style="font-size:.95rem">가</button>
+    </div>
+  </div>
+</header>
+
+<!-- ① 지금 뜨는 이슈 -->
+<section id="sec-top">
+  <div class="sh"><div><h2>지금 대한민국에서 뜨는 이슈</h2><p id="top-desc">여러 언론사가 함께 다룬 이슈 순위예요 · 눌러서 기사 보기</p></div></div>
+  <ol class="rk" id="top"></ol>
+  <button class="more" id="top-more">실시간 이슈 순위 더 보기</button>
+</section>
+
+<!-- ▼ [광고 설정 2] 첫 번째 광고: 애드센스 광고 단위 코드를 이 div 안에 붙여넣으세요 -->
+<div class="ad-slot" id="ad-1"></div>
+
+<!-- ② 치고 올라오는 이슈 -->
+<section id="sec-rising">
+  <div class="sh"><div><h2>치고 올라오는 이슈</h2><p>최근 2시간 동안 기사가 빠르게 늘고 있는 이슈예요</p></div>
+    <div class="arrows" data-rail="rising"><button data-d="-1" aria-label="이전">‹</button><button data-d="1" aria-label="다음">›</button></div></div>
+  <div class="rail" id="rising"></div>
+</section>
+
+<!-- ③ 이슈人 -->
+<section id="sec-people">
+  <div class="sh"><div><h2>이슈人</h2><p>최근 24시간 뉴스 언급 순위예요 · 언급 건수와 매체 수를 함께 반영</p></div></div>
+  <ol class="rk" id="people"></ol>
+  <p class="note">인기 순위가 아니라 기사 제목에 이름이 나온 횟수와 매체 수로 정한 언급량 순위예요. 옮겨 실은 기사와 포토 기사는 빼고 셉니다.</p>
+</section>
+
+<!-- ④ 분야별 이슈 -->
+<section id="sec-cat">
+  <div class="sh"><div><h2>분야별 이슈</h2><p>분야를 골라 보세요 — 옆으로 넘겨도 돼요</p></div></div>
+  <div class="chips" id="chips"></div>
+  <ol class="rk" id="cat"></ol>
+</section>
+
+<!-- ▼ [광고 설정 3] 두 번째 광고 -->
+<div class="ad-slot" id="ad-2"></div>
+
+<!-- ⑤ 검색 급상승 -->
+<section id="sec-search" hidden>
+  <div class="sh"><div><h2>검색 급상승</h2><p>검색량이 확 뛴 키워드예요 · 구글 트렌드 기준</p></div></div>
+  <ol class="sg" id="search"></ol>
+</section>
+
+<!-- ⑥ 지금 뜨는 영상 -->
+<section id="sec-videos" hidden>
+  <div class="sh"><div><h2>지금 뜨는 영상</h2><p id="vid-desc">최근 조회수가 가장 빨리 늘어난 영상이에요</p></div>
+    <div class="arrows" data-rail="videos"><button data-d="-1" aria-label="이전">‹</button><button data-d="1" aria-label="다음">›</button></div></div>
+  <div class="rail" id="videos"></div>
+</section>
+
+<!-- ▼ [광고 설정 4] 세 번째 광고 -->
+<div class="ad-slot" id="ad-3"></div>
+
+<footer>
+  <p><b>이슈레이더</b> — 뉴스 · 검색 · 영상 데이터를 모아 30분마다 자동 갱신해요.<br>
+  기사 제목과 링크만 보여드리며, 기사 저작권은 각 언론사에 있습니다.</p>
+  <nav><a href="about.html">이슈레이더란?</a><a href="copyright.html">저작권 정책</a><a href="privacy.html">개인정보처리방침</a><a href="terms.html">이용약관</a><a href="mailto:contact@example.com">문의</a></nav>
+  <p>© 2026 이슈레이더</p>
+</footer>
+</div>
+
+<script>
+let DATA = null, curCat = null, topOpen = false;
+const $ = id => document.getElementById(id);
+const esc = s => String(s ?? "").replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+const url = u => /^https?:\/\//.test(u || "") ? u : "#";
+const pad = n => String(n).padStart(2, "0");
+const heat = t => t >= 75 ? "hot" : t >= 55 ? "warm" : "cool";
+function ago(iso) {
+  const m = Math.round((Date.now() - new Date(iso)) / 60000);
+  if (m < 1) return "방금"; if (m < 60) return m + "분 전";
+  const h = Math.floor(m / 60); return h < 24 ? h + "시간 전" : Math.floor(h / 24) + "일 전";
+}
+function badge(c) {
+  if (c === "new") return '<span class="chg new">NEW</span>';
+  if (c > 0) return `<span class="chg up">▲${c}</span>`;
+  if (c < 0) return `<span class="chg down">▼${-c}</span>`;
+  return "";
+}
+function korNum(n) {
+  if (n >= 1e8) return (n / 1e8).toFixed(1).replace(/\.0$/, "") + "억";
+  if (n >= 1e4) return Math.round(n / 1e4) + "만";
+  return n.toLocaleString("ko-KR");
+}
+const newsList = arr => `<ul class="news">${arr.map(n => `<li><a href="${esc(url(n.link))}" target="_blank" rel="noopener nofollow">${esc(n.title)}</a><small>${esc(n.source)}${n.time ? " · " + ago(n.time) : ""}</small></li>`).join("")}</ul>`;
+
+// 순위 한 줄: "01. 키워드   61°" / "온도 61도 · 대표 기사 제목"
+function row(it, i, line2) {
+  return `<li class="${heat(it.temp)}"><details><summary>
+    <span class="num">${pad(i)}.</span>
+    <span class="ttl">${esc(it.keyword)}${badge(it.change)}</span>
+    <span class="deg">${it.temp}°</span>
+    <span class="ln2">${line2 ?? `온도 ${it.temp}도 · ${esc(it.headline)}`}</span>
+  </summary>${newsList(it.news)}</details></li>`;
+}
+const emptyMsg = '<li class="empty">아직 모은 이슈가 없어요. 잠시 후 다시 확인해 주세요.</li>';
+
+function renderTop() {
+  const list = DATA.top || [];
+  const shown = topOpen ? list : list.slice(0, 10);
+  $("top").innerHTML = shown.length ? shown.map((it, i) => row(it, i + 1)).join("") : emptyMsg;
+  $("top-more").hidden = list.length <= 10;
+  $("top-more").textContent = topOpen ? "접기" : `실시간 이슈 순위 ${list.length}위까지 보기`;
+}
+
+function renderRising() {
+  const r = DATA.rising || [];
+  $("sec-rising").hidden = !r.length;
+  $("rising").innerHTML = r.map(it => `
+    <a class="rc" href="${esc(url(it.news[0]?.link))}" target="_blank" rel="noopener nofollow">
+      <span class="pill">최근 ${it.recent}건 ↑</span>
+      <div class="k">${esc(it.keyword)}</div>
+      <div class="h">${esc(it.headline)}</div>
+    </a>`).join("");
+}
+
+function renderPeople() {
+  const p = DATA.people || [];
+  $("sec-people").hidden = !p.length;
+  $("people").innerHTML = p.map((it, i) => row(it, i + 1, `언급 ${it.articles}건 · 매체 ${it.sources}곳 · ${esc(it.headline)}`)).join("");
+}
+
+function renderCats() {
+  const cats = Object.entries(DATA.categories || {});
+  if (!curCat || !DATA.categories[curCat]) curCat = cats[0]?.[0];
+  $("chips").innerHTML = cats.map(([id, c]) =>
+    `<button class="${id === curCat ? "on" : ""}" data-id="${id}">${esc(c.name)}</button>`).join("");
+  const list = DATA.categories[curCat]?.issues || [];
+  $("cat").innerHTML = list.length ? list.map((it, i) => row(it, i + 1)).join("") : emptyMsg;
+}
+
+function renderSearch() {
+  const s = DATA.search || [];
+  $("sec-search").hidden = !s.length;
+  $("search").innerHTML = s.map((it, i) => {
+    const link = it.news?.[0]?.link || "https://www.google.com/search?q=" + encodeURIComponent(it.keyword);
+    return `<li><span class="num">${pad(i + 1)}</span><a href="${esc(url(link))}" target="_blank" rel="noopener nofollow">${esc(it.keyword)}</a><small>${esc(it.traffic)}</small></li>`;
+  }).join("");
+}
+
+function renderVideos() {
+  const v = DATA.videos || [];
+  $("sec-videos").hidden = !v.length;
+  const hasGain = v.some(x => x.gain != null);
+  $("vid-desc").textContent = hasGain ? "최근 조회수가 가장 빨리 늘어난 영상이에요" : "지금 한국 유튜브 인기 영상이에요";
+  $("videos").innerHTML = v.map(x => `
+    <a class="vc" href="${esc(url(x.link))}" target="_blank" rel="noopener">
+      <img src="${esc(url(x.thumb))}" alt="" loading="lazy">
+      <div class="t">${esc(x.title)}</div>
+      <small>${esc(x.channel)} · ${x.gain != null ? "시간당 +" + korNum(x.gain) + "회" : "조회수 " + korNum(x.views) + "회"}</small>
+    </a>`).join("");
+}
+
+function render() {
+  if (!DATA) return;
+  renderTop(); renderRising(); renderPeople(); renderCats(); renderSearch(); renderVideos();
+}
+
+async function load() {
+  try {
+    DATA = window.__DATA__ || await (await fetch("data.json?t=" + Date.now())).json();
+    const d = new Date(DATA.updated);
+    $("updated").textContent = d.toLocaleString("ko-KR", {month: "long", day: "numeric", hour: "2-digit", minute: "2-digit"})
+      + " 기준" + (DATA.total_sources ? ` · 언론사 ${DATA.total_sources}곳 기사 ${DATA.total_articles}건 분석` : "");
+  } catch (e) {
+    $("updated").textContent = "데이터를 불러오지 못했어요";
+  }
+  render();
+}
+
+// 버튼 동작
+$("top-more").onclick = () => { topOpen = !topOpen; renderTop(); };
+$("chips").onclick = e => { const b = e.target.closest("button"); if (b) { curCat = b.dataset.id; renderCats(); } };
+document.querySelectorAll(".arrows").forEach(a => a.onclick = e => {
+  const b = e.target.closest("button"); if (!b) return;
+  const rail = $(a.dataset.rail); rail.scrollBy({left: b.dataset.d * rail.clientWidth * .8, behavior: "smooth"});
+});
+
+// 화면 밝기·글자 크기 (브라우저에 기억)
+function pref(key, attr, def) {
+  let v = def; try { v = localStorage.getItem(key) || def; } catch (e) {}
+  const set = val => {
+    document.documentElement.setAttribute(attr, val);
+    document.querySelectorAll(`#${key} button`).forEach(b => b.classList.toggle("on", b.dataset.v === val));
+    try { localStorage.setItem(key, val); } catch (e) {}
+  };
+  set(v);
+  $(key).onclick = e => { const b = e.target.closest("button"); if (b) set(b.dataset.v); };
+}
+pref("theme", "data-theme", matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light");
+pref("fsize", "data-fs", "m");
+
+load();
+setInterval(load, 10 * 60 * 1000);   // 화면을 켜 두면 10분마다 새로고침
+</script>
+</body>
+</html>

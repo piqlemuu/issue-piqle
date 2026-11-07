@@ -273,10 +273,20 @@ def rising(scored, now):
             continue
         used.append(ids)
         news = sorted(arts, key=lambda a: a["time"], reverse=True)
+        # 상승 표시: 최근 3시간 기사 수 ÷ 그 전 3시간 기사 수 (그 전에 없었으면 '방금 뜸')
+        c3 = (now - timedelta(hours=3)).isoformat()
+        c6 = (now - timedelta(hours=6)).isoformat()
+        last3 = sum(1 for a in arts if a["time"] >= c3)
+        prev3 = sum(1 for a in arts if c6 <= a["time"] < c3)
         out.append({"keyword": kw, "recent": n_recent, "articles": n_art, "sources": n_src,
-                    "headline": news[0]["title"], "news": news[:NEWS_PER_ISSUE]})
+                    "headline": news[0]["title"], "latest": news[0]["time"], "score": s,
+                    "is_new": prev3 == 0, "ratio": round(last3 / prev3, 1) if prev3 else None,
+                    "news": news[:NEWS_PER_ISSUE]})
         if len(out) >= RISING_N:
             break
+    top = out[0]["score"] if out else 1
+    for it in out:                                       # 온도 (급부상 안에서 비교, 30~100도)
+        it["temp"] = round(30 + 70 * it.pop("score") / top)
     return out
 
 

@@ -1,0 +1,254 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>콘텐츠 랭킹 - 유튜브 인기 급상승 · 박스오피스 · 넷플릭스 순위 | 이슈레이더</title>
+<meta name="description" content="지금 조회수가 가장 빨리 오르는 유튜브 영상 TOP 100, 어제 박스오피스 순위, 이번 주 한국 넷플릭스 TOP 10을 한 곳에서.">
+<meta name="keywords" content="유튜브 인기 급상승, 유튜브 순위, 박스오피스 순위, 영화 순위, 넷플릭스 순위, 넷플릭스 TOP 10">
+<meta property="og:title" content="콘텐츠 랭킹 - 이슈레이더">
+<meta property="og:description" content="유튜브 · 박스오피스 · 넷플릭스 순위를 한 곳에서">
+<meta property="og:type" content="website">
+
+<!-- ▼ [광고 설정 1] index.html 과 똑같이: 애드센스 승인 후 주석 기호를 지우고 내 번호로 바꾸세요
+<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-0000000000000000" crossorigin="anonymous"></script>
+-->
+
+<style>
+:root{--bg:#f5f6f8;--card:#fff;--text:#15171c;--sub:#6b7280;--line:#e6e8ec;--soft:#f0f1f4;--hot:#ff4d2e;--cool:#3b82f6;--fs:16px}
+html[data-theme=soft]{--bg:#f4efe6;--card:#fbf8f2;--text:#2b2620;--sub:#7a7062;--line:#e6dccb;--soft:#efe7d9}
+html[data-theme=dark]{--bg:#0f1115;--card:#181b21;--text:#eef0f3;--sub:#9aa1ad;--line:#2a2e36;--soft:#20242b}
+html[data-fs=s]{--fs:14px}html[data-fs=l]{--fs:18px}
+*{box-sizing:border-box}
+html{font-size:var(--fs)}
+body{margin:0;background:var(--bg);color:var(--text);font-family:-apple-system,BlinkMacSystemFont,"Apple SD Gothic Neo","Noto Sans KR","Malgun Gothic",sans-serif;line-height:1.5;-webkit-text-size-adjust:100%;padding-bottom:72px}
+a{color:inherit;text-decoration:none}
+button{font:inherit;color:inherit}
+.wrap{max-width:760px;margin:0 auto;padding:0 16px}
+header{padding:18px 0 6px;display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap}
+.logo{margin:0;font-size:1.45rem;font-weight:800;letter-spacing:-.5px}
+.logo span{color:var(--hot)}
+.tag{color:var(--sub);font-size:.82rem}
+.ctrl{display:flex;gap:6px;flex-wrap:wrap}
+.seg{display:flex;border:1px solid var(--line);border-radius:999px;overflow:hidden;background:var(--card)}
+.seg button{border:0;background:none;padding:5px 10px;font-size:.78rem;cursor:pointer;color:var(--sub)}
+.seg button.on{background:var(--text);color:var(--bg)}
+.status{display:flex;justify-content:flex-end;align-items:center;gap:6px;color:var(--sub);font-size:.8rem;margin:10px 0}
+.dot{width:8px;height:8px;border-radius:50%;background:var(--hot);box-shadow:0 0 0 3px rgba(255,77,46,.18)}
+
+/* 큰 탭 */
+.sticky{position:sticky;top:0;z-index:5;background:var(--bg);padding:6px 0 4px}
+.tabs{display:grid;grid-template-columns:repeat(3,1fr);background:var(--soft);border-radius:14px;padding:4px}
+.tabs button{border:0;background:none;padding:10px 0;border-radius:11px;font-weight:700;color:var(--sub);cursor:pointer}
+.tabs button.on{background:var(--card);color:var(--text);box-shadow:0 1px 3px rgba(0,0,0,.08)}
+.chips{display:flex;gap:6px;overflow-x:auto;scrollbar-width:none;padding:10px 0 4px}
+.chips::-webkit-scrollbar{display:none}
+.chips button{flex:0 0 auto;border:1px solid var(--line);background:var(--card);padding:6px 14px;border-radius:999px;font-size:.88rem;font-weight:600;cursor:pointer}
+.chips button.on{background:var(--text);color:var(--bg);border-color:var(--text)}
+.chips:empty{display:none}
+
+/* 순위 카드 */
+.list{list-style:none;margin:6px 0 0;padding:0}
+.card{display:grid;grid-template-columns:2.2rem auto 1fr auto;gap:12px;align-items:center;background:var(--card);border:1px solid var(--line);border-radius:16px;padding:12px;margin:8px 0}
+.card.noimg{grid-template-columns:2.2rem 1fr auto}
+.rk{width:2.2rem;height:2.2rem;border-radius:10px;background:var(--soft);display:flex;align-items:center;justify-content:center;font-weight:800;color:var(--sub);font-variant-numeric:tabular-nums;font-size:.95rem}
+.card:nth-child(-n+3) .rk{color:var(--hot)}
+.th{width:116px;aspect-ratio:16/9;border-radius:10px;object-fit:cover;background:var(--soft);display:block}
+.body{min-width:0}
+.t{font-weight:700;font-size:.98rem;line-height:1.35;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.m{color:var(--sub);font-size:.8rem;margin-top:3px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.side{text-align:right;white-space:nowrap;font-variant-numeric:tabular-nums}
+.gain{color:var(--hot);font-weight:800;font-size:.9rem}
+.v{color:var(--sub);font-size:.78rem;margin-top:2px}
+.chg{font-size:.78rem;font-weight:800;margin-top:2px}
+.up{color:var(--hot)}.down{color:var(--cool)}.same{color:var(--sub)}.new{color:var(--cool);letter-spacing:.5px}
+.more{display:block;width:100%;margin:8px 0;padding:12px;border:1px solid var(--line);border-radius:14px;background:var(--card);cursor:pointer;font-weight:600}
+.note{color:var(--sub);font-size:.78rem;margin:10px 2px}
+.empty{background:var(--card);border:1px dashed var(--line);border-radius:16px;padding:32px 16px;text-align:center;color:var(--sub);font-size:.9rem;margin-top:10px}
+.ad-slot{margin:10px 0;min-height:90px;display:flex;align-items:center;justify-content:center;border:1px dashed var(--line);border-radius:14px;color:var(--sub);font-size:.8rem}
+.ad-slot:empty{display:none}
+@media (max-width:480px){.th{width:92px}.card{gap:9px;padding:10px}.t{font-size:.92rem}}
+
+footer{padding:22px 0 24px;color:var(--sub);font-size:.8rem}
+footer nav a{margin-right:12px;text-decoration:underline}
+
+/* 아래 메뉴 */
+.bnav{position:fixed;left:0;right:0;bottom:0;background:var(--card);border-top:1px solid var(--line);display:flex;justify-content:center;z-index:9;padding-bottom:env(safe-area-inset-bottom)}
+.bnav a{flex:1;max-width:150px;display:flex;flex-direction:column;align-items:center;gap:2px;padding:8px 0;font-size:.72rem;color:var(--sub)}
+.bnav a.on{color:var(--text);font-weight:700}
+.bnav svg{width:22px;height:22px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+.more[hidden]{display:none}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<header>
+  <a href="index.html"><h1 class="logo">이슈<span>레이더</span></h1><div class="tag">지금 대한민국 이슈 온도계</div></a>
+  <div class="ctrl">
+    <div class="seg" id="theme"><button data-v="light">밝게</button><button data-v="soft">편하게</button><button data-v="dark">어둡게</button></div>
+    <div class="seg" id="fsize"><button data-v="s" style="font-size:.7rem">가</button><button data-v="m">가</button><button data-v="l" style="font-size:.95rem">가</button></div>
+  </div>
+</header>
+
+<div class="status"><i class="dot"></i><span id="updated">연결 중…</span></div>
+
+<div class="sticky">
+  <div class="tabs" id="tabs">
+    <button data-t="youtube">유튜브</button><button data-t="boxoffice">박스오피스</button><button data-t="netflix">넷플릭스</button>
+  </div>
+  <div class="chips" id="chips"></div>
+</div>
+
+<!-- ▼ [광고 설정 2] 목록 위 광고 -->
+<div class="ad-slot" id="ad-1"></div>
+
+<p class="note" id="desc"></p>
+<ol class="list" id="list"></ol>
+<button class="more" id="more" hidden></button>
+
+<!-- ▼ [광고 설정 3] 목록 아래 광고 -->
+<div class="ad-slot" id="ad-2"></div>
+
+<footer>
+  <p><b>이슈레이더</b> — 유튜브 영상은 YouTube 공식 API, 박스오피스는 영화진흥위원회 통합전산망, 넷플릭스는 넷플릭스 공식 주간 TOP 10 자료를 바탕으로 해요.</p>
+  <nav><a href="about.html">이슈레이더란?</a><a href="copyright.html">저작권 정책</a><a href="privacy.html">개인정보처리방침</a><a href="terms.html">이용약관</a></nav>
+  <p>© 2026 이슈레이더</p>
+</footer>
+</div>
+
+<nav class="bnav">
+  <a href="index.html"><svg viewBox="0 0 24 24"><path d="M3 11l9-7 9 7v9a1 1 0 0 1-1 1h-5v-6H9v6H4a1 1 0 0 1-1-1z"/></svg>홈</a>
+  <a href="index.html#sec-top"><svg viewBox="0 0 24 24"><path d="M6 20V10M12 20V4M18 20v-7"/></svg>이슈 랭킹</a>
+  <a href="index.html#sec-people"><svg viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M4 21c1-4 4-6 8-6s7 2 8 6"/></svg>이슈人</a>
+  <a href="content.html" class="on"><svg viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="M10 9l5 3-5 3z"/></svg>콘텐츠 랭킹</a>
+</nav>
+
+<script>
+const $ = id => document.getElementById(id);
+const esc = s => String(s ?? "").replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+const url = u => /^https?:\/\//.test(u || "") ? u : "#";
+function kn(n) {                       // 1234567 → 123만
+  if (n == null) return "";
+  if (n >= 1e8) return (n / 1e8).toFixed(1).replace(/\.0$/, "") + "억";
+  if (n >= 1e5) return Math.round(n / 1e4) + "만";
+  if (n >= 1e4) return (n / 1e4).toFixed(1).replace(/\.0$/, "") + "만";
+  return n.toLocaleString("ko-KR");
+}
+function chg(c) {
+  if (c === "new") return '<div class="chg new">NEW</div>';
+  if (c > 0) return `<div class="chg up">▲${c}</div>`;
+  if (c < 0) return `<div class="chg down">▼${-c}</div>`;
+  return '<div class="chg same">–</div>';
+}
+const YT_CHIPS = ["전체", "기타", "뉴스·정치", "음악", "스포츠", "엔터", "영화·애니", "게임", "인물"];
+let D = null, tab = "youtube", chip = "전체", nfChip = "tv", limit = 30;
+
+function setTab(t) {
+  tab = ["youtube", "boxoffice", "netflix"].includes(t) ? t : "youtube";
+  limit = 30;
+  document.querySelectorAll("#tabs button").forEach(b => b.classList.toggle("on", b.dataset.t === tab));
+  try { history.replaceState(null, "", "#" + tab); } catch (e) {}
+  render();
+}
+
+function emptyBox(msg) { $("list").innerHTML = `<li class="empty">${msg}</li>`; $("more").hidden = true; }
+
+function renderYoutube() {
+  $("chips").innerHTML = YT_CHIPS.map(c => `<button class="${c === chip ? "on" : ""}" data-c="${c}">${c}</button>`).join("");
+  const all = (D.youtube || []);
+  if (!all.length) return emptyBox("유튜브 순위를 준비 중이에요.<br>(운영자: README 5단계에서 유튜브 키를 넣어 주세요)");
+  const list = (chip === "전체" ? all.slice(0, 100) : all.filter(v => v.cat === chip));
+  $("desc").textContent = `최근 ${D.youtube_hours || 6}시간 동안 조회수가 가장 빨리 늘어난 한국 유튜브 영상이에요`;
+  if (!list.length) return emptyBox("이 분야의 영상이 아직 없어요.");
+  $("list").innerHTML = list.slice(0, limit).map((v, i) => `
+    <li><a class="card" href="${esc(url(v.link))}" target="_blank" rel="noopener">
+      <div class="rk">${chip === "전체" ? v.rank : i + 1}</div>
+      <img class="th" src="${esc(url(v.thumb))}" alt="" loading="lazy">
+      <div class="body"><div class="t">${esc(v.title)}</div>
+        <div class="m">${esc(v.channel)}${v.subs ? " 구독 " + kn(v.subs) : ""} · ${esc(v.cat)}</div></div>
+      <div class="side">${v.gain != null ? `<div class="gain">+${kn(v.gain)}·${v.hrs}시간</div>` : ""}
+        <div class="v">${kn(v.views)}회</div>${chg(v.change)}</div>
+    </a></li>`).join("");
+  $("more").hidden = list.length <= limit;
+  $("more").textContent = `${Math.min(list.length, limit + 30)}위까지 더 보기`;
+}
+
+function renderBox() {
+  $("chips").innerHTML = "";
+  const bo = D.boxoffice;
+  if (!bo || !bo.items?.length) return emptyBox("박스오피스 순위를 준비 중이에요.<br>(운영자: README 6단계에서 영화진흥위원회 키를 넣어 주세요)");
+  const d = new Date(bo.date);
+  $("desc").textContent = `${d.getMonth() + 1}월 ${d.getDate()}일 하루 관객 수 기준 순위예요 · 영화진흥위원회 통합전산망`;
+  $("list").innerHTML = bo.items.map(m => `
+    <li><a class="card noimg" href="https://search.naver.com/search.naver?query=${encodeURIComponent("영화 " + m.title)}" target="_blank" rel="noopener">
+      <div class="rk">${m.rank}</div>
+      <div class="body"><div class="t">${esc(m.title)}</div>
+        <div class="m">개봉 ${esc(m.open)} · 누적 ${kn(m.acc)}명${m.share ? " · 매출 점유 " + esc(m.share) + "%" : ""}</div></div>
+      <div class="side"><div class="gain">${kn(m.audi)}명</div><div class="v">하루 관객</div>${chg(m.change)}</div>
+    </a></li>`).join("");
+  $("more").hidden = true;
+}
+
+function renderNetflix() {
+  $("chips").innerHTML = [["tv", "시리즈"], ["films", "영화"]].map(([k, n]) =>
+    `<button class="${k === nfChip ? "on" : ""}" data-nf="${k}">${n}</button>`).join("");
+  const nf = D.netflix;
+  if (!nf || !(nf[nfChip] || []).length) return emptyBox("넷플릭스 순위를 준비 중이에요. 잠시 후 다시 확인해 주세요.");
+  const end = new Date(nf.week), start = new Date(end - 6 * 864e5);
+  const f = d => `${d.getMonth() + 1}/${d.getDate()}`;
+  $("desc").textContent = `${f(start)} ~ ${f(end)} 한 주 동안 한국에서 많이 본 넷플릭스 ${nfChip === "tv" ? "시리즈" : "영화"}예요 · 넷플릭스 공식 TOP 10 (매주 화요일 갱신)`;
+  $("list").innerHTML = nf[nfChip].map(m => `
+    <li><a class="card noimg" href="https://www.netflix.com/search?q=${encodeURIComponent(m.title)}" target="_blank" rel="noopener">
+      <div class="rk">${m.rank}</div>
+      <div class="body"><div class="t">${esc(m.season || m.title)}</div>
+        <div class="m">${m.weeks}주째 TOP 10</div></div>
+      <div class="side">${chg(m.change)}</div>
+    </a></li>`).join("");
+  $("more").hidden = true;
+}
+
+function render() {
+  if (!D) return;
+  $("desc").textContent = "";
+  ({youtube: renderYoutube, boxoffice: renderBox, netflix: renderNetflix})[tab]();
+}
+
+$("tabs").onclick = e => { const b = e.target.closest("button"); if (b) setTab(b.dataset.t); };
+$("chips").onclick = e => {
+  const b = e.target.closest("button"); if (!b) return;
+  if (b.dataset.c) { chip = b.dataset.c; limit = 30; }
+  if (b.dataset.nf) nfChip = b.dataset.nf;
+  render();
+};
+$("more").onclick = () => { limit += 30; render(); };
+
+function pref(key, attr, def) {
+  let v = def; try { v = localStorage.getItem(key) || def; } catch (e) {}
+  const set = val => {
+    document.documentElement.setAttribute(attr, val);
+    document.querySelectorAll(`#${key} button`).forEach(b => b.classList.toggle("on", b.dataset.v === val));
+    try { localStorage.setItem(key, val); } catch (e) {}
+  };
+  set(v);
+  $(key).onclick = e => { const b = e.target.closest("button"); if (b) set(b.dataset.v); };
+}
+pref("theme", "data-theme", matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light");
+pref("fsize", "data-fs", "m");
+
+async function load() {
+  try {
+    D = window.__CONTENT__ || await (await fetch("content.json?t=" + Date.now())).json();
+    const d = new Date(D.updated);
+    $("updated").textContent = d.toLocaleString("ko-KR", {month: "numeric", day: "numeric", hour: "2-digit", minute: "2-digit"}) + " 업데이트";
+  } catch (e) {
+    D = {}; $("updated").textContent = "아직 데이터가 없어요";
+  }
+  render();
+}
+setTab(location.hash.slice(1));
+load();
+setInterval(load, 10 * 60 * 1000);
+</script>
+</body>
+</html>

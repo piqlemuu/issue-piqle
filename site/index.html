@@ -22,7 +22,7 @@ html[data-theme=dark]{--bg:#0f1115;--card:#181b21;--text:#eef0f3;--sub:#9aa1ad;-
 html[data-fs=s]{--fs:14px}html[data-fs=l]{--fs:18px}
 *{box-sizing:border-box}
 html{font-size:var(--fs)}
-body{margin:0;background:var(--bg);color:var(--text);font-family:-apple-system,BlinkMacSystemFont,"Apple SD Gothic Neo","Noto Sans KR","Malgun Gothic",sans-serif;line-height:1.55;-webkit-text-size-adjust:100%}
+body{padding-bottom:72px;margin:0;background:var(--bg);color:var(--text);font-family:-apple-system,BlinkMacSystemFont,"Apple SD Gothic Neo","Noto Sans KR","Malgun Gothic",sans-serif;line-height:1.55;-webkit-text-size-adjust:100%}
 a{color:inherit}
 button{font:inherit;color:inherit}
 .wrap{max-width:760px;margin:0 auto;padding:0 16px}
@@ -42,6 +42,11 @@ header{padding:18px 0 6px;display:flex;justify-content:space-between;align-items
 /* 섹션 공통 */
 section{background:var(--card);border:1px solid var(--line);border-radius:18px;padding:18px 16px;margin:14px 0}
 section[hidden]{display:none}
+section{scroll-margin-top:12px}
+.bnav{position:fixed;left:0;right:0;bottom:0;background:var(--card);border-top:1px solid var(--line);display:flex;justify-content:center;z-index:9;padding-bottom:env(safe-area-inset-bottom)}
+.bnav a{flex:1;max-width:150px;display:flex;flex-direction:column;align-items:center;gap:2px;padding:8px 0;font-size:.72rem;color:var(--sub);text-decoration:none}
+.bnav a.on{color:var(--text);font-weight:700}
+.bnav svg{width:22px;height:22px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
 .sh{display:flex;justify-content:space-between;align-items:flex-end;gap:8px;margin-bottom:10px}
 .sh h2{margin:0;font-size:1.15rem;letter-spacing:-.3px}
 .sh p{margin:2px 0 0;color:var(--sub);font-size:.82rem}
@@ -103,6 +108,7 @@ section[hidden]{display:none}
 footer{padding:22px 0 48px;color:var(--sub);font-size:.8rem}
 footer nav a{margin-right:12px;text-decoration:underline}
 @media (max-width:420px){.sg{grid-template-columns:1fr}}
+.more[hidden]{display:none}
 </style>
 </head>
 <body>
@@ -165,10 +171,11 @@ footer nav a{margin-right:12px;text-decoration:underline}
 </section>
 
 <!-- ⑥ 지금 뜨는 영상 -->
-<section id="sec-videos" hidden>
+<section id="sec-videos">
   <div class="sh"><div><h2>지금 뜨는 영상</h2><p id="vid-desc">최근 조회수가 가장 빨리 늘어난 영상이에요</p></div>
     <div class="arrows" data-rail="videos"><button data-d="-1" aria-label="이전">‹</button><button data-d="1" aria-label="다음">›</button></div></div>
   <div class="rail" id="videos"></div>
+  <a class="more" href="content.html" style="text-align:center;text-decoration:none">콘텐츠 랭킹 더 보기 ›</a>
 </section>
 
 <!-- ▼ [광고 설정 4] 세 번째 광고 -->
@@ -181,6 +188,13 @@ footer nav a{margin-right:12px;text-decoration:underline}
   <p>© 2026 이슈레이더</p>
 </footer>
 </div>
+
+<nav class="bnav">
+  <a href="index.html" class="on"><svg viewBox="0 0 24 24"><path d="M3 11l9-7 9 7v9a1 1 0 0 1-1 1h-5v-6H9v6H4a1 1 0 0 1-1-1z"/></svg>홈</a>
+  <a href="#sec-top"><svg viewBox="0 0 24 24"><path d="M6 20V10M12 20V4M18 20v-7"/></svg>이슈 랭킹</a>
+  <a href="#sec-people"><svg viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M4 21c1-4 4-6 8-6s7 2 8 6"/></svg>이슈人</a>
+  <a href="content.html"><svg viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="M10 9l5 3-5 3z"/></svg>콘텐츠 랭킹</a>
+</nav>
 
 <script>
 let DATA = null, curCat = null, topOpen = false;
@@ -263,14 +277,16 @@ function renderSearch() {
 
 function renderVideos() {
   const v = DATA.videos || [];
-  $("sec-videos").hidden = !v.length;
+  $("videos").hidden = !v.length;
+  document.querySelector("#sec-videos .arrows").hidden = !v.length;
   const hasGain = v.some(x => x.gain != null);
-  $("vid-desc").textContent = hasGain ? "최근 조회수가 가장 빨리 늘어난 영상이에요" : "지금 한국 유튜브 인기 영상이에요";
+  $("vid-desc").textContent = !v.length ? "유튜브 · 박스오피스 · 넷플릭스 순위를 한 곳에서 볼 수 있어요"
+    : hasGain ? "최근 조회수가 가장 빨리 늘어난 영상이에요" : "지금 한국 유튜브 인기 영상이에요";
   $("videos").innerHTML = v.map(x => `
     <a class="vc" href="${esc(url(x.link))}" target="_blank" rel="noopener">
       <img src="${esc(url(x.thumb))}" alt="" loading="lazy">
       <div class="t">${esc(x.title)}</div>
-      <small>${esc(x.channel)} · ${x.gain != null ? "시간당 +" + korNum(x.gain) + "회" : "조회수 " + korNum(x.views) + "회"}</small>
+      <small>${esc(x.channel)} · ${x.gain != null ? `<b style="color:var(--hot)">+${korNum(x.gain)}·${x.hrs}시간</b>` : "조회수 " + korNum(x.views) + "회"}</small>
     </a>`).join("");
 }
 

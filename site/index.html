@@ -305,9 +305,11 @@ function renderRising() {
   $("rising").innerHTML = r.slice(rPage * R_PER, rPage * R_PER + R_PER).map(it => {
     const th = findThumb(it.keyword);
     const thumb = th ? `<img src="${esc(th)}" alt="" loading="lazy">` : `<div class="ra">${esc([...it.keyword][0] || "")}</div>`;
-    const side = it.is_new || it.ratio == null
+    const side = it.is_new
       ? `<div class="big fresh">↑ 방금</div><small>막 뜨는 중</small>`
-      : `<div class="big">${it.ratio}배</div><small>3시간 전보다</small>`;
+      : it.ratio != null
+        ? `<div class="big">${it.ratio}배</div><small>3시간 전보다</small>`
+        : `<div class="big">${it.last3 ?? it.recent}건</div><small>최근 3시간</small>`;
     const t = it.temp ?? 50;
     return `<a class="rcard" href="${esc(url(it.news[0]?.link))}" target="_blank" rel="noopener nofollow">
       <div class="rthumb">${thumb}</div>

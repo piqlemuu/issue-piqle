@@ -6,7 +6,9 @@ GitHub Actions 가 30분마다 이 파일을 실행해서 site/data.json 을 만
 
   - 뉴스:        구글 뉴스 RSS (무료, 키 필요 없음)
   - 검색 급상승: 구글 트렌드 RSS (무료, 키 필요 없음)
-  - 뜨는 영상:   YouTube Data API (무료, API 키 필요 → README 5단계)
+  - 유튜브:      YouTube Data API (무료, API 키 필요 → README 5단계)
+  - 박스오피스:  영화진흥위원회 오픈API (무료, 키 필요 → README 6단계)
+  - 넷플릭스:    넷플릭스 공식 주간 TOP 10 (무료, 키 필요 없음)
 
 직접 실행해 보려면:  python collect.py
 """
@@ -50,7 +52,15 @@ CATEGORIES = {
 }
 
 TRENDS_URL = "https://trends.google.com/trending/rss?geo=KR"
+NETFLIX_URL = "https://www.netflix.com/tudum/top10/data/all-weeks-countries.tsv"
+NETFLIX_EVERY_H = 12  # 넷플릭스는 주 1회 바뀌어서 12시간에 한 번만 받음
+YT_WINDOW_H = 6       # 유튜브: 최근 몇 시간 동안 늘어난 조회수로 순위를 매길지
+YT_CATS = {"1": "영화·애니", "10": "음악", "17": "스포츠", "20": "게임", "22": "인물",
+           "23": "엔터", "24": "엔터", "25": "뉴스·정치"}   # 나머지는 '기타'
+
+# 비밀 키 (GitHub Secrets 에 넣으면 자동으로 들어와요. 없으면 그 섹션만 빠져요)
 YOUTUBE_KEY = os.environ.get("YOUTUBE_API_KEY", "").strip()
+KOBIS_KEY = os.environ.get("KOBIS_API_KEY", "").strip()
 
 # 순위에서 뺄 흔한 단어 (이상한 키워드가 순위에 뜨면 여기에 추가하세요)
 STOPWORDS = set("""
@@ -102,6 +112,7 @@ JOSA = sorted("""
 KST = timezone(timedelta(hours=9))
 ROOT = Path(__file__).resolve().parent
 OUT = ROOT / "site" / "data.json"
+CONTENT_OUT = ROOT / "site" / "content.json"
 
 
 def fetch(url):
@@ -312,33 +323,141 @@ def collect_trends():
     return out
 
 
-# ───────────── 지금 뜨는 영상 ─────────────
-def collect_videos(old_videos, old_time, now):
+# ───────────── 유튜브 (콘텐츠 랭킹) ─────────────
+def yt_get(path, **params):
+    params["key"] = YOUTUBE_KEY
+    return json.loads(fetch("https://www.googleapis.com/youtube/v3/" + path + "?"
+                            + urllib.parse.urlencode(params)))
+
+
+def collect_youtube(state, now):
+    """인기 영상 200개를 모아 최근 YT_WINDOW_H 시간 동안 늘어난 조회수 순으로 정렬"""
+    state = state or {}
     if not YOUTUBE_KEY:
-        print("[안내] YOUTUBE_API_KEY 가 없어 영상 섹션은 건너뜁니다.")
-        return []
-    url = ("https://www.googleapis.com/youtube/v3/videos?part=snippet,statistics"
-           f"&chart=mostPopular&regionCode=KR&maxResults=50&key={YOUTUBE_KEY}")
+        print("[안내] YOUTUBE_API_KEY 가 없어 영상은 건너뜁니다.")
+        return [], state
+    items, token = [], None
     try:
-        data = json.loads(fetch(url))
+        for _ in range(4):                                   # 50개씩 4번 = 200개
+            p = dict(part="snippet,statistics", chart="mostPopular", regionCode="KR", maxResults=50)
+            if token:
+                p["pageToken"] = token
+            d = yt_get("videos", **p)
+            items += d.get("items", [])
+            token = d.get("nextPageToken")
+            if not token:
+                break
+        subs, ch = {}, sorted({v["snippet"]["channelId"] for v in items})
+        for i in range(0, len(ch), 50):                      # 구독자 수
+            for c in yt_get("channels", part="statistics", id=",".join(ch[i:i + 50])).get("items", []):
+                st = c.get("statistics", {})
+                if not st.get("hiddenSubscriberCount"):
+                    subs[c["id"]] = int(st.get("subscriberCount", 0))
     except Exception as e:
-        print(f"[경고] 영상 수집 실패 ({type(e).__name__})", file=sys.stderr)  # 키가 로그에 안 찍히게
-        return []
-    prev = {v["id"]: v["views"] for v in old_videos or []}
-    hours = max((now - old_time).total_seconds() / 3600, 0.25) if old_time else None
+        print(f"[경고] 유튜브 수집 실패 ({type(e).__name__})", file=sys.stderr)  # 키가 로그에 안 찍히게
+        return [], state
+
+    snaps = sorted(state.get("snaps", []), key=lambda x: x["t"])
+    win_start = (now - timedelta(hours=YT_WINDOW_H, minutes=15)).isoformat()
+    old_ranks = state.get("ranks")
     vids = []
-    for v in data.get("items", []):
+    for v in items:
+        sn, vid = v["snippet"], v["id"]
         views = int(v.get("statistics", {}).get("viewCount", 0))
-        sn = v["snippet"]
-        gain = round((views - prev[v["id"]]) / hours) if hours and v["id"] in prev else None
-        vids.append({"id": v["id"], "title": sn["title"], "channel": sn["channelTitle"],
-                     "thumb": sn["thumbnails"].get("medium", sn["thumbnails"]["default"])["url"],
-                     "views": views, "gain": gain,
-                     "link": f"https://www.youtube.com/watch?v={v['id']}"})
-    # 이전 기록이 있으면 '시간당 늘어난 조회수' 순, 없으면 인기 순 그대로
-    if any(v["gain"] is not None for v in vids):
-        vids.sort(key=lambda v: -(v["gain"] or 0))
-    return vids
+        gain = hrs = None
+        for snap in snaps:                                  # 6시간 안의 가장 오래된 기록과 비교
+            if snap["t"] >= win_start and vid in snap["v"]:
+                gain = views - snap["v"][vid]
+                hrs = (now - datetime.fromisoformat(snap["t"])).total_seconds() / 3600
+                break
+        try:
+            age = (now - datetime.fromisoformat(sn["publishedAt"].replace("Z", "+00:00"))).total_seconds() / 3600
+        except Exception:
+            age = 999
+        if age <= YT_WINDOW_H and (hrs is None or age < hrs):  # 6시간 안에 올라온 영상은 조회수 전체가 증가분
+            gain, hrs = views, age
+        # 순위는 '시간당 늘어난 조회수' 로 공평하게 비교 (기록이 쌓이기 전 초반에도 정확하도록)
+        est = (gain / max(hrs, 0.5) if gain is not None else views / max(age, 1)) * YT_WINDOW_H
+        thumbs = sn.get("thumbnails", {})
+        vids.append({
+            "id": vid, "title": sn.get("title", ""), "channel": sn.get("channelTitle", ""),
+            "subs": subs.get(sn["channelId"]), "cat": YT_CATS.get(sn.get("categoryId"), "기타"),
+            "thumb": (thumbs.get("medium") or thumbs.get("default") or {}).get("url", ""),
+            "views": views, "gain": gain, "hrs": max(1, round(hrs)) if hrs is not None else None,
+            "link": f"https://www.youtube.com/watch?v={vid}", "_est": est,
+        })
+    vids.sort(key=lambda x: -x.pop("_est"))
+    for i, x in enumerate(vids, 1):
+        x["rank"] = i
+        x["change"] = (0 if old_ranks is None else
+                       old_ranks[x["id"]] - i if x["id"] in old_ranks else "new")
+
+    keep = (now - timedelta(hours=YT_WINDOW_H + 1)).isoformat()
+    snaps = [s_ for s_ in snaps if s_["t"] >= keep]
+    snaps.append({"t": now.isoformat(timespec="minutes"), "v": {x["id"]: x["views"] for x in vids}})
+    return vids, {"snaps": snaps, "ranks": {x["id"]: x["rank"] for x in vids}}
+
+
+# ───────────── 박스오피스 (영화진흥위원회) ─────────────
+def collect_boxoffice(now):
+    if not KOBIS_KEY:
+        print("[안내] KOBIS_API_KEY 가 없어 박스오피스는 건너뜁니다.")
+        return None
+    day = (now - timedelta(days=1)).strftime("%Y%m%d")       # 어제 기준 (오늘 집계는 내일 나옴)
+    path = ("www.kobis.or.kr/kobisopenapi/webservice/rest/boxoffice/searchDailyBoxOfficeList.json?"
+            + urllib.parse.urlencode({"key": KOBIS_KEY, "targetDt": day}))
+    for scheme in ("https://", "http://"):
+        try:
+            res = json.loads(fetch(scheme + path))["boxOfficeResult"]
+            break
+        except Exception as e:
+            err = type(e).__name__
+    else:
+        print(f"[경고] 박스오피스 수집 실패 ({err})", file=sys.stderr)
+        return None
+    items = []
+    for m in res.get("dailyBoxOfficeList", []):
+        inten = int(m.get("rankInten") or 0)
+        items.append({"rank": int(m["rank"]), "title": m.get("movieNm", ""), "open": m.get("openDt", ""),
+                      "audi": int(m.get("audiCnt") or 0), "acc": int(m.get("audiAcc") or 0),
+                      "share": m.get("salesShare", ""),
+                      "change": "new" if m.get("rankOldAndNew") == "NEW" else inten})
+    return {"date": f"{day[:4]}-{day[4:6]}-{day[6:]}", "items": items}
+
+
+# ───────────── 넷플릭스 (공식 주간 TOP 10, 한국) ─────────────
+def collect_netflix(cache, now):
+    if cache and cache.get("fetched", "") >= (now - timedelta(hours=NETFLIX_EVERY_H)).isoformat():
+        return cache                                      # 자주 바뀌지 않아서 몇 시간에 한 번만 받음
+    try:
+        lines = fetch(NETFLIX_URL).decode("utf-8").splitlines()
+    except Exception as e:
+        print(f"[경고] 넷플릭스 수집 실패 ({e})", file=sys.stderr)
+        return cache
+    head = lines[0].split("\t")
+    col = {h: i for i, h in enumerate(head)}
+    rows = [r for r in (l.split("\t") for l in lines[1:])
+            if len(r) == len(head) and r[col["country_iso2"]] == "KR"]
+    if not rows:
+        return cache
+    weeks = sorted({r[col["week"]] for r in rows})
+    out = {"fetched": now.isoformat(timespec="minutes"), "week": weeks[-1]}
+    for key, cat in (("tv", "TV"), ("films", "Films")):
+        def lst(week):
+            return sorted((r for r in rows if r[col["week"]] == week and r[col["category"]] == cat),
+                          key=lambda r: int(r[col["weekly_rank"]]))
+        prev = {(r[col["show_title"]], r[col["season_title"]]): int(r[col["weekly_rank"]])
+                for r in lst(weeks[-2])} if len(weeks) > 1 else {}
+        out[key] = []
+        for r in lst(weeks[-1]):
+            k = (r[col["show_title"]], r[col["season_title"]])
+            rank = int(r[col["weekly_rank"]])
+            season = r[col["season_title"]]
+            out[key].append({"rank": rank, "title": r[col["show_title"]],
+                             "season": "" if season in ("", "N/A") else season,
+                             "weeks": int(r[col["cumulative_weeks_in_top_10"]] or 1),
+                             "change": prev[k] - rank if k in prev else "new"})
+    return out
 
 
 # ───────────── 실행 ─────────────
@@ -369,11 +488,6 @@ def main():
 
     scored = score_terms(articles, keywords)
     old_cats = old.get("categories", {})
-    old_time = None
-    try:
-        old_time = datetime.fromisoformat(old["updated"])
-    except Exception:
-        pass
 
     result = {
         "updated": now.isoformat(timespec="minutes"),
@@ -390,16 +504,22 @@ def main():
             for cid, cat in CATEGORIES.items()
         },
         "search": collect_trends(),
-        "videos": [],
     }
-    vids = collect_videos(old.get("videos_all"), old_time, now)
+    vids, result["_yt"] = collect_youtube(old.get("_yt"), now)
     result["videos"] = vids[:10]
-    result["videos_all"] = [{"id": v["id"], "views": v["views"]} for v in vids]  # 다음 비교용
+    result["_nf"] = collect_netflix(old.get("_nf"), now)
+
+    content = {"updated": result["updated"], "youtube": vids[:200],
+               "youtube_hours": YT_WINDOW_H,
+               "boxoffice": collect_boxoffice(now), "netflix": result["_nf"]}
 
     OUT.parent.mkdir(exist_ok=True)
-    OUT.write_text(json.dumps(result, ensure_ascii=False, indent=1), encoding="utf-8")
+    OUT.write_text(json.dumps(result, ensure_ascii=False, separators=(",", ":")), encoding="utf-8")
+    CONTENT_OUT.write_text(json.dumps(content, ensure_ascii=False, separators=(",", ":")), encoding="utf-8")
+    bo, nf = content["boxoffice"], content["netflix"]
     print(f"저장 완료: 이슈 {len(result['top'])} · 인물 {len(result['people'])} · "
-          f"검색어 {len(result['search'])} · 영상 {len(result['videos'])}")
+          f"검색어 {len(result['search'])} · 영상 {len(vids)} · "
+          f"박스오피스 {len(bo['items']) if bo else 0} · 넷플릭스 {len(nf['tv']) + len(nf['films']) if nf else 0}")
 
 
 if __name__ == "__main__":

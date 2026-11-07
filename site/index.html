@@ -183,12 +183,11 @@ h1,h2{font-weight:800}
   <span class="hcount" id="hcount"></span>
 </div>
 
-<!-- ⑥ 급상승 영상 -->
-<section id="sec-videos">
-  <div class="sh"><div><h2>급상승 영상</h2><p id="vid-desc">조회수가 가파르게 오르고 있는 유튜브 영상</p></div>
-    <div class="arrows" data-rail="videos"><button data-d="-1" aria-label="이전">‹</button><button data-d="1" aria-label="다음">›</button></div></div>
-  <div class="rail" id="videos"></div>
-  <a class="more" href="content.html" style="text-align:center;text-decoration:none">콘텐츠 랭킹 더 보기 ›</a>
+<!-- ② 급부상 이슈 -->
+<section id="sec-rising">
+  <div class="sh"><div><h2>급부상 이슈</h2><p>최근 2시간 사이 기사가 몰리기 시작한 이슈</p></div>
+    <div class="arrows" id="rpage"><button data-d="-1" aria-label="이전">‹</button><button data-d="1" aria-label="다음">›</button></div></div>
+  <div class="rl" id="rising"></div>
 </section>
 
 <!-- ① 지금 뜨는 이슈 -->
@@ -200,15 +199,6 @@ h1,h2{font-weight:800}
 
 <!-- ▼ [광고 설정 2] 첫 번째 광고: 애드센스 광고 단위 코드를 이 div 안에 붙여넣으세요 -->
 <div class="ad-slot" id="ad-1"></div>
-
-<!-- ② 급부상 이슈 -->
-<section id="sec-rising">
-  <div class="sh"><div><h2>급부상 이슈</h2><p>최근 2시간 사이 기사가 몰리기 시작한 이슈</p></div>
-    <div class="arrows" id="rpage"><button data-d="-1" aria-label="이전">‹</button><button data-d="1" aria-label="다음">›</button></div></div>
-  <div class="rl" id="rising"></div>
-</section>
-
-
 
 <!-- ④ 분야별 이슈 -->
 <section id="sec-cat">
@@ -233,7 +223,13 @@ h1,h2{font-weight:800}
   <ol class="sg" id="search"></ol>
 </section>
 
-
+<!-- ⑥ 급상승 영상 -->
+<section id="sec-videos">
+  <div class="sh"><div><h2>급상승 영상</h2><p id="vid-desc">조회수가 가파르게 오르고 있는 유튜브 영상</p></div>
+    <div class="arrows" data-rail="videos"><button data-d="-1" aria-label="이전">‹</button><button data-d="1" aria-label="다음">›</button></div></div>
+  <div class="rail" id="videos"></div>
+  <a class="more" href="content.html" style="text-align:center;text-decoration:none">콘텐츠 랭킹 더 보기 ›</a>
+</section>
 
 <!-- ▼ [광고 설정 4] 세 번째 광고 -->
 <div class="ad-slot" id="ad-3"></div>
@@ -292,14 +288,14 @@ const emptyMsg = '<li class="empty">아직 모은 이슈가 없어요. 잠시 �
 
 function renderTop() {
   const list = DATA.top || [];
-  const shown = topOpen ? list : list.slice(0, 10);
+  const shown = topOpen ? list : list.slice(0, 5);
   $("top").innerHTML = shown.length ? shown.map((it, i) => row(it, i + 1)).join("") : emptyMsg;
-  $("top-more").hidden = list.length <= 10;
+  $("top-more").hidden = list.length <= 5;
   $("top-more").textContent = topOpen ? "접기" : `실시간 이슈 순위 ${list.length}위까지 보기`;
 }
 
 let rPage = 0;
-const R_PER = 4;                                   // 한 번에 보여줄 카드 수
+const R_PER = 5;                                   // 한 번에 보여줄 카드 수
 function renderRising() {
   const r = DATA.rising || [];
   $("sec-rising").hidden = !r.length;
@@ -324,7 +320,7 @@ function renderRising() {
 function renderPeople() {
   const p = DATA.people || [];
   $("sec-people").hidden = !p.length;
-  $("people").innerHTML = p.map((it, i) => row(it, i + 1, `언급 ${it.articles}건 · 매체 ${it.sources}곳 · ${esc(it.headline)}`)).join("");
+  $("people").innerHTML = p.slice(0, 5).map((it, i) => row(it, i + 1, `언급 ${it.articles}건 · 매체 ${it.sources}곳 · ${esc(it.headline)}`)).join("");
 }
 
 function renderCats() {
@@ -333,13 +329,13 @@ function renderCats() {
   $("chips").innerHTML = cats.map(([id, c]) =>
     `<button class="${id === curCat ? "on" : ""}" data-id="${id}">${esc(c.name)}</button>`).join("");
   const list = DATA.categories[curCat]?.issues || [];
-  $("cat").innerHTML = list.length ? list.map((it, i) => row(it, i + 1)).join("") : emptyMsg;
+  $("cat").innerHTML = list.length ? list.slice(0, 5).map((it, i) => row(it, i + 1)).join("") : emptyMsg;
 }
 
 function renderSearch() {
   const s = DATA.search || [];
   $("sec-search").hidden = !s.length;
-  $("search").innerHTML = s.map((it, i) => {
+  $("search").innerHTML = s.slice(0, 5).map((it, i) => {
     const link = it.news?.[0]?.link || "https://www.google.com/search?q=" + encodeURIComponent(it.keyword);
     return `<li><span class="num">${pad(i + 1)}</span><a href="${esc(url(link))}" target="_blank" rel="noopener nofollow">${esc(it.keyword)}</a><small>${esc(it.traffic)}</small></li>`;
   }).join("");
@@ -351,14 +347,13 @@ function renderVideos() {
   const hasGain = v.some(x => x.gain != null);
   $("vid-desc").textContent = !v.length ? "유튜브 · 박스오피스 · 넷플릭스 순위를 한 곳에서 볼 수 있어요"
     : hasGain ? "조회수가 가파르게 오르고 있는 유튜브 영상" : "지금 한국 유튜브 인기 영상";
-  $("videos").innerHTML = v.map(x => `
+  $("videos").innerHTML = v.slice(0, 5).map(x => `
     <a class="vc" href="${esc(url(x.link))}" target="_blank" rel="noopener">
       <img src="${esc(url(x.thumb))}" alt="" loading="lazy">
       <div class="t">${esc(x.title)}</div>
       <small>${esc(x.channel)} · ${x.gain != null ? `<b style="color:var(--hot)">+${korNum(x.gain)}·${x.hrs}시간</b>` : "조회수 " + korNum(x.views) + "회"}</small>
     </a>`).join("");
 }
-
 
 let EXTRA = {videos: [], meme: null};
 const tempWord = t => t >= 80 ? "뜨거움" : t >= 60 ? "들썩임" : t >= 40 ? "따끈함" : "잔잔함";

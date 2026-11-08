@@ -12,6 +12,8 @@ GitHub Actions 가 30분마다 이 파일을 실행해서 site/data.json 을 만
 
 직접 실행해 보려면:  python collect.py
 """
+import base64
+import html as htmllib
 import json
 import os
 import re
@@ -19,7 +21,7 @@ import sys
 import urllib.parse
 import urllib.request
 import xml.etree.ElementTree as ET
-from collections import defaultdict
+from collections import Counter, defaultdict
 from datetime import datetime, timedelta, timezone
 from email.utils import parsedate_to_datetime
 from pathlib import Path
@@ -28,7 +30,8 @@ from pathlib import Path
 TOP_N = 20            # '지금 뜨는 이슈' 개수
 CAT_N = 10            # 분야별 이슈 개수
 PEOPLE_N = 10         # 이슈人 개수
-RISING_N = 8          # 치고 올라오는 이슈 개수
+RISING_N = 10         # 치고 올라오는 이슈 개수
+RISING_PER_CAT = 2    # 분야마다 최대 몇 개까지 (먼저 분야마다 1개씩, 남으면 2개째)
 NEWS_PER_ISSUE = 5    # 첫 화면에서 이슈마다 보여줄 관련 기사 수
 MAX_AGE_HOURS = 24    # 이 시간보다 오래된 기사는 버림
 RISING_HOURS = 2      # '최근' 으로 볼 시간 (치고 올라오는 이슈)
@@ -41,15 +44,33 @@ def search(word): return f"{G}/search?q={urllib.parse.quote(word)}+when:1d&{Q}"
 GENERAL_FEEDS = [f"{G}?{Q}"]   # 분야 없이 전체 주요 뉴스
 
 # 분야 추가·삭제는 여기서. (화면에는 자동으로 반영돼요)
+QUERY_WORDS = set()   # 분야를 찾으려고 넣은 검색어는 이슈 키워드에서 빼요 (안 그러면 '할인'·'카페'가 1위가 돼요)
+def find(*words):
+    QUERY_WORDS.update(w for w in words if " " not in w)
+    return search(" OR ".join(words))
+
 CATEGORIES = {
-    "pol":  {"name": "정치",    "feeds": [search("정치"), search("국회")]},
-    "eco":  {"name": "경제",    "feeds": [topic("BUSINESS"), search("경제")]},
-    "soc":  {"name": "사회",    "feeds": [topic("NATION"), search("사회")]},
-    "ent":  {"name": "연예",    "feeds": [topic("ENTERTAINMENT"), search("연예")]},
-    "spo":  {"name": "스포츠",  "feeds": [topic("SPORTS")]},
-    "it":   {"name": "IT·과학", "feeds": [topic("TECHNOLOGY"), topic("SCIENCE")]},
-    "wor":  {"name": "세계",    "feeds": [topic("WORLD")]},
+    "ent":    {"name": "연예",      "feeds": [topic("ENTERTAINMENT"), search("연예")]},
+    "spo":    {"name": "스포츠",    "feeds": [topic("SPORTS")]},
+    # 생활·경제: 국민이 꼭 알아야 할 돈·생활 뉴스 (물가·요금 인상·금리·세금·해킹·사기·리콜 등)
+    "life":   {"name": "생활·경제", "feeds": [topic("BUSINESS"),
+                                          find("물가", "요금", "금리", "대출", "환율", "집값", "전세"),
+                                          find("세금", "연금", "건강보험료", "최저임금", "지원금"),
+                                          find("해킹", "\"개인정보 유출\"", "보이스피싱", "리콜", "\"소비자 피해\"")]},
+    "food":   {"name": "음식·카페", "feeds": [find("맛집", "카페", "디저트", "신메뉴"), find("편의점", "프랜차이즈", "배달")]},
+    "beauty": {"name": "뷰티·패션", "feeds": [find("화장품", "뷰티", "스킨케어"), find("패션", "운동화", "명품")]},
+    "shop":   {"name": "쇼핑·혜택", "feeds": [find("할인", "쿠폰", "환급", "적립"), find("쇼핑", "이커머스", "다이소", "올리브영")]},
+    "trip":   {"name": "여행·공간", "feeds": [find("여행", "축제", "호텔", "항공권"), find("팝업스토어", "핫플", "전시회")]},
+    "cul":    {"name": "문화·여가", "feeds": [find("공연", "뮤지컬", "웹툰", "신간"), find("영화", "게임", "OTT")]},
+    "it":     {"name": "IT·테크",   "feeds": [topic("TECHNOLOGY"), topic("SCIENCE")]},
+    "sisa":   {"name": "시사",      "feeds": [search("정치"), topic("NATION"), topic("WORLD")]},
 }
+QUERY_WORDS |= {"인상", "인하", "유출", "피해", "소비자"}   # 너무 흔한 말이라 키워드로는 안 써요
+QUERY_WORDS -= {"다이소", "올리브영", "OTT"}   # 브랜드 이름은 그 자체로 이슈가 될 수 있어서 남겨요
+DEFAULT_CAT = "sisa"  # 어느 분야에도 안 잡힌 기사(전체 주요 뉴스)는 시사로 봐요
+TOP_CAT_CAP = 3       # 실시간 순위 10위마다 같은 분야는 최대 3개
+PEOPLE_CAT_CAP = 2    # 화제의 인물 5명마다 같은 분야는 최대 2명
+CAP_FREE = {"life"}   # 개수 제한 없이 다 넣는 분야 (생활·경제)
 
 TRENDS_URL = "https://trends.google.com/trending/rss?geo=KR"
 NETFLIX_URL = "https://www.netflix.com/tudum/top10/data/all-weeks-countries.tsv"
@@ -61,6 +82,12 @@ YT_CATS = {"1": "영화·애니", "10": "음악", "17": "스포츠", "20": "게�
 # 비밀 키 (GitHub Secrets 에 넣으면 자동으로 들어와요. 없으면 그 섹션만 빠져요)
 YOUTUBE_KEY = os.environ.get("YOUTUBE_API_KEY", "").strip()
 KOBIS_KEY = os.environ.get("KOBIS_API_KEY", "").strip()
+KAKAO_KEY = os.environ.get("KAKAO_REST_KEY", "").strip()   # 있으면 기사 원문 주소 찾기에 써요 (없어도 돼요)
+
+# 기사 사진 썸네일: 기사 원문의 대표 사진(og:image)을 작게 보여줘요. 끄려면 False 로.
+ARTICLE_IMAGES = True
+IMG_NEW_PER_RUN = 40   # 한 번 실행할 때 새로 찾아볼 기사 수 (사이트에 부담 안 주게)
+IMG_KEEP_H = 48        # 찾아 둔 사진 주소를 기억하는 시간
 NAVER_ID = os.environ.get("NAVER_CLIENT_ID", "").strip()          # 네이버 데이터랩 (선택)
 NAVER_SECRET = os.environ.get("NAVER_CLIENT_SECRET", "").strip()
 DATALAB_EVERY_H = 3   # 네이버 데이터랩 확인 간격(시간)
@@ -185,7 +212,7 @@ def keywords(title):
     found = set()
     for w in tokens(title):
         w = strip_josa(w)
-        if len(w) < 2 or re.match(r"^\d", w) or w in STOPWORDS:
+        if len(w) < 2 or re.match(r"^\d", w) or w in STOPWORDS or w in QUERY_WORDS:
             continue
         found.add(w.upper() if w.isascii() else w)
     return found
@@ -219,9 +246,15 @@ def score_terms(articles, extract, min_sources=2):
     return out
 
 
-def pick(scored, n, old_ranks):
-    """겹치는 이슈를 합치고 상위 n 개를 고른 뒤 온도·순위변화를 붙임"""
-    issues, used = [], []
+def cat_of(arts, link_cat):
+    cnt = Counter(link_cat.get(a["link"], DEFAULT_CAT) for a in arts)
+    return cnt.most_common(1)[0][0] if cnt else DEFAULT_CAT
+
+
+def pick(scored, n, old_ranks, link_cat=None, cap=None, per=10):
+    """겹치는 이슈를 합치고 상위 n 개를 고른 뒤 온도·순위변화를 붙임.
+    cap 을 주면 per 개마다 같은 분야는 cap 개까지만 (한 분야가 순위를 독차지하지 않게)"""
+    issues, used, cnt, skipped = [], [], Counter(), []
     for score, kw, n_art, n_src, arts in scored:
         ids = {a["link"] for a in arts}
         if any(len(ids & u) / len(ids) > 0.6 for u in used):
@@ -229,13 +262,34 @@ def pick(scored, n, old_ranks):
         if any((kw in it["keyword"] or it["keyword"] in kw)
                and len(ids & {a["link"] for a in it["_arts"]}) / len(ids) > 0.3 for it in issues):
             continue                       # '의장' 과 '국회의장' 처럼 겹치는 단어 → 하나만
+        cid = cat_of(arts, link_cat) if link_cat is not None else None
+        if cap and cid not in CAP_FREE and cnt[cid] >= cap * (1 + len(issues) // per):
+            skipped.append((score, kw, n_art, n_src, arts, cid))
+            continue                       # 이 분야는 이미 충분히 올라와 있음 (자리가 남으면 나중에 채움)
+        cnt[cid] += 1
         used.append(ids)
         news = sorted(arts, key=lambda a: a["time"], reverse=True)[:NEWS_PER_ISSUE]
-        issues.append({"keyword": kw, "score": score, "articles": n_art, "sources": n_src,
-                       "headline": news[0]["title"], "news": news, "_arts": arts})
+        it = {"keyword": kw, "score": score, "articles": n_art, "sources": n_src,
+              "headline": news[0]["title"], "news": news, "_arts": arts}
+        if cid in CATEGORIES:
+            it["cat"] = CATEGORIES[cid]["name"]
+        issues.append(it)
         if len(issues) >= n:
             break
-    top = issues[0]["score"] if issues else 1
+    for score, kw, n_art, n_src, arts, cid in skipped:   # 다른 분야로 다 못 채우면 남은 자리를 채움
+        if len(issues) >= n:
+            break
+        ids = {a["link"] for a in arts}
+        if any(len(ids & u) / len(ids) > 0.6 for u in used):
+            continue
+        used.append(ids)
+        news = sorted(arts, key=lambda a: a["time"], reverse=True)[:NEWS_PER_ISSUE]
+        it = {"keyword": kw, "score": score, "articles": n_art, "sources": n_src,
+              "headline": news[0]["title"], "news": news, "_arts": arts}
+        if cid in CATEGORIES:
+            it["cat"] = CATEGORIES[cid]["name"]
+        issues.append(it)
+    top = max((x["score"] for x in issues), default=1)
     for i, it in enumerate(issues, 1):
         it["rank"] = i
         it["temp"] = round(30 + 70 * it.pop("score") / top)          # 30~100도
@@ -258,8 +312,10 @@ def old_rank_map(lst, key="keyword"):
     return {x[key]: x["rank"] for x in lst} if lst is not None else None
 
 
-def rising(scored, now):
-    """최근 RISING_HOURS 시간에 기사가 몰린 이슈. 모자라면 최근 기사 증가가 큰 순으로 채움"""
+def rising(scored, now, link_cat=None):
+    """최근 RISING_HOURS 시간에 기사가 몰린 이슈. 모자라면 최근 기사 증가가 큰 순으로 채움.
+    분야(정치·경제…)마다 먼저 1개씩 고르고, 자리가 남으면 분야당 2개까지 채움"""
+    link_cat = link_cat or {}
     recent_cut = (now - timedelta(hours=RISING_HOURS)).isoformat()
     c3 = (now - timedelta(hours=3)).isoformat()
     c6 = (now - timedelta(hours=6)).isoformat()
@@ -280,12 +336,26 @@ def rising(scored, now):
     strict.sort(key=lambda x: (-x[0], x[1]))
     loose.sort(key=lambda x: (-x[0], x[1]))
 
-    out, used = [], []
-    for s, kw, n_art, n_src, arts, n_recent, filled in strict + loose:
-        ids = {a["link"] for a in arts}
+    cands, used = [], []
+    for c in strict + loose:                              # 기사가 70% 넘게 겹치면 같은 이슈로 봄
+        ids = {a["link"] for a in c[4]}
         if any(len(ids & u) / len(ids) > 0.7 for u in used):
             continue
         used.append(ids)
+        cands.append((len(cands), cat_of(c[4], link_cat), c))
+
+    picked, per = [], Counter()
+    for limit in range(1, RISING_PER_CAT + 1):            # 1바퀴: 분야마다 1개 → 2바퀴: 2개째
+        for order, cid, c in cands:
+            if len(picked) >= RISING_N:
+                break
+            if (cid in CAP_FREE or per[cid] < limit) and all(order != p[0] for p in picked):
+                picked.append((order, cid, c))
+                per[cid] += 1
+    picked.sort(key=lambda p: p[0])                       # 원래 점수 순서대로
+
+    out = []
+    for _, cid, (s, kw, n_art, n_src, arts, n_recent, filled) in picked:
         news = sorted(arts, key=lambda a: a["time"], reverse=True)
         last3, prev3 = metrics(arts)
         out.append({"keyword": kw, "recent": n_recent, "articles": n_art, "sources": n_src,
@@ -294,9 +364,8 @@ def rising(scored, now):
                     # '방금' 표시는 조건을 통과한 이슈 중 3시간 전에 기사가 없던 것만
                     "is_new": (not filled) and prev3 == 0,
                     "ratio": round(last3 / prev3, 1) if prev3 else None,
+                    "cat": CATEGORIES[cid]["name"] if cid in CATEGORIES else "",
                     "news": news[:NEWS_PER_ISSUE]})
-        if len(out) >= RISING_N:
-            break
     n = len(out)
     for i, it in enumerate(out):                         # 온도: 순서대로 100도 → 40도
         it.pop("score")
@@ -349,6 +418,61 @@ def collect_trends():
         if i >= 10:
             break
     return out
+
+
+# ───────────── 위키백과 많이 본 문서 (한국어, 하루 단위) ─────────────
+WIKI_N = 10
+WIKI_EVERY_H = 3            # 새 날짜 자료가 아직 없으면 3시간 뒤에 다시 시도
+WIKI_UA = "IssuePickle/1.0 (https://piqlemuu.github.io/issue-rader/)"   # 위키미디어가 요구하는 봇 이름
+WIKI_SKIP = ("대문", "위키백과:대문")
+
+
+def wiki_day(day):
+    url = ("https://wikimedia.org/api/rest_v1/metrics/pageviews/top/ko.wikipedia/all-access/"
+           + day.strftime("%Y/%m/%d"))
+    req = urllib.request.Request(url, headers={"User-Agent": WIKI_UA})
+    with urllib.request.urlopen(req, timeout=20) as r:
+        arts = json.loads(r.read())["items"][0]["articles"]
+    out = []
+    for a in arts:
+        t = a["article"]
+        if ":" in t or t in WIKI_SKIP:      # 특수:검색, 분류:, 틀: 같은 위키 내부 문서는 뺌
+            continue
+        out.append({"title": t.replace("_", " "), "views": a["views"], "_key": t})
+    return out
+
+
+def collect_wiki(cache, now):
+    utc = now.astimezone(timezone.utc).date()
+    want = (utc - timedelta(days=1)).isoformat()
+    if cache and (cache.get("date") == want or
+                  cache.get("tried", "") >= (now - timedelta(hours=WIKI_EVERY_H)).isoformat()):
+        return cache
+    for back in (1, 2):                      # 어제 자료가 아직 안 나왔으면 그저께
+        day = utc - timedelta(days=back)
+        try:
+            cur = wiki_day(day)
+        except Exception as e:
+            print(f"[경고] 위키백과 {day} 수집 실패 ({e})", file=sys.stderr)
+            continue
+        if not cur:
+            continue
+        if cache and cache.get("date") == day.isoformat():
+            cache["tried"] = now.isoformat(timespec="minutes")
+            return cache
+        try:
+            prev = {a["_key"]: i for i, a in enumerate(wiki_day(day - timedelta(days=1)), 1)}
+        except Exception:
+            prev = {}
+        items = []
+        for i, a in enumerate(cur[:WIKI_N], 1):
+            k = a.pop("_key")
+            items.append({**a, "rank": i, "change": (prev[k] - i) if k in prev else "new",
+                          "link": "https://ko.wikipedia.org/wiki/" + urllib.parse.quote(k)})
+        return {"date": day.isoformat(), "tried": now.isoformat(timespec="minutes"), "items": items}
+    if cache:
+        cache["tried"] = now.isoformat(timespec="minutes")
+    return cache
 
 
 # ───────────── 유튜브 (콘텐츠 랭킹) ─────────────
@@ -560,7 +684,8 @@ def collect_community(now):
 
 
 def datalab_check(words, state, now):
-    """네이버 데이터랩(공식 API)으로 후보 단어의 최근 검색량 변화 확인. 키가 없으면 건너뜀"""
+    """네이버 검색어 트렌드(NAVER API HUB)로 후보 단어의 최근 검색량 변화 확인. 키가 없으면 건너뜀.
+    약관상 API 결과를 광고와 함께 화면에 보여주면 안 되므로, 결과는 순위 계산에만 쓰고 화면에는 내보내지 않음"""
     state = dict(state or {})
     if not (NAVER_ID and NAVER_SECRET) or not words:
         return state
@@ -573,10 +698,11 @@ def datalab_check(words, state, now):
         body = {"startDate": start, "endDate": end, "timeUnit": "date",
                 "keywordGroups": [{"groupName": w, "keywords": [w]} for w in words[i:i + 5]]}
         try:
-            req = urllib.request.Request("https://openapi.naver.com/v1/datalab/search",
+            # 2026년부터 네이버 클라우드 'NAVER API HUB' 로 옮겨진 검색어 트렌드 API
+            req = urllib.request.Request("https://naverapihub.apigw.ntruss.com/search-trend/v1/search",
                                          data=json.dumps(body).encode(), method="POST",
-                                         headers={"X-Naver-Client-Id": NAVER_ID,
-                                                  "X-Naver-Client-Secret": NAVER_SECRET,
+                                         headers={"X-NCP-APIGW-API-KEY-ID": NAVER_ID,
+                                                  "X-NCP-APIGW-API-KEY": NAVER_SECRET,
                                                   "Content-Type": "application/json"})
             with urllib.request.urlopen(req, timeout=20) as r:
                 res = json.loads(r.read())
@@ -681,21 +807,21 @@ def find_memes(vids, trends, articles, community, state, now):
 
 
 def read_meme_dictionary():
-    """memes.md 에 직접 쓴 밈 사전을 읽어요. (## 단어 / 뜻: / 예문: / 유래: / 날짜: / 출처: / 글:)"""
+    """memes.md 에 직접 쓴 밈 사전을 읽어요. (## 단어 / 뜻: / 예문: / 유래: / 날짜: / 출처: / 글: / 이미지: / 영상:)"""
     path = ROOT / "memes.md"
     if not path.exists():
         return []
     text = path.read_text(encoding="utf-8")
-    keys = {"뜻": "meaning", "예문": "example", "유래": "origin", "날짜": "date", "출처": "source", "글": "page"}
+    keys = {"뜻": "meaning", "예문": "example", "유래": "origin", "날짜": "date", "출처": "source", "글": "page", "이미지": "img", "영상": "video"}
     items = []
     for block in re.split(r"^## ", text, flags=re.M)[1:]:
         lines = block.strip().splitlines()
         if not lines:
             continue
-        it = {"word": lines[0].strip(), "meaning": "", "example": "", "origin": "", "date": "", "source": "", "page": ""}
+        it = {"word": lines[0].strip(), "meaning": "", "example": "", "origin": "", "date": "", "source": "", "page": "", "img": "", "video": ""}
         cur = None
         for ln in lines[1:]:
-            m = re.match(r"^\s*(뜻|예문|유래|날짜|출처|글)\s*[:：]\s*(.*)$", ln)
+            m = re.match(r"^\s*(뜻|예문|유래|날짜|출처|글|이미지|영상)\s*[:：]\s*(.*)$", ln)
             if m:
                 cur = keys[m.group(1)]
                 it[cur] = m.group(2).strip()
@@ -705,6 +831,94 @@ def read_meme_dictionary():
             items.append(it)
     items.sort(key=lambda x: x["date"], reverse=True)
     return items
+
+
+# ───────────── 기사 대표 사진 (작은 썸네일용) ─────────────
+def google_to_url(link):
+    """구글 뉴스 링크 안에 원문 주소가 들어 있으면 꺼내요 (옛 형식만 가능)"""
+    m = re.search(r"/articles/([A-Za-z0-9_-]+)", link)
+    if not m:
+        return ""
+    try:
+        raw = base64.urlsafe_b64decode(m.group(1) + "=" * (-len(m.group(1)) % 4))
+    except Exception:
+        return ""
+    u = re.search(rb"https?://[\x21-\x7e]+", raw)
+    return u.group(0).decode("ascii", "ignore") if u else ""
+
+
+def kakao_url(title, source):
+    """카카오 검색 API로 같은 제목의 원문 주소 찾기 (KAKAO_REST_KEY 가 있을 때만)"""
+    if not KAKAO_KEY:
+        return ""
+    q = urllib.parse.urlencode({"query": title, "size": 3})
+    req = urllib.request.Request("https://dapi.kakao.com/v2/search/web?" + q,
+                                 headers={"Authorization": "KakaoAK " + KAKAO_KEY})
+    with urllib.request.urlopen(req, timeout=10) as r:
+        docs = json.loads(r.read()).get("documents", [])
+    key = normalize(title)[:20]
+    for d in docs:
+        if key and key in normalize(re.sub(r"<[^>]+>", "", d.get("title", ""))):
+            return d.get("url", "")
+    return ""
+
+
+def og_image(url):
+    req = urllib.request.Request(url, headers={"User-Agent": "Mozilla/5.0 (issue-pickle link preview)"})
+    with urllib.request.urlopen(req, timeout=10) as r:
+        final = r.geturl()
+        page = r.read(400_000).decode("utf-8", "ignore")
+    if "news.google.com" in urllib.parse.urlparse(final).netloc:
+        return ""
+    for pat in (r'<meta[^>]+property=["\']og:image(?::secure_url)?["\'][^>]+content=["\']([^"\']+)',
+                r'<meta[^>]+content=["\']([^"\']+)["\'][^>]+property=["\']og:image',
+                r'<meta[^>]+name=["\']twitter:image["\'][^>]+content=["\']([^"\']+)'):
+        m = re.search(pat, page, re.I)
+        if m:
+            img = urllib.parse.urljoin(final, htmllib.unescape(m.group(1).strip()))
+            if img.startswith("http") and not re.search(r"logo|default|noimage|no_image|blank", img, re.I):
+                return img.replace("http://", "https://", 1)
+    return ""
+
+
+def attach_images(result, cache, now):
+    """순위에 나온 이슈의 대표 기사 사진을 찾아 기사·이슈에 img 로 붙여요"""
+    keep = (now - timedelta(hours=IMG_KEEP_H)).isoformat()
+    cache = {k: v for k, v in (cache or {}).items() if v[1] >= keep}
+    groups = [result["rising"], result["top"], result["people"]] + [c["issues"] for c in result["categories"].values()]
+    targets = []
+    for g in groups:
+        for it in g:
+            for a in it.get("news", [])[:2]:
+                if a["link"] not in {t["link"] for t in targets}:
+                    targets.append(a)
+    tried, found = 0, 0
+    for a in targets:
+        if a["link"] not in cache:
+            if not ARTICLE_IMAGES or tried >= IMG_NEW_PER_RUN:
+                continue
+            tried += 1
+            img = ""
+            try:
+                url = google_to_url(a["link"]) if "news.google.com" in a["link"] else a["link"]
+                if not url:
+                    url = kakao_url(a["title"], a["source"])
+                if not url:
+                    url = a["link"]                      # 그냥 열어 보고 원문으로 넘어가면 사용
+                img = og_image(url)
+            except Exception:
+                pass
+            cache[a["link"]] = [img, now.isoformat(timespec="minutes")]
+            found += bool(img)
+        if ARTICLE_IMAGES and cache[a["link"]][0]:
+            a["img"] = cache[a["link"]][0]
+    for g in groups:
+        for it in g:
+            im = next((a["img"] for a in it.get("news", []) if a.get("img")), "")
+            if im:
+                it["img"] = im
+    print(f"기사 사진: 새로 {tried}건 확인 · {found}건 찾음 · 기억 {sum(1 for v in cache.values() if v[0])}건")
+    return cache
 
 
 # ───────────── 이슈 상세 페이지 데이터 ─────────────
@@ -766,9 +980,11 @@ def build_details(result, kw_arts, vids, community, now, old_hist):
                         "video": min(100, len(vmatch) * 25) if vmatch else None,
                         "community": min(100, len(cmatch) * 15) if cmatch else None},
             "evidence": evidence,
-            "news": [{"title": a["title"], "source": a["source"], "link": a["link"], "time": a["time"]}
+            "news": [dict({"title": a["title"], "source": a["source"], "link": a["link"], "time": a["time"]},
+                          **({"img": a["img"]} if a.get("img") else {}))
                      for a in news[:DETAIL_NEWS]],
         }
+        entries[kw]["img"] = next((a["img"] for a in news if a.get("img")), "")
         h = [x for x in (old_hist or {}).get(kw, []) if x[0] >= keep]
         stamp = now.isoformat(timespec="minutes")
         if h and h[-1][0] == stamp:                      # 같은 시각에 두 번 돌면 마지막 값만
@@ -812,6 +1028,10 @@ def main():
         print(f"{cat['name']}: 기사 {len(seen)}건")
     articles = list(all_seen.values())
     print(f"전체: 기사 {len(articles)}건")
+    link_cat = {}                                          # 기사 → 처음 잡힌 분야
+    for cid, arts in per_cat.items():
+        for a in arts:
+            link_cat.setdefault(a["link"], cid)
 
     if not articles:
         print("[오류] 기사를 하나도 못 가져왔어요. 이전 데이터를 그대로 둡니다.", file=sys.stderr)
@@ -824,10 +1044,10 @@ def main():
         "updated": now.isoformat(timespec="minutes"),
         "total_articles": len(articles),
         "total_sources": len({a["source"] for a in articles}),
-        "top": pick(scored, TOP_N, old_rank_map(old.get("top"))),
-        "rising": rising(scored, now),
+        "top": pick(scored, TOP_N, old_rank_map(old.get("top")), link_cat, TOP_CAT_CAP),
+        "rising": rising(scored, now, link_cat),
         "people": pick(score_terms(articles, find_people(articles)), PEOPLE_N,
-                       old_rank_map(old.get("people"))),
+                       old_rank_map(old.get("people")), link_cat, PEOPLE_CAT_CAP, 5),
         "categories": {
             cid: {"name": cat["name"],
                   "issues": pick(score_terms(per_cat[cid], keywords), CAT_N,
@@ -836,6 +1056,7 @@ def main():
         },
         "search": collect_trends(),
     }
+    result["wiki"] = collect_wiki(old.get("wiki"), now)
     vids, result["_yt"] = collect_youtube(old.get("_yt"), now)
     result["videos"] = vids[:10]
     result["_nf"] = collect_netflix(old.get("_nf"), now)
@@ -843,10 +1064,13 @@ def main():
     community = collect_community(now)
     memes, result["_meme"] = find_memes(vids, result["search"], articles, community, old.get("_meme"), now)
     result["_dl"] = datalab_check([m["word"] for m in memes[:10]], old.get("_dl"), now)
-    for m in memes:
-        m["naver"] = result["_dl"].get(m["word"])          # 네이버 검색량 (최근 2일 / 그 전 평균)
+    # 네이버 검색량이 실제로 늘어난 단어를 위로 (결과 숫자 자체는 화면에 내보내지 않음)
+    memes.sort(key=lambda m: -(min(result["_dl"].get(m["word"]) or 1, 5) >= 1.5))
     for v in vids:
         v.pop("_tags", None)
+
+    # 기사 대표 사진 (기사 목록 앞 작은 썸네일)
+    result["_img"] = attach_images(result, old.get("_img"), now)
 
     # 이슈 상세 페이지용 데이터 (issues.json) + 온도 기록
     kw_arts = {kw: arts for _, kw, _, _, arts in scored}

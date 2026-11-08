@@ -28,6 +28,8 @@
 | `collect.py` | 뉴스를 모아 순위를 계산하는 프로그램 |
 | `.github/workflows/update.yml` | 30분마다 `collect.py` 를 실행하고 사이트를 갱신하는 자동 설정 |
 | `site/index.html` | 사이트 메인 화면 |
+| `site/style.css` | 모든 페이지가 같이 쓰는 디자인(색·글씨·박스). 색을 바꾸려면 맨 위 변수만 고치면 돼요 |
+| `site/ui.js` | 모든 페이지가 같이 쓰는 화면 설정(밝기·글자 크기)과 아래 메뉴 |
 | `site/content.html` | 콘텐츠 랭킹 (유튜브 · 박스오피스 · 넷플릭스) |
 | `site/data.json` | 수집 결과 (자동으로 바뀌니 건드리지 마세요) |
 | `site/about.html`, `copyright.html`, `privacy.html`, `terms.html` | 소개·저작권 정책·개인정보처리방침·이용약관 (애드센스 승인에 필요) |

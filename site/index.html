@@ -299,8 +299,8 @@ function renderMemes() {
 // ── 대표 슬라이드 ──
 function slideHTML(o, i, n) {
   const ico = `<span class="ico" aria-hidden="true">${ICONS[o.icon] || ICONS.news}</span>`;
-  const img = o.img ? `${ico}<img src="${esc(o.img)}" alt="" loading="lazy" referrerpolicy="no-referrer" decoding="async" style="position:relative" onerror="this.closest('.slide').querySelector('.bgfx').style.backgroundImage='';this.remove()">${o.video ? PLAY : ""}` : ico;
-  const bg = o.img ? ` style="background-image:url('${esc(o.img).replace(/'/g, "%27")}')"` : "";
+  const img = o.img ? `${ico}<img src="${esc(o.img)}" alt="" loading="lazy" referrerpolicy="no-referrer" decoding="async" style="position:relative" onerror="this.remove()">${o.video ? PLAY : ""}` : ico;
+  const bg = "";
   return `<a class="slide ${catCls(o.cat)}" href="${esc(o.href)}" ${o.ext ? 'target="_blank" rel="noopener"' : ""} role="group" aria-roledescription="slide" aria-label="${i + 1} / ${n}: ${esc(o.kind)}">
     <span class="bgfx" aria-hidden="true"${bg}></span>
     <span class="ph"><span class="kind">${o.emoji} ${esc(o.kind)}</span>${img}</span>

@@ -28,7 +28,7 @@ from pathlib import Path
 
 # ═════════════ 설정 (여기만 바꿔도 됩니다) ═════════════
 TOP_N = 20            # '지금 뜨는 이슈' 개수
-CAT_N = 10            # 분야별 이슈 개수
+CAT_N = 20            # 분야별 이슈 개수
 PEOPLE_N = 10         # 이슈人 개수
 RISING_N = 10         # 치고 올라오는 이슈 개수
 RISING_PER_CAT = 2    # 분야마다 최대 몇 개까지 (먼저 분야마다 1개씩, 남으면 2개째)
@@ -675,7 +675,7 @@ def collect_community(now):
             got = 0
             for a in items:
                 if a["time"] >= cutoff:
-                    posts.append({"title": a["title"], "link": a["link"], "channel": name, "src": name})
+                    posts.append({"title": a["title"], "link": a["link"], "channel": name, "src": name, "time": a["time"]})
                     got += 1
             print(f"[커뮤니티] {name}: 글 {got}개 ({url})")
         except Exception as e:
@@ -968,6 +968,7 @@ def attach_images(result, cache, now):
     return cache
 
 # ───────────── 이슈 상세 페이지 데이터 ─────────────
+COMMUNITY_PER_ISSUE = 5   # 상세 페이지에 보여 줄 커뮤니티 관련글 수
 DETAIL_NEWS = 8      # 상세 페이지에 보여줄 관련 기사 수
 HIST_HOURS = 8       # 온도 추이 그래프에 남길 시간
 
@@ -1003,7 +1004,14 @@ def build_details(result, kw_arts, vids, community, now, old_hist):
         prev3 = sum(1 for a in arts if c6 <= a["time"] < c3)
         low = kw.lower()
         vmatch = [v for v in vids if low in v["title"].lower()]
-        cmatch = [p for p in community if low in p["title"].lower()]
+        # 커뮤니티 관련글: 최근 24시간 커뮤니티 글 '제목'에 이 키워드가 그대로 들어 있는 글
+        # (영문 키워드는 'AI'가 'MAIL'에 걸리지 않게 단어 단위로만)
+        if kw.isascii():
+            pat = re.compile(r"(?<![A-Za-z])" + re.escape(low) + r"(?![A-Za-z])")
+            cmatch = [p for p in community if pat.search(p["title"].lower())]
+        else:
+            cmatch = [p for p in community if low in p["title"].lower()]
+        cmatch.sort(key=lambda p: p.get("time", ""), reverse=True)
         tmatch = [t for t in result["search"] if len(kw) >= 2 and (low in t["keyword"].lower() or t["keyword"].lower() in low)]
         base = top_map.get(kw, it)
         temp = base.get("temp", 50)
@@ -1026,6 +1034,8 @@ def build_details(result, kw_arts, vids, community, now, old_hist):
                         "video": min(100, len(vmatch) * 25) if vmatch else None,
                         "community": min(100, len(cmatch) * 15) if cmatch else None},
             "evidence": evidence,
+            "community": [{"title": p["title"], "link": p["link"], "src": p["channel"], "time": p.get("time", "")}
+                          for p in cmatch[:COMMUNITY_PER_ISSUE]],
             "news": [dict({"title": a["title"], "source": a["source"], "link": a["link"], "time": a["time"]},
                           **({"img": a["img"]} if a.get("img") else {}))
                      for a in news[:DETAIL_NEWS]],
@@ -1050,7 +1060,8 @@ def build_details(result, kw_arts, vids, community, now, old_hist):
         add(it, "인물")
     cats = {cid: {"name": c["name"], "list": [it["keyword"] for it in c["issues"]]}
             for cid, c in result["categories"].items()}
-    return {"updated": result["updated"], "issues": entries, "cats": cats}, hist
+    sites = sorted({name for name, _ in read_sources()})
+    return {"updated": result["updated"], "issues": entries, "cats": cats, "community_sites": sites}, hist
 
 
 # ───────────── 실행 ─────────────

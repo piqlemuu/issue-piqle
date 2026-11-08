@@ -1,0 +1,21 @@
+# 언론사 공식 RSS 목록 (기사 대표 사진을 찾는 데 쓰여요)
+#
+# 구글 뉴스 링크에는 원문 주소가 없어서, 언론사가 직접 공개한 RSS에서
+# 같은 제목의 기사를 찾아 원문 주소를 알아내요. 그 원문의 대표 사진(og:image)을 작게 보여줘요.
+#
+# 한 줄에 하나씩:  언론사 이름 | RSS 주소
+# 맨 앞에 # 을 붙이면 그 줄은 쓰지 않아요.
+# 많이 넣을수록 사진이 붙는 기사가 늘어나요.
+# 잘 되는지는 GitHub Actions 실행 기록의 '[언론사 RSS]' 줄에서 볼 수 있어요.
+
+# ▼ 동작 확인한 주소 (2026-11-08)
+한국경제 | https://www.hankyung.com/feed/all-news
+경향신문 | https://www.khan.co.kr/rss/rssdata/total_news.xml
+
+# ▼ 아직 확인 전 (실패해도 사이트에는 문제없어요. 실행 기록에서 '실패'로 나오면 # 을 붙여 끄세요)
+연합뉴스 | https://www.yna.co.kr/rss/news.xml
+조선일보 | https://www.chosun.com/arc/outboundfeeds/rss/?outputType=xml
+동아일보 | https://rss.donga.com/total.xml
+매일경제 | https://www.mk.co.kr/rss/30000001/
+한겨레 | https://www.hani.co.kr/rss/
+연합뉴스TV | https://www.yonhapnewstv.co.kr/browse/feed/

@@ -144,6 +144,7 @@ https://adfit.kakao.com 에서 신청하면 국내 사이트는 비교적 빨리
 ## 7단계: 밈절임 교차 확인 (선택)
 
 - **커뮤니티 추가**: `sources.txt` 에 `사이트 이름 | RSS 주소` 한 줄을 추가해요. 사이트가 직접 공개한 RSS만 넣어요.
+- **기사 사진 늘리기**: `press.txt` 에 `언론사 이름 | 언론사 공식 RSS 주소` 한 줄을 추가해요. 같은 제목의 기사를 찾아 대표 사진을 붙여요.
 - **네이버 검색량 확인**: https://developers.naver.com 에서 '애플리케이션 등록' → 사용 API에 **데이터랩(검색어 트렌드)** 선택 → 받은 Client ID / Client Secret 을
   GitHub Secrets 에 `NAVER_CLIENT_ID`, `NAVER_CLIENT_SECRET` 으로 넣어요. (하루 무료 1,000회 중 약 20회만 써요)
 

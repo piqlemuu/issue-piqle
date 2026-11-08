@@ -65,7 +65,7 @@ CATEGORIES = {
     "it":     {"name": "IT·테크",   "feeds": [topic("TECHNOLOGY"), topic("SCIENCE")]},
     "sisa":   {"name": "시사",      "feeds": [search("정치"), topic("NATION"), topic("WORLD")]},
 }
-QUERY_WORDS |= {"인상", "인하", "유출", "피해", "소비자"}   # 너무 흔한 말이라 키워드로는 안 써요
+QUERY_WORDS |= {"인상", "인하", "유출", "피해", "소비자", "혜택", "이벤트", "출시"}   # 너무 흔한 말이라 키워드로는 안 써요
 QUERY_WORDS -= {"다이소", "올리브영", "OTT"}   # 브랜드 이름은 그 자체로 이슈가 될 수 있어서 남겨요
 DEFAULT_CAT = "sisa"  # 어느 분야에도 안 잡힌 기사(전체 주요 뉴스)는 시사로 봐요
 TOP_CAT_CAP = 3       # 실시간 순위 10위마다 같은 분야는 최대 3개
@@ -881,45 +881,91 @@ def og_image(url):
     return ""
 
 
+PRESS_FILE = Path(__file__).parent / "press.txt"
+
+
+def press_key(title):
+    return normalize(re.sub(r"\[[^\]]*\]", "", title))[:24]
+
+
+def collect_press():
+    """언론사 공식 RSS 에서 제목 → (원문 주소, 사진) 지도를 만들어요"""
+    found = {}
+    if not PRESS_FILE.exists():
+        return found
+    for line in PRESS_FILE.read_text(encoding="utf-8").splitlines():
+        if not line.strip() or line.lstrip().startswith("#") or "|" not in line:
+            continue
+        name, url = [x.strip() for x in line.split("|", 1)]
+        try:
+            got = 0
+            for it in ET.fromstring(fetch(url)).iter("item"):
+                title, link = text(it, "title"), text(it, "link")
+                if not title or not link.startswith("http"):
+                    continue
+                img = ""
+                for el in it.iter():                 # media:content / media:thumbnail / enclosure
+                    tag = local(el.tag)
+                    if tag in ("content", "thumbnail", "enclosure") and el.get("url", "").startswith("http"):
+                        if tag != "enclosure" or "image" in el.get("type", "image"):
+                            img = el.get("url"); break
+                if not img:
+                    m = re.search(r'<img[^>]+src=["\']([^"\']+)', text(it, "description") or "")
+                    img = m.group(1) if m and m.group(1).startswith("http") else ""
+                found.setdefault(press_key(title), (link, img))
+                got += 1
+            print(f"[언론사 RSS] {name}: 기사 {got}건")
+        except Exception as e:
+            print(f"[언론사 RSS] {name}: 실패 ({type(e).__name__}) {url}", file=sys.stderr)
+    return found
+
+
 def attach_images(result, cache, now):
-    """순위에 나온 이슈의 대표 기사 사진을 찾아 기사·이슈에 img 로 붙여요"""
+    """순위에 나온 이슈마다, 언론사 RSS 와 제목이 같은 기사를 찾아 대표 사진을 붙여요"""
     keep = (now - timedelta(hours=IMG_KEEP_H)).isoformat()
     cache = {k: v for k, v in (cache or {}).items() if v[1] >= keep}
+    if not ARTICLE_IMAGES:
+        return cache
+    press = collect_press()
     groups = [result["rising"], result["top"], result["people"]] + [c["issues"] for c in result["categories"].values()]
-    targets = []
+    tried = found = 0
     for g in groups:
         for it in g:
-            for a in it.get("news", [])[:2]:
-                if a["link"] not in {t["link"] for t in targets}:
-                    targets.append(a)
-    tried, found = 0, 0
-    for a in targets:
-        if a["link"] not in cache:
-            if not ARTICLE_IMAGES or tried >= IMG_NEW_PER_RUN:
-                continue
-            tried += 1
-            img = ""
-            try:
-                url = google_to_url(a["link"]) if "news.google.com" in a["link"] else a["link"]
-                if not url:
-                    url = kakao_url(a["title"], a["source"])
-                if not url:
-                    url = a["link"]                      # 그냥 열어 보고 원문으로 넘어가면 사용
-                img = og_image(url)
-            except Exception:
-                pass
-            cache[a["link"]] = [img, now.isoformat(timespec="minutes")]
-            found += bool(img)
-        if ARTICLE_IMAGES and cache[a["link"]][0]:
-            a["img"] = cache[a["link"]][0]
-    for g in groups:
-        for it in g:
-            im = next((a["img"] for a in it.get("news", []) if a.get("img")), "")
+            arts = sorted(it.get("_arts") or it.get("news") or [], key=lambda a: a["time"], reverse=True)
+            for a in arts:
+                if a["link"] in cache and cache[a["link"]][0]:
+                    a["img"] = cache[a["link"]][0]; break
+                hit = press.get(press_key(a["title"]))
+                if not hit and KAKAO_KEY and tried < IMG_NEW_PER_RUN and a is arts[0]:
+                    try:
+                        u = kakao_url(a["title"], a["source"])
+                        hit = (u, "") if u else None
+                    except Exception:
+                        hit = None
+                if not hit or a["link"] in cache:
+                    continue
+                url, img = hit
+                if not img and tried < IMG_NEW_PER_RUN:
+                    tried += 1
+                    try:
+                        img = og_image(url)
+                    except Exception:
+                        img = ""
+                cache[a["link"]] = [img, now.isoformat(timespec="minutes")]
+                if img:
+                    found += 1
+                    a["img"] = img
+                    break
+            im = next((a["img"] for a in arts if a.get("img")), "")
             if im:
                 it["img"] = im
-    print(f"기사 사진: 새로 {tried}건 확인 · {found}건 찾음 · 기억 {sum(1 for v in cache.values() if v[0])}건")
+                for n in it.get("news", []):            # 화면에 나가는 기사 목록에도 표시
+                    c = cache.get(n["link"])
+                    if c and c[0]:
+                        n["img"] = c[0]
+    with_img = sum(1 for g in groups for it in g if it.get("img"))
+    print(f"기사 사진: 원문 확인 {tried}건 · 새로 찾음 {found}건 · 사진 붙은 이슈 {with_img}개")
     return cache
-
 
 # ───────────── 이슈 상세 페이지 데이터 ─────────────
 DETAIL_NEWS = 8      # 상세 페이지에 보여줄 관련 기사 수

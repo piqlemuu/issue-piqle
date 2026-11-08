@@ -94,6 +94,7 @@ DATALAB_EVERY_H = 3   # 네이버 데이터랩 확인 간격(시간)
 
 # 순위에서 뺄 흔한 단어 (이상한 키워드가 순위에 뜨면 여기에 추가하세요)
 STOPWORDS = set("""
+최대 최소 가을 겨울 여름 봄 사과 오전 오후 이날 당시 직접 최근 결국 다시 계속
 기자 뉴스 속보 단독 종합 오늘 내일 어제 올해 지난 이번 관련 대한 위해 통해 위한
 있는 없는 한다 했다 하는 하고 것으로 대해 이후 가능 사진 영상 포토 공개 발표 진행
 예정 최근 오후 오전 확인 결국 논란 기준 전망 이유 상황 우리 국내 해외 정부 한국
@@ -218,6 +219,58 @@ def keywords(title):
     return found
 
 
+TITLE_MAX = 18   # 이슈 제목 최대 글자 수
+
+
+def _norm_tok(w):
+    w = strip_josa(w)
+    return w.upper() if w.isascii() else w
+
+
+def _ok_edge(w):
+    return len(w) >= 2 and not re.match(r"^\d+$", w) and w not in STOPWORDS
+
+
+def make_title(kw, arts):
+    """한 단어 키워드를 '구자욱 우승'처럼 2~4단어 제목으로 만들어요.
+    1) 여러 기사 제목에 똑같이 붙어 나오는 구절(키워드 포함)을 먼저 찾고
+    2) 없으면 기사 제목에 자주 같이 나오는 단어를 키워드 앞뒤에 붙여요."""
+    titles = [[_norm_tok(w) for w in tokens(a["title"])] for a in arts]
+    titles = [t for t in titles if kw in t]
+    n = len(titles)
+    if n < 2:
+        return kw
+    need = max(2, round(n * 0.25))
+    # 1) 키워드를 포함한 연속 구절
+    grams = Counter()
+    for t in titles:
+        seen = set()
+        for size in (2, 3, 4):
+            for i in range(len(t) - size + 1):
+                g = tuple(t[i:i + size])
+                if kw in g and _ok_edge(g[0]) and _ok_edge(g[-1]) and len(set(g)) == size:
+                    seen.add(g)
+        grams.update(seen)
+    best = [(c * (1 + 0.2 * len(g)), g) for g, c in grams.items()
+            if c >= need and len(" ".join(g)) <= TITLE_MAX]
+    if best:
+        return " ".join(max(best)[1])
+    # 2) 자주 같이 나오는 단어 (키워드 기준 앞뒤 위치 순서로)
+    co, pos = Counter(), defaultdict(list)
+    for t in titles:
+        k = t.index(kw)
+        for i, w in enumerate(t):
+            if w != kw and _ok_edge(w) and len(w) <= 8:
+                pos[w].append(i - k)
+        co.update({w for w in t if w != kw and _ok_edge(w) and len(w) <= 8})
+    picks = [w for w, c in co.most_common(4) if c >= max(2, round(n * 0.35))][:2]
+    if not picks:
+        return kw
+    words = sorted(picks + [kw], key=lambda w: 0 if w == kw else sum(pos[w]) / len(pos[w]))
+    title = " ".join(words)
+    return title if len(title) <= TITLE_MAX else kw
+
+
 def collect_feeds(urls, cutoff):
     seen = {}
     for url in urls:
@@ -269,7 +322,7 @@ def pick(scored, n, old_ranks, link_cat=None, cap=None, per=10):
         cnt[cid] += 1
         used.append(ids)
         news = sorted(arts, key=lambda a: a["time"], reverse=True)[:NEWS_PER_ISSUE]
-        it = {"keyword": kw, "score": score, "articles": n_art, "sources": n_src,
+        it = {"keyword": kw, "title": make_title(kw, arts), "score": score, "articles": n_art, "sources": n_src,
               "headline": news[0]["title"], "news": news, "_arts": arts}
         if cid in CATEGORIES:
             it["cat"] = CATEGORIES[cid]["name"]
@@ -284,7 +337,7 @@ def pick(scored, n, old_ranks, link_cat=None, cap=None, per=10):
             continue
         used.append(ids)
         news = sorted(arts, key=lambda a: a["time"], reverse=True)[:NEWS_PER_ISSUE]
-        it = {"keyword": kw, "score": score, "articles": n_art, "sources": n_src,
+        it = {"keyword": kw, "title": make_title(kw, arts), "score": score, "articles": n_art, "sources": n_src,
               "headline": news[0]["title"], "news": news, "_arts": arts}
         if cid in CATEGORIES:
             it["cat"] = CATEGORIES[cid]["name"]
@@ -358,7 +411,7 @@ def rising(scored, now, link_cat=None):
     for _, cid, (s, kw, n_art, n_src, arts, n_recent, filled) in picked:
         news = sorted(arts, key=lambda a: a["time"], reverse=True)
         last3, prev3 = metrics(arts)
-        out.append({"keyword": kw, "recent": n_recent, "articles": n_art, "sources": n_src,
+        out.append({"keyword": kw, "title": make_title(kw, arts), "recent": n_recent, "articles": n_art, "sources": n_src,
                     "headline": news[0]["title"], "latest": news[0]["time"], "score": s,
                     "filled": filled, "last3": last3,
                     # '방금' 표시는 조건을 통과한 이슈 중 3시간 전에 기사가 없던 것만
@@ -1022,7 +1075,8 @@ def build_details(result, kw_arts, vids, community, now, old_hist):
                        for t in tmatch[:1]]
                     + [{"type": "영상", "title": v["title"], "link": v["link"], "src": v["channel"]} for v in vmatch[:2]])
         entries[kw] = {
-            "keyword": kw, "kind": kind, "temp": temp, "headline": news[0]["title"],
+            "keyword": kw, "title": base.get("title") or it.get("title") or kw,
+            "kind": kind, "temp": temp, "headline": news[0]["title"],
             "articles": len(arts), "sources": len(src_cnt),
             "source_names": [k for k, _ in sorted(src_cnt.items(), key=lambda kv: -kv[1])[:3]],
             "rank": base.get("rank") if kw in top_map else None,

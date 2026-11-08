@@ -39,12 +39,13 @@
   <!-- ③ 대표 이슈 슬라이드 (자동으로 넘어가지 않아요) -->
   <section class="hero" id="hero" aria-roledescription="carousel" aria-label="대표 이슈">
     <div class="hs" id="hs" aria-live="polite">
-      <div class="slide" aria-hidden="true"><div class="ph sk"></div><div class="tx"><div class="sk sk-l" style="width:40%"></div><div class="sk" style="height:1.4rem;margin-top:.5rem;width:80%"></div><div class="sk sk-l" style="margin-top:.5rem;width:60%"></div></div></div>
+      <div class="slide" aria-hidden="true"><div class="ph sk" style="box-shadow:none"></div><div class="tx"><div class="sk sk-l" style="width:40%"></div><div class="sk" style="height:1.4rem;margin-top:.5rem;width:80%"></div><div class="sk sk-l" style="margin-top:.5rem;width:60%"></div></div></div>
     </div>
-    <div class="hctl">
-      <button class="round-btn" id="hprev" aria-label="이전 대표 이슈">‹</button>
-      <span class="hcount" id="hcount" aria-live="polite"></span>
-      <button class="round-btn" id="hnext" aria-label="다음 대표 이슈">›</button>
+    <button class="hnav prev" id="hprev" aria-label="이전 대표 이슈"><span aria-hidden="true">‹</span></button>
+    <button class="hnav next" id="hnext" aria-label="다음 대표 이슈"><span aria-hidden="true">›</span></button>
+    <div class="hbar">
+      <button class="hplay" id="hplay" aria-label="자동 넘김 멈추기"><span aria-hidden="true">❚❚</span></button>
+      <span class="hcount" id="hcount" aria-live="off"></span>
     </div>
   </section>
 
@@ -59,7 +60,6 @@
   <section class="sec" id="sec-rising" aria-labelledby="h-rising">
     <div class="sec-head"><div><h2 id="h-rising">급부상 이슈</h2><p>최근 몇 시간 사이 기사가 빠르게 늘어난 이슈예요</p></div></div>
     <div class="cards" id="rising"></div>
-    <button class="more" id="rising-more" hidden aria-expanded="false" aria-controls="rising"></button>
   </section>
 
   <!-- ▼ [광고 설정 2] 첫 번째 광고: 애드센스 광고 단위 코드를 이 div 안에 붙여넣으세요 -->
@@ -70,6 +70,7 @@
     <div class="sec-head"><div><h2 id="h-cat">분야별 이슈</h2><p>관심 있는 분야를 골라 보세요</p></div></div>
     <div class="tabs" id="chips" role="tablist" aria-label="분야"></div>
     <div class="box" id="cat-box" role="tabpanel"><ol class="rlist" id="cat"></ol></div>
+    <button class="more" id="cat-more" hidden aria-expanded="false" aria-controls="cat"></button>
   </section>
 
   <!-- ⑦ 화제의 인물 -->
@@ -124,7 +125,7 @@
 
 <script src="ui.js"></script>
 <script>
-let DATA = null, FAILED = false, curCat = null, topOpen = false, risingOpen = false, heroIdx = 0;
+let DATA = null, FAILED = false, curCat = null, topOpen = false, catOpen = false, heroIdx = 0, heroTimer = null, heroPaused = false;
 let EXTRA = {videos: [], memes: []};
 const $ = id => document.getElementById(id);
 const esc = s => String(s ?? "").replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
@@ -138,6 +139,13 @@ const ICONS = {
   rise: '<svg viewBox="0 0 24 24"><path d="M3 17l6-6 4 4 8-8"/><path d="M15 7h6v6"/></svg>',
   meme: '<svg viewBox="0 0 24 24"><path d="M4 5h16v11H9l-5 4z"/></svg>'
 };
+// 숫자 구간 색 (높을수록 빨강 → 주황 → 황토 → 초록)
+const lv = (n, [a, b, c]) => n >= a ? "lv4" : n >= b ? "lv3" : n >= c ? "lv2" : "lv1";
+const tempLv = t => lv(t, [80, 60, 40]);
+const parseTraffic = s => { const m = String(s || "").replace(/,/g, "").match(/([\d.]+)\s*(만|천)?/); return m ? parseFloat(m[1]) * (m[2] === "만" ? 1e4 : m[2] === "천" ? 1e3 : 1) : 0; };
+const CATS = {"연예": "ent", "스포츠": "spo", "생활·경제": "life", "음식·카페": "food", "뷰티·패션": "beauty", "쇼핑·혜택": "shop", "여행·공간": "trip", "문화·여가": "cul", "IT·테크": "it", "시사": "sisa"};
+const catCls = name => CATS[name] ? "c-" + CATS[name] : "";
+const catLbl = name => name ? `<span class="lbl cat ${catCls(name)}">${esc(name)}</span>` : "";
 const M = (...a) => a.filter(Boolean).map(x => `<span class="nw">${x}</span>`).join(" · ");
 function ago(iso) {
   if (!iso) return "";
@@ -176,10 +184,10 @@ function row(it, i, opt = {}) {
   const meta = opt.meta ?? M(`매체 ${it.sources}곳`, `기사 ${it.articles}건`, latest ? ago(latest) : "");
   return `<li><a class="row" href="${issueLink(it.keyword)}">
     <span class="rank">${i}</span>
-    <span class="mid">${it.cat && !opt.noCat ? `<span class="lbl cat">${esc(it.cat)}</span>` : ""}<span class="kw">${esc(it.keyword)}</span>${opt.noChg ? "" : chg(it.change)}
+    <span class="mid">${!opt.noCat ? catLbl(it.cat) : ""}<span class="kw">${esc(it.keyword)}</span>${opt.noChg ? "" : chg(it.change)}
       ${it.headline ? `<span class="hl">${esc(it.headline)}</span>` : ""}
       <span class="meta">${meta}</span></span>
-    <span class="end">${opt.end ?? `<b>${it.temp}°</b><small>${tempWord(it.temp)}</small>`}</span>
+    <span class="end">${opt.end ?? `<b class="${tempLv(it.temp)}">${it.temp}°</b><small>${tempWord(it.temp)}</small>`}</span>
   </a></li>`;
 }
 
@@ -198,19 +206,16 @@ function risingSide(it) {                            // 오른쪽: 상승 수치
 }
 function renderRising() {
   const r = DATA?.rising || [];
-  const shown = risingOpen ? r : r.slice(0, 3);
+  const shown = r;
   $("rising").innerHTML = r.length ? shown.map(it => {
     const th = it.img || findThumb(it.keyword);
     return `<a class="box rcard ${th ? "has-img" : ""}" href="${issueLink(it.keyword)}">
       ${th ? `<img class="th" src="${esc(th)}" alt="" loading="lazy" referrerpolicy="no-referrer" decoding="async" width="74" height="51" onerror="this.parentNode.classList.remove('has-img');this.remove()">` : ""}
-      <span class="mid"><span class="kw">${it.cat ? `<span class="lbl cat">${esc(it.cat)}</span>` : ""}${esc(it.keyword)}</span>
+      <span class="mid"><span class="kw">${catLbl(it.cat)}${esc(it.keyword)}</span>
         <span class="hl">${esc(it.headline)}</span>
-        <span class="meta">${M(`<b>${it.temp}°</b> ${tempWord(it.temp)}`, it.latest ? ago(it.latest) : "", `매체 ${it.sources}곳`)}</span></span>
+        <span class="meta">${M(`<b class="${tempLv(it.temp)}">${it.temp}°</b> ${tempWord(it.temp)}`, it.latest ? ago(it.latest) : "", `매체 ${it.sources}곳`)}</span></span>
       <span class="end">${risingSide(it)}</span></a>`;
   }).join("") : `<div class="box"><ul class="rlist">${stateMsg("급부상 이슈")}</ul></div>`;
-  $("rising-more").hidden = r.length <= 3;
-  $("rising-more").setAttribute("aria-expanded", risingOpen);
-  $("rising-more").textContent = risingOpen ? "접기" : `급부상 이슈 ${r.length - 3}개 더 보기`;
 }
 
 let catMinH = 0;
@@ -221,7 +226,11 @@ function renderCats() {
     `<button role="tab" id="tab-${id}" aria-selected="${id === curCat}" aria-controls="cat-box" data-id="${id}">${esc(c.name)}</button>`).join("");
   $("cat-box").setAttribute("aria-labelledby", "tab-" + curCat);
   const list = DATA?.categories?.[curCat]?.issues || [];
-  $("cat").innerHTML = list.length ? list.slice(0, 5).map((it, i) => row(it, i + 1, {noCat: true})).join("") : stateMsg("이슈");
+  $("cat").innerHTML = list.length ? (catOpen ? list.slice(0, 20) : list.slice(0, 5)).map((it, i) => row(it, i + 1, {noCat: true})).join("") : stateMsg("이슈");
+  $("cat-more").hidden = list.length <= 5;
+  $("cat-more").setAttribute("aria-expanded", catOpen);
+  $("cat-more").textContent = catOpen ? "접기" : `${DATA.categories[curCat].name} 이슈 ${Math.min(list.length, 20)}위까지 더 보기`;
+  if (catOpen) { $("cat-box").style.minHeight = ""; return; }
   catMinH = Math.max(catMinH, $("cat-box").offsetHeight);       // 분야를 바꿔도 화면이 튀지 않게
   $("cat-box").style.minHeight = catMinH ? catMinH + "px" : "";
 }
@@ -231,7 +240,7 @@ function renderPeople() {
   $("people").innerHTML = p.length ? p.slice(0, 5).map((it, i) => row(it, i + 1, {
     noChg: false,
     meta: M(`매체 ${it.sources}곳`, it.news?.[0]?.time ? ago(it.news[0].time) : ""),
-    end: `<b>${it.articles}건</b><small>언급</small>`
+    end: `<b class="${lv(it.articles, [50, 20, 10])}">${it.articles}건</b><small>언급</small>`
   })).join("") : stateMsg("인물");
 }
 
@@ -242,7 +251,7 @@ function renderSearch() {
     return `<li><a class="row" href="${esc(url(link))}" target="_blank" rel="noopener nofollow">
       <span class="rank">${i + 1}</span>
       <span class="mid"><span class="kw">${esc(it.keyword)}</span>${it.news?.[0]?.title ? `<span class="meta">${esc(it.news[0].title)}</span>` : ""}</span>
-      <span class="end"><b>${esc(it.traffic || "")}</b><small>검색량</small></span></a></li>`;
+      <span class="end"><b class="${lv(parseTraffic(it.traffic), [5e4, 2e4, 5e3])}">${esc(it.traffic || "")}</b><small>검색량</small></span></a></li>`;
   }).join("") : stateMsg("검색어");
 }
 
@@ -255,7 +264,7 @@ function renderWiki() {
   $("wiki").innerHTML = w.slice(0, 5).map((it, i) => `<li><a class="row" href="${esc(url(it.link))}" target="_blank" rel="noopener nofollow">
       <span class="rank">${i + 1}</span>
       <span class="mid"><span class="kw">${esc(it.title)}</span>${chg(it.change)}</span>
-      <span class="end"><b>${korNum(it.views)}</b><small>조회</small></span></a></li>`).join("");
+      <span class="end"><b class="${lv(it.views, [5e4, 2e4, 1e4])}">${korNum(it.views)}</b><small>조회</small></span></a></li>`).join("");
 }
 
 function renderVideos() {
@@ -266,8 +275,8 @@ function renderVideos() {
     <a class="box vc" href="${esc(url(x.link))}" target="_blank" rel="noopener" aria-label="${esc(x.title)} (유튜브에서 보기)">
       <span class="vt">${x.thumb ? `<img src="${esc(url(x.thumb))}" alt="" loading="lazy">` : ""}${PLAY}</span>
       <span class="vb"><span class="t">${esc(x.title)}</span>
-        <span class="m">${M(esc(x.channel), `조회수 ${korNum(x.views)}회`)}</span>
-        ${x.gain != null ? `<span class="g">▲${korNum(x.gain)}회 · 최근 ${x.hrs}시간</span>` : ""}</span>
+        <span class="m">${M(esc(x.channel), `조회수 <b class="${lv(x.views, [1e6, 1e5, 1e4])}">${korNum(x.views)}회</b>`)}</span>
+        ${x.gain != null ? `<span class="g ${lv(x.gain, [5e5, 1e5, 2e4])}">▲${korNum(x.gain)}회 · 최근 ${x.hrs}시간</span>` : ""}</span>
     </a>`).join("") : `<div class="box" style="flex:1"><ul class="rlist">${stateMsg("영상")}</ul></div>`;
 }
 
@@ -289,27 +298,30 @@ function renderMemes() {
 
 // ── 대표 슬라이드 ──
 function slideHTML(o, i, n) {
-  const img = o.img ? `<img src="${esc(o.img)}" alt="" loading="lazy" referrerpolicy="no-referrer" decoding="async" onerror="this.remove()">${o.video ? PLAY : ""}` : `<span class="ico" aria-hidden="true">${ICONS[o.icon] || ICONS.news}</span>`;
-  return `<a class="slide" href="${esc(o.href)}" ${o.ext ? 'target="_blank" rel="noopener"' : ""} role="group" aria-roledescription="slide" aria-label="${i + 1} / ${n}: ${esc(o.kind)}">
-    <span class="ph">${img}</span>
-    <span class="tx"><span class="kind">${esc(o.kind)}</span><h3>${esc(o.title)}</h3>${o.desc ? `<p>${esc(o.desc)}</p>` : ""}<span class="mt">${o.meta}</span></span></a>`;
+  const ico = `<span class="ico" aria-hidden="true">${ICONS[o.icon] || ICONS.news}</span>`;
+  const img = o.img ? `${ico}<img src="${esc(o.img)}" alt="" loading="lazy" referrerpolicy="no-referrer" decoding="async" style="position:relative" onerror="this.closest('.slide').querySelector('.bgfx').style.backgroundImage='';this.remove()">${o.video ? PLAY : ""}` : ico;
+  const bg = o.img ? ` style="background-image:url('${esc(o.img).replace(/'/g, "%27")}')"` : "";
+  return `<a class="slide ${catCls(o.cat)}" href="${esc(o.href)}" ${o.ext ? 'target="_blank" rel="noopener"' : ""} role="group" aria-roledescription="slide" aria-label="${i + 1} / ${n}: ${esc(o.kind)}">
+    <span class="bgfx" aria-hidden="true"${bg}></span>
+    <span class="ph"><span class="kind">${o.emoji} ${esc(o.kind)}</span>${img}</span>
+    <span class="tx"><h3>${esc(o.title)}</h3>${o.desc ? `<p>${esc(o.desc)}</p>` : ""}<span class="mt">${o.meta}</span></span></a>`;
 }
 function renderHero() {
   const S = [];
   const t = (DATA?.top || [])[0];
-  if (t) S.push({kind: "실시간 1위 이슈", title: t.keyword, desc: t.headline, img: t.img || findThumb(t.keyword), icon: "news",
-    meta: M(`<b>${t.temp}°</b> ${tempWord(t.temp)}`, `매체 ${t.sources}곳`, `기사 ${t.articles}건`), href: issueLink(t.keyword)});
+  if (t) S.push({kind: "지금 1위 이슈", emoji: "🏆", cat: t.cat, title: t.keyword, desc: t.headline, img: t.img || findThumb(t.keyword), icon: "news",
+    meta: M(t.cat || "", `<b class="${tempLv(t.temp)}">${t.temp}° ${tempWord(t.temp)}</b>`, `매체 ${t.sources}곳`, `기사 ${t.articles}건`), href: issueLink(t.keyword)});
   const r = (DATA?.rising || [])[0];
-  if (r) S.push({kind: "급부상 1위", title: r.keyword, desc: r.headline, img: r.img || findThumb(r.keyword), icon: "rise",
-    meta: M(r.ratio != null ? `<b>▲${r.ratio}배</b> 3시간 전보다` : `<b>▲${r.last3 ?? r.recent}건</b> 최근 3시간`, `매체 ${r.sources}곳`), href: issueLink(r.keyword)});
+  if (r) S.push({kind: "급부상 1위", emoji: "🚀", cat: r.cat, title: r.keyword, desc: r.headline, img: r.img || findThumb(r.keyword), icon: "rise",
+    meta: M(r.cat || "", r.ratio != null ? `<b class="lv4">▲${r.ratio}배</b> 3시간 전보다` : `<b class="lv4">▲${r.last3 ?? r.recent}건</b> 최근 3시간`, `매체 ${r.sources}곳`), href: issueLink(r.keyword)});
   const v = (DATA?.videos || [])[0];
-  if (v) S.push({kind: "급상승 영상 1위", title: v.title, desc: v.channel, img: url(v.thumb) !== "#" ? v.thumb : "", video: true, ext: true, href: url(v.link),
-    meta: M(v.gain != null ? `<b>▲${korNum(v.gain)}회</b> 최근 ${v.hrs}시간` : "", `조회수 ${korNum(v.views)}회`)});
+  if (v) S.push({kind: "지금 1위 영상", emoji: "🎬", cat: "", title: v.title, desc: v.channel, img: url(v.thumb) !== "#" ? v.thumb : "", video: true, ext: true, href: url(v.link),
+    meta: M(v.gain != null ? `<b class="${lv(v.gain, [5e5, 1e5, 2e4])}">▲${korNum(v.gain)}회</b> 최근 ${v.hrs}시간` : "", `조회수 <b class="${lv(v.views, [1e6, 1e5, 1e4])}">${korNum(v.views)}회</b>`)});
   const p = (DATA?.people || [])[0];
-  if (p) S.push({kind: "가장 많이 언급된 인물", title: p.keyword, desc: p.headline, img: p.img || "", icon: "person",
-    meta: M(`<b>언급 ${p.articles}건</b>`, `매체 ${p.sources}곳`), href: issueLink(p.keyword)});
+  if (p) S.push({kind: "가장 많이 언급된 인물", emoji: "🗣️", cat: p.cat, title: p.keyword, desc: p.headline, img: p.img || "", icon: "person",
+    meta: M(p.cat || "", `언급 <b class="${lv(p.articles, [50, 20, 10])}">${p.articles}건</b>`, `매체 ${p.sources}곳`), href: issueLink(p.keyword)});
   const m = EXTRA.memes[0];
-  if (m) S.push({kind: "오늘의 밈절임", title: m.word, desc: m.meaning, img: memeImg(m), icon: "meme",
+  if (m) S.push({kind: "오늘의 밈절임", emoji: "🥒", cat: "", title: m.word, desc: m.meaning, img: memeImg(m), icon: "meme",
     meta: m.date ? esc(m.date.replace(/-/g, ".")) : "요즘 뜨는 밈", href: m.page && /^[\w.-]+\.html$/.test(m.page) ? m.page : "memes.html"});
   $("hero").hidden = !S.length;
   $("hs").innerHTML = S.map((o, i) => slideHTML(o, i, S.length)).join("");
@@ -320,13 +332,28 @@ function renderHero() {
 function updateCount() {
   const n = $("hs").children.length;
   $("hcount").textContent = n ? `${heroIdx + 1} / ${n}` : "";
-  $("hprev").disabled = $("hnext").disabled = n < 2;
+  $("hprev").hidden = $("hnext").hidden = $("hplay").hidden = n < 2;
 }
 function goHero(d) {
   const n = $("hs").children.length; if (!n) return;
   heroIdx = (heroIdx + d + n) % n;
   $("hs").scrollTo({left: heroIdx * $("hs").clientWidth});
   updateCount();
+}
+// 자동 넘김: 5초마다. 손가락·마우스를 올리거나 키보드로 고르는 동안, 화면이 안 보일 때는 멈춰요.
+// '움직임 줄이기'를 켠 사람에게는 처음부터 멈춰 있어요.
+const REDUCE = matchMedia("(prefers-reduced-motion: reduce)").matches;
+let heroHold = false;
+function heroTick() {
+  clearTimeout(heroTimer);
+  if (heroPaused || REDUCE) return;
+  heroTimer = setTimeout(() => { if (!heroHold && !document.hidden) goHero(1); heroTick(); }, 5000);
+}
+function setPaused(p) {
+  heroPaused = p;
+  $("hplay").setAttribute("aria-label", p ? "자동 넘김 다시 시작" : "자동 넘김 멈추기");
+  $("hplay").firstElementChild.textContent = p ? "▶" : "❚❚";
+  heroTick();
 }
 
 function render() {
@@ -358,20 +385,24 @@ async function load() {
 }
 
 // ── 버튼 ──
-$("hprev").onclick = () => goHero(-1);
-$("hnext").onclick = () => goHero(1);
+$("hprev").onclick = () => { goHero(-1); heroTick(); };
+$("hnext").onclick = () => { goHero(1); heroTick(); };
+$("hplay").onclick = () => setPaused(!heroPaused);
+["pointerenter", "focusin", "touchstart"].forEach(ev => $("hero").addEventListener(ev, () => heroHold = true, {passive: true}));
+["pointerleave", "focusout", "touchend"].forEach(ev => $("hero").addEventListener(ev, () => heroHold = false, {passive: true}));
+if (REDUCE) setPaused(true); else heroTick();
 $("hs").addEventListener("scroll", () => {          // 손으로 넘겼을 때 번호 맞추기
   const i = Math.round($("hs").scrollLeft / Math.max($("hs").clientWidth, 1));
   if (i !== heroIdx) { heroIdx = i; updateCount(); }
 }, {passive: true});
 $("top-more").onclick = () => { topOpen = !topOpen; renderTop(); };
-$("rising-more").onclick = () => { risingOpen = !risingOpen; renderRising(); };
-$("chips").onclick = e => { const b = e.target.closest("button"); if (b) { curCat = b.dataset.id; renderCats(); b.focus(); } };
+$("cat-more").onclick = () => { catOpen = !catOpen; renderCats(); };
+$("chips").onclick = e => { const b = e.target.closest("button"); if (b) { curCat = b.dataset.id; catOpen = false; renderCats(); b.focus(); } };
 $("chips").onkeydown = e => {                       // 탭은 좌우 화살표로도 이동
   if (!["ArrowLeft", "ArrowRight"].includes(e.key)) return;
   const bs = [...$("chips").querySelectorAll("button")], i = bs.findIndex(b => b.dataset.id === curCat);
   const n = bs[(i + (e.key === "ArrowRight" ? 1 : -1) + bs.length) % bs.length];
-  if (n) { curCat = n.dataset.id; renderCats(); $("tab-" + curCat).focus(); }
+  if (n) { curCat = n.dataset.id; catOpen = false; renderCats(); $("tab-" + curCat).focus(); }
 };
 document.querySelectorAll("[data-rail]").forEach(b => b.onclick = () => {
   const rail = $(b.dataset.rail); rail.scrollBy({left: b.dataset.d * rail.clientWidth * .8});
@@ -381,7 +412,7 @@ document.addEventListener("click", e => { if (e.target.closest("[data-retry]")) 
 
 // 처음 불러오는 동안 자리 잡아 두기 (화면이 덜 튀어요)
 ["top", "cat", "people", "search"].forEach(id => $(id).innerHTML = skRows(id === "search" ? 3 : 5));
-$("rising").innerHTML = '<div class="box"><ul class="rlist">' + skRows(3) + "</ul></div>";
+$("rising").innerHTML = '<div class="box"><ul class="rlist">' + skRows(5) + "</ul></div>";
 $("videos").innerHTML = '<div class="box vc" aria-hidden="true"><span class="vt sk"></span><span class="vb"><span class="sk sk-l" style="display:block;width:90%"></span></span></div>'.repeat(2);
 
 load();

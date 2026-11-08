@@ -54,6 +54,8 @@ const $ = id => document.getElementById(id);
 const esc = s => String(s ?? "").replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
 const url = u => /^https?:\/\//.test(u || "") ? u : "#";
 const tempWord = t => t >= 80 ? "뜨거움" : t >= 60 ? "들썩임" : t >= 40 ? "따끈함" : "잔잔함";
+const lv = (n, [a, b, c]) => n >= a ? "lv4" : n >= b ? "lv3" : n >= c ? "lv2" : "lv1";
+const CATS = {"연예": "ent", "스포츠": "spo", "생활·경제": "life", "음식·카페": "food", "뷰티·패션": "beauty", "쇼핑·혜택": "shop", "여행·공간": "trip", "문화·여가": "cul", "IT·테크": "it", "시사": "sisa"};
 const M = (...a) => a.filter(Boolean).map(x => `<span class="nw">${x}</span>`).join(" · ");
 const EXT = '<span class="ext" aria-hidden="true">원문 ↗</span>';
 function ago(iso) {
@@ -107,7 +109,7 @@ function render(k) {
   document.title = `${E.keyword} - 지금 왜 화제일까? | 이슈피클`;
   const names = {news: "뉴스", search: "검색", video: "영상", community: "커뮤니티"}, sig = E.signals || {};
   const kinds = Object.keys(names).filter(x => sig[x] != null);
-  const cat = E.cat ? `${esc(E.cat.name)} · ${E.cat.rank}위` : E.kind === "인물" ? "화제의 인물" : "이슈";
+  const cat = E.cat ? `<span class="lbl cat c-${CATS[E.cat.name] || ""}" style="margin:0">${esc(E.cat.name)}</span> ${E.cat.rank}위` : E.kind === "인물" ? "화제의 인물" : "이슈";
   const rank = E.rank ? `실시간 ${E.rank}위${chg(E.change)}` : "";
   const lead = E.news?.[0];
   const img = E.img || E.news.find(n => n.img)?.img || findThumb(E.keyword);
@@ -125,7 +127,7 @@ function render(k) {
     </a>
 
     <div class="box kpis">
-      <div><b>${E.temp}°</b><small>온도 · ${tempWord(E.temp)}</small></div>
+      <div><b class="${lv(E.temp, [80, 60, 40])}">${E.temp}°</b><small>온도 · ${tempWord(E.temp)}</small></div>
       <div><b>${E.sources}곳</b><small>보도한 언론사</small></div>
       <div><b>${E.articles}건</b><small>관련 기사</small></div>
     </div>
@@ -135,12 +137,18 @@ function render(k) {
       <div class="box"><ul class="nlist">${E.news.map(n => `<li><a class="${n.img ? "has-img" : ""}" href="${esc(url(n.link))}" target="_blank" rel="noopener nofollow">
         ${n.img ? `<img class="nth" src="${esc(n.img)}" alt="" loading="lazy" referrerpolicy="no-referrer" decoding="async" onerror="this.parentNode.classList.remove('has-img');this.remove()">` : ""}<span><span class="tt">${esc(n.title)}</span><small>${M(esc(n.source), ago(n.time))}</small></span>${EXT}<span class="sr">(새 창에서 원문 열기)</span></a></li>`).join("")}</ul></div></section>
 
+    <section class="sec"><div class="sec-head"><div><h2>커뮤니티 관련글</h2><p>최근 24시간 ${esc((D.community_sites || []).join("·") || "커뮤니티")} 글 중 제목에 '${esc(E.keyword)}'가 들어간 글이에요</p></div></div>
+      <div class="box">${(E.community || []).length ? `<ul class="nlist">${E.community.map(c => `<li><a href="${esc(url(c.link))}" target="_blank" rel="noopener nofollow">
+        <span><span class="tt">${esc(c.title)}</span><small>${M(esc(c.src), c.time ? ago(c.time) : "")}</small></span>${EXT}<span class="sr">(새 창에서 원문 열기)</span></a></li>`).join("")}</ul>`
+        : `<p class="state">아직 커뮤니티에서 이 키워드가 들어간 글을 찾지 못했어요.</p>`}</div>
+      <p class="note">글 제목과 링크만 보여 드리고 내용은 저장하지 않아요. 커뮤니티 글은 개인 의견이라 사실과 다를 수 있어요.</p></section>
+
     <section class="sec"><div class="sec-head"><div><h2>온도 추이</h2><p>30분마다 잰 온도예요</p></div></div>
       <div class="box chart">${chart(E.hist, E.temp)}</div></section>
 
     ${same.length ? `<section class="sec"><div class="sec-head"><div><h2>연관 이슈</h2><p>같은 ${esc(E.cat.name)} 분야의 다른 이슈예요</p></div></div>
       <div class="box"><ol class="rlist">${same.map(x => { const o = D.issues[x];
-        return `<li><a class="row" href="${link(x)}"><span class="rank">${o.cat ? o.cat.rank : "·"}</span><span class="mid"><span class="kw">${esc(o.keyword)}</span>${chg(o.change)}<span class="hl">${esc(o.headline)}</span><span class="meta">${M(`매체 ${o.sources}곳`, `기사 ${o.articles}건`)}</span></span><span class="end"><b>${o.temp}°</b><small>${tempWord(o.temp)}</small></span></a></li>`; }).join("")}</ol></div></section>` : ""}
+        return `<li><a class="row" href="${link(x)}"><span class="rank">${o.cat ? o.cat.rank : "·"}</span><span class="mid"><span class="kw">${esc(o.keyword)}</span>${chg(o.change)}<span class="hl">${esc(o.headline)}</span><span class="meta">${M(`매체 ${o.sources}곳`, `기사 ${o.articles}건`)}</span></span><span class="end"><b class="${lv(o.temp, [80, 60, 40])}">${o.temp}°</b><small>${tempWord(o.temp)}</small></span></a></li>`; }).join("")}</ol></div></section>` : ""}
 
     <section class="sec">
       <details class="box how"><summary>집계 방식·출처 안내</summary><div class="in">
@@ -148,7 +156,7 @@ function render(k) {
         <p><b>확인한 신호 종류</b>: ${kinds.map(x => names[x]).join(" · ") || "뉴스"} (${kinds.length || 1}종류)<br>
            <b>보도한 언론사</b>: ${E.sources}곳 — ${esc(E.source_names.join(", "))}${others}</p>
         <div class="box" style="box-shadow:none"><ol class="rlist">${Object.keys(names).map(x => `<li><div class="row" style="grid-template-columns:5rem minmax(0,1fr) auto;align-items:center;padding:.625rem .875rem"><span>${names[x]}</span><span class="meta" style="margin:0">${sig[x] == null ? "신호 없음" : "신호 세기 0~100 중"}</span><span class="end"><b style="font-size:1rem">${sig[x] == null ? "–" : sig[x]}</b></span></div></li>`).join("")}</ol></div>
-        ${E.evidence?.length ? `<p style="margin-top:.875rem"><b>뉴스 밖 근거</b></p><ul class="nlist">${E.evidence.map(v => `<li><a href="${esc(url(v.link))}" target="_blank" rel="noopener nofollow" style="padding:.625rem 0"><span><span class="lbl cat">${esc(v.type)}</span><span class="tt">${esc(v.title)}</span></span>${EXT}</a></li>`).join("")}</ul>` : ""}
+        ${E.evidence?.filter(v => v.type !== "커뮤니티").length ? `<p style="margin-top:.875rem"><b>뉴스 밖 근거</b></p><ul class="nlist">${E.evidence.filter(v => v.type !== "커뮤니티").map(v => `<li><a href="${esc(url(v.link))}" target="_blank" rel="noopener nofollow" style="padding:.625rem 0"><span><span class="lbl cat">${esc(v.type)}</span><span class="tt">${esc(v.title)}</span></span>${EXT}</a></li>`).join("")}</ul>` : ""}
         <p>기사 제목과 링크만 보여드리며, 기사 저작권은 각 언론사에 있어요. <a href="about.html" style="text-decoration:underline">이슈피클이란?</a></p>
       </div></details>
     </section>`;

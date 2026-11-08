@@ -1,31 +1,64 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1050 600" width="1050" height="600">
   <defs>
-    <radialGradient id="glow" cx="0.5" cy="0.5" r="0.5">
-      <stop offset="0" stop-color="#7e9a63" stop-opacity=".28"/>
-      <stop offset="1" stop-color="#7e9a63" stop-opacity="0"/>
-    </radialGradient>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#4AD1B0"/>
+      <stop offset=".55" stop-color="#8FD8F0"/>
+      <stop offset="1" stop-color="#C3B1FF"/>
+    </linearGradient>
+    <pattern id="dots" width="18" height="18" patternUnits="userSpaceOnUse">
+      <circle cx="3" cy="3" r="2.2" fill="#ffffff" opacity=".35"/>
+    </pattern>
+    <pattern id="tape" width="56" height="56" patternUnits="userSpaceOnUse" patternTransform="rotate(45)">
+      <rect width="56" height="56" fill="#FFE14D"/>
+      <rect width="28" height="56" fill="#111111"/>
+    </pattern>
   </defs>
-  <rect width="1050" height="600" fill="#fafaf6"/>
-  <circle cx="525" cy="110" r="210" fill="url(#glow)"/>
-  <rect x="24" y="24" width="1002" height="552" rx="28" fill="none" stroke="#e7e7e0" stroke-width="2"/>
-  <!-- 경광등 -->
-  <g transform="translate(470 58)">
-    <rect x="0" y="62" width="110" height="22" rx="6" fill="#111111"/>
-    <path d="M14 62 Q14 0 55 0 Q96 0 96 62 Z" fill="#7e9a63"/>
-    <path d="M30 50 Q30 18 52 14" stroke="#ffffff" stroke-width="7" fill="none" stroke-linecap="round" opacity=".7"/>
-    <g stroke="#7e9a63" stroke-width="7" stroke-linecap="round">
-      <line x1="-30" y1="30" x2="-8" y2="36"/><line x1="-22" y1="-6" x2="0" y2="10"/>
-      <line x1="140" y1="30" x2="118" y2="36"/><line x1="132" y1="-6" x2="110" y2="10"/>
+  <g font-family="'Pretendard Variable',Pretendard,'Apple SD Gothic Neo','Noto Sans KR','Malgun Gothic',sans-serif">
+  <rect width="1050" height="600" fill="url(#bg)"/>
+  <rect width="1050" height="600" fill="url(#dots)"/>
+
+  <!-- 폴리스 라인 테이프 -->
+  <g transform="rotate(-8 525 300)">
+    <rect x="-80" y="438" width="1210" height="70" fill="#FFE14D" stroke="#111" stroke-width="5"/>
+    <text x="525" y="487" text-anchor="middle" font-size="34" font-weight="900" fill="#111" letter-spacing="6">밈절임 경보 · 밈절임 경보 · 밈절임 경보 · 밈절임 경보</text>
+  </g>
+  <g transform="rotate(5 525 300)">
+    <rect x="-80" y="40" width="1210" height="26" fill="url(#tape)" stroke="#111" stroke-width="4"/>
+  </g>
+
+  <!-- 경광등 스티커 -->
+  <g transform="translate(118 132) rotate(-12)">
+    <circle r="78" fill="#ffffff" stroke="#111" stroke-width="6"/>
+    <path d="M-34 26 Q-34 -40 0 -40 Q34 -40 34 26 Z" fill="#FF4D6D" stroke="#111" stroke-width="5"/>
+    <rect x="-46" y="22" width="92" height="20" rx="6" fill="#111"/>
+    <path d="M-16 10 Q-16 -18 2 -24" stroke="#fff" stroke-width="7" fill="none" stroke-linecap="round"/>
+    <g stroke="#111" stroke-width="6" stroke-linecap="round">
+      <line x1="-62" y1="-30" x2="-48" y2="-20"/><line x1="62" y1="-30" x2="48" y2="-20"/><line x1="0" y1="-70" x2="0" y2="-54"/>
     </g>
   </g>
-  <g font-family="'Pretendard Variable',Pretendard,'Apple SD Gothic Neo','Noto Sans KR','Malgun Gothic',sans-serif" font-weight="800">
-    <text x="525" y="300" text-anchor="middle" font-size="128" fill="#111111" letter-spacing="-6">체포하겠어<tspan fill="#7e9a63">.</tspan></text>
-    <text x="525" y="378" text-anchor="middle" font-size="48" fill="#7e9a63" letter-spacing="-1.5">취뽀하겠어 · 부자 되겠어 · 칼퇴하겠어</text>
-    <g transform="translate(525 466)">
-      <rect x="-240" y="-32" width="480" height="56" rx="28" fill="#eeeee8"/>
-      <text x="0" y="6" text-anchor="middle" font-size="28" font-weight="700" fill="#111111">두 번 외치면 이뤄지는 다짐 밈</text>
-    </g>
-    <text x="56" y="546" font-size="22" font-weight="700" fill="#86867f" letter-spacing="2">밈절임 · 2026년 11월</text>
-    <text x="994" y="546" text-anchor="end" font-size="24" font-weight="900" fill="#111111" letter-spacing="-1">이슈<tspan fill="#7e9a63">피클</tspan></text>
+
+  <!-- 메인 단어: 두꺼운 외곽선 + 하드 섀도 -->
+  <text x="545" y="318" text-anchor="middle" font-size="150" font-weight="900" letter-spacing="-8" fill="#FF4D6D" stroke="#111" stroke-width="10" stroke-linejoin="round" paint-order="stroke" transform="translate(12 12)">체포하겠어</text>
+  <text x="545" y="318" text-anchor="middle" font-size="150" font-weight="900" letter-spacing="-8" fill="#ffffff" stroke="#111" stroke-width="14" stroke-linejoin="round" paint-order="stroke">체포하겠어</text>
+
+  <!-- ×2 스티커 -->
+  <g transform="translate(932 176) rotate(14)">
+    <circle r="62" fill="#111"/>
+    <circle r="54" fill="#FFE14D"/>
+    <text y="20" text-anchor="middle" font-size="58" font-weight="900" fill="#111">×2</text>
+  </g>
+
+  <!-- 말풍선: 이렇게 바꿔 써요 -->
+  <g transform="translate(300 352)">
+    <path d="M0 0 H450 a22 22 0 0 1 22 22 V64 a22 22 0 0 1 -22 22 H130 L96 112 L100 86 H22 A22 22 0 0 1 0 64 V22 A22 22 0 0 1 22 0Z" fill="#ffffff" stroke="#111" stroke-width="5" transform="translate(-22 0)"/>
+    <text x="214" y="56" text-anchor="middle" font-size="36" font-weight="800" fill="#111" letter-spacing="-1">취뽀하겠어! 부자되겠어!</text>
+  </g>
+
+  <!-- 태그 -->
+  <g transform="translate(40 556)">
+    <rect width="232" height="40" rx="20" fill="#111"/>
+    <text x="116" y="28" text-anchor="middle" font-size="22" font-weight="800" fill="#4AD1B0">#이슈피클 #밈절임</text>
+  </g>
+  <text x="1010" y="584" text-anchor="end" font-size="22" font-weight="700" fill="#111" opacity=".75">2026.11 · 요즘 뜨는 밈</text>
   </g>
 </svg>

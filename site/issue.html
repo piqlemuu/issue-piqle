@@ -2,7 +2,7 @@
 <html lang="ko">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>이슈 자세히 보기 | 이슈피클</title>
 <meta name="description" content="지금 뜨는 이슈의 온도, 추이, 관련 기사와 근거를 한눈에 보여드려요.">
 <meta name="keywords" content="실시간 이슈, 이슈 정리, 관련 기사, 이슈 온도">
@@ -15,314 +15,165 @@
 -->
 
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.min.css">
-<style>
-:root{--bg:#fafaf6;--card:#ffffff;--text:#111111;--sub:#86867f;--line:#e7e7e0;--soft:#eeeee8;--hot:#7e9a63;--warm:#a9b98f;--cool:#6e7f8d;--fs:16px}
-html[data-theme=soft]{--bg:#f3f0e6;--card:#faf8f1;--text:#1c1b17;--sub:#7d786b;--line:#e3ddcd;--soft:#ebe6d8}
-html[data-theme=dark]{--bg:#11120f;--card:#1a1b17;--text:#f2f2ec;--sub:#9c9c94;--line:#2b2c26;--soft:#22231e;--hot:#9db883;--warm:#7f8f68;--cool:#8fa0ad}
-html[data-fs=s]{--fs:14px}html[data-fs=l]{--fs:18px}
-*{box-sizing:border-box}
-html{font-size:var(--fs)}
-body{margin:0;background:var(--bg);color:var(--text);font-family:"Pretendard Variable",Pretendard,-apple-system,BlinkMacSystemFont,"Apple SD Gothic Neo","Noto Sans KR","Malgun Gothic",sans-serif;line-height:1.5;-webkit-text-size-adjust:100%;padding-bottom:72px}
-a{color:inherit;text-decoration:none}
-button{font:inherit;color:inherit}
-.wrap{max-width:760px;margin:0 auto;padding:0 16px}
-header{padding:18px 0 6px;display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap}
-.logo{margin:0;font-size:1.45rem;font-weight:800;letter-spacing:-.5px}
-.logo span{color:var(--hot)}
-.tag{color:var(--sub);font-size:.82rem}
-.ctrl{display:flex;gap:6px;flex-wrap:wrap}
-.seg{display:flex;border:1px solid var(--line);border-radius:999px;overflow:hidden;background:var(--card)}
-.seg button{border:0;background:none;padding:5px 10px;font-size:.78rem;cursor:pointer;color:var(--sub)}
-.seg button.on{background:var(--text);color:var(--bg)}
-.status{display:flex;justify-content:flex-end;align-items:center;gap:6px;color:var(--sub);font-size:.8rem;margin:10px 0}
-.dot{width:8px;height:8px;border-radius:50%;background:var(--hot);box-shadow:0 0 0 3px rgba(126,154,99,.22)}
-
-/* 큰 탭 */
-.sticky{position:sticky;top:0;z-index:5;background:var(--bg);padding:6px 0 4px}
-.tabs{display:grid;grid-template-columns:repeat(3,1fr);background:var(--soft);border-radius:14px;padding:4px}
-.tabs button{border:0;background:none;padding:10px 0;border-radius:11px;font-weight:700;color:var(--sub);cursor:pointer}
-.tabs button.on{background:var(--card);color:var(--text);box-shadow:0 1px 3px rgba(0,0,0,.08)}
-.chips{display:flex;gap:6px;overflow-x:auto;scrollbar-width:none;padding:10px 0 4px}
-.chips::-webkit-scrollbar{display:none}
-.chips button{flex:0 0 auto;border:1px solid var(--line);background:var(--card);padding:6px 14px;border-radius:999px;font-size:.88rem;font-weight:600;cursor:pointer}
-.chips button.on{background:var(--text);color:var(--bg);border-color:var(--text)}
-.chips:empty{display:none}
-
-/* 순위 카드 */
-.list{list-style:none;margin:6px 0 0;padding:0}
-.card{display:grid;grid-template-columns:2.2rem auto 1fr auto;gap:12px;align-items:center;background:var(--card);border:1px solid var(--line);border-radius:16px;padding:12px;margin:8px 0}
-.card.noimg{grid-template-columns:2.2rem 1fr auto}
-.rk{width:2.2rem;height:2.2rem;border-radius:10px;background:var(--soft);display:flex;align-items:center;justify-content:center;font-weight:800;color:var(--sub);font-variant-numeric:tabular-nums;font-size:.95rem}
-.card:nth-child(-n+3) .rk{color:var(--hot)}
-.th{width:116px;aspect-ratio:16/9;border-radius:10px;object-fit:cover;background:var(--soft);display:block}
-.body{min-width:0}
-.t{font-weight:700;font-size:.98rem;line-height:1.35;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
-.m{color:var(--sub);font-size:.8rem;margin-top:3px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-.side{text-align:right;white-space:nowrap;font-variant-numeric:tabular-nums}
-.gain{color:var(--hot);font-weight:800;font-size:.9rem}
-.v{color:var(--sub);font-size:.78rem;margin-top:2px}
-.chg{font-size:.78rem;font-weight:800;margin-top:2px}
-.up{color:var(--hot)}.down{color:var(--cool)}.same{color:var(--sub)}.new{color:var(--cool);letter-spacing:.5px}
-.more{display:block;width:100%;margin:8px 0;padding:12px;border:1px solid var(--line);border-radius:14px;background:var(--card);cursor:pointer;font-weight:600}
-.note{color:var(--sub);font-size:.78rem;margin:10px 2px}
-.empty{background:var(--card);border:1px dashed var(--line);border-radius:16px;padding:32px 16px;text-align:center;color:var(--sub);font-size:.9rem;margin-top:10px}
-.ad-slot{margin:10px 0;min-height:90px;display:flex;align-items:center;justify-content:center;border:1px dashed var(--line);border-radius:14px;color:var(--sub);font-size:.8rem}
-.ad-slot:empty{display:none}
-@media (max-width:480px){.th{width:92px}.card{gap:9px;padding:10px}.t{font-size:.92rem}}
-
-footer{padding:22px 0 24px;color:var(--sub);font-size:.8rem}
-footer nav a{margin-right:12px;text-decoration:underline}
-
-/* 아래 메뉴 */
-.bnav{position:fixed;left:0;right:0;bottom:0;background:var(--card);border-top:1px solid var(--line);display:flex;justify-content:center;z-index:9;padding-bottom:env(safe-area-inset-bottom)}
-.bnav a{flex:1;max-width:150px;display:flex;flex-direction:column;align-items:center;gap:2px;padding:8px 0;font-size:.72rem;color:var(--sub)}
-.bnav a.on{color:var(--text);font-weight:700}
-.bnav svg{width:22px;height:22px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
-.more[hidden]{display:none}
-
-/* 밈절임 */
-.sec-t{font-size:1.15rem;margin:22px 2px 2px;letter-spacing:-.3px}
-.sec-d{color:var(--sub);font-size:.82rem;margin:0 2px 8px}
-.meme{background:var(--card);border:1px solid var(--line);border-radius:18px;padding:18px 16px;margin:10px 0}
-.meme h3{margin:0;font-size:1.3rem;letter-spacing:-.4px}
-.meme .date{color:var(--sub);font-size:.76rem;margin-left:6px;font-weight:400}
-.meme .mean{margin:8px 0 0;font-size:1rem;line-height:1.6}
-.meme .ex{margin:10px 0 0;padding:10px 12px;background:var(--soft);border-radius:12px;font-size:.92rem}
-.meme .ex::before{content:"예문  ";color:var(--hot);font-weight:700;font-size:.78rem}
-.meme .org{margin:10px 0 0;color:var(--sub);font-size:.88rem;line-height:1.6;white-space:pre-line}
-.meme .src{display:inline-block;margin-top:8px;font-size:.78rem;color:var(--sub);text-decoration:underline}
-.cand details{background:var(--card);border:1px solid var(--line);border-radius:14px;margin:8px 0}
-.cand summary{list-style:none;cursor:pointer;padding:12px;display:grid;grid-template-columns:2.2rem 1fr auto;gap:10px;align-items:center}
-.cand summary::-webkit-details-marker{display:none}
-.cand .w{font-weight:800;font-size:1.02rem}
-.cand .m{margin:0}
-.cand ul{list-style:none;margin:0;padding:0 12px 10px 3.4rem}
-.cand li{font-size:.86rem;padding:5px 0;border-top:1px solid var(--line)}
-.cand li small{color:var(--sub);display:block;font-size:.74rem}
-.srcs{display:flex;flex-wrap:wrap;gap:4px;margin-top:4px}
-.src-b{font-size:.68rem;font-weight:700;padding:2px 7px;border-radius:999px;background:var(--soft);color:var(--sub);border:1px solid var(--line)}
-.src-b.yt{color:var(--text)}.src-b.gg{color:var(--hot)}
-.nv{font-size:.7rem;font-weight:800;color:var(--hot)}
-.badge{font-size:.7rem;font-weight:800;color:#fff;background:var(--hot);padding:2px 7px;border-radius:999px}
-h1,h2,h3,.logo,.ttl,.kw,.k,.w,.t,.gain,.deg,.rk,.num{letter-spacing:-.03em}
-.logo{font-weight:900;letter-spacing:-.05em}
-h1,h2{font-weight:800}
-
-/* 이슈 상세 */
-.back{display:inline-flex;align-items:center;gap:4px;margin:4px 0 10px;font-weight:700}
-.tags{display:flex;gap:6px;margin-bottom:6px}
-.tags span{background:var(--soft);color:var(--sub);font-size:.76rem;font-weight:700;padding:4px 10px;border-radius:999px}
-.ititle{font-size:1.7rem;font-weight:900;letter-spacing:-.05em;margin:4px 0 6px;line-height:1.25;word-break:keep-all}
-.ihead{color:var(--text);opacity:.8;margin:0 0 14px;font-size:.98rem}
-.box{background:var(--card);border:1px solid var(--line);border-radius:18px;padding:18px 16px;margin:12px 0}
-.box h2{font-size:1.12rem;margin:0 0 2px;letter-spacing:-.03em}
-.box .desc{color:var(--sub);font-size:.8rem;margin:0 0 10px}
-.sec-h{margin:22px 2px 8px}
-.sec-h h2{font-size:1.12rem;margin:0;letter-spacing:-.03em}
-.sec-h p{color:var(--sub);font-size:.8rem;margin:2px 0 0}
-.gwrap{display:grid;grid-template-columns:150px 1fr;gap:14px;align-items:center}
-.gnum{text-align:center;margin-top:-18px}
-.gnum b{font-size:2.3rem;font-weight:900;color:var(--hot);letter-spacing:-.05em}
-.gnum small{font-weight:800;color:var(--hot)}
-.gnum div{color:var(--hot);font-weight:800;font-size:.9rem}
-.gtxt h3{margin:0 0 6px;font-size:1rem;letter-spacing:-.03em}
-.gtxt p{margin:0;color:var(--sub);font-size:.84rem;line-height:1.6}
-.bars{border-top:1px solid var(--line);margin-top:14px;padding-top:10px}
-.bar{display:grid;grid-template-columns:4.2rem 1fr 2.6rem;gap:10px;align-items:center;padding:6px 0;font-size:.86rem}
-.bar .t{height:8px;border-radius:4px;background:var(--soft);overflow:hidden}
-.bar .t i{display:block;height:100%;background:var(--hot);border-radius:4px}
-.bar .v{text-align:right;font-weight:800}
-.bar .v.none{color:var(--sub);font-weight:500}
-.share{display:block;width:100%;padding:13px;border-radius:14px;border:1.5px solid var(--hot);background:rgba(126,154,99,.1);font-weight:800;font-size:.95rem;cursor:pointer;color:var(--text)}
-.share b{color:var(--hot)}
-.chart svg{width:100%;height:auto;display:block}
-.chart .empty{padding:24px 0}
-.stats{display:grid;grid-template-columns:repeat(3,1fr);background:var(--card);border:1px solid var(--line);border-radius:18px;margin:12px 0}
-.stats>div{padding:14px 12px;border-left:1px solid var(--line)}
-.stats>div:first-child{border-left:0}
-.stats .q{color:var(--sub);font-size:.74rem;font-weight:700}
-.stats .a{font-size:1.3rem;font-weight:900;letter-spacing:-.04em;margin:6px 0 2px}
-.stats .s{color:var(--sub);font-size:.74rem;line-height:1.4}
-.nl{list-style:none;margin:0;padding:0}
-.nl li{border-top:1px solid var(--line)}
-.nl li:first-child{border-top:0}
-.nl a{display:block;padding:12px 2px}
-.nl .tt{font-size:.95rem;line-height:1.45}
-.nl small{display:block;color:var(--sub);font-size:.74rem;margin-top:3px}
-.ol a{display:grid;grid-template-columns:1fr auto;gap:8px;align-items:center;padding:12px 2px}
-.ol .k{font-weight:800;letter-spacing:-.03em}
-.ol .m{color:var(--sub);font-size:.78rem;margin-top:2px}
-.ol .r{color:var(--sub);font-weight:800;font-size:.8rem;white-space:nowrap}
-.ev a{display:flex;gap:10px;align-items:center;padding:12px 2px}
-.ev .tp{flex:0 0 auto;background:var(--soft);color:var(--sub);font-size:.72rem;font-weight:800;padding:4px 9px;border-radius:999px}
-.ev .tt{font-size:.92rem;line-height:1.45}
-.btn{display:inline-block;margin-top:8px;padding:10px 14px;border-radius:12px;border:1px solid var(--line);background:var(--soft);font-weight:700}
-.toast{position:fixed;left:50%;bottom:90px;transform:translateX(-50%);background:var(--text);color:var(--bg);padding:9px 16px;border-radius:999px;font-size:.84rem;font-weight:700;opacity:0;transition:opacity .2s;pointer-events:none;z-index:20}
-.toast.on{opacity:1}
-@media (max-width:420px){.gwrap{grid-template-columns:1fr}.gwrap svg{max-width:200px;margin:0 auto;display:block}.stats .a{font-size:1.1rem}}
-</style>
+<link rel="stylesheet" href="style.css">
+<script>try{var d=document.documentElement,t=localStorage.getItem("theme"),f=localStorage.getItem("fsize");d.setAttribute("data-theme",t||(matchMedia("(prefers-color-scheme: dark)").matches?"dark":"light"));d.setAttribute("data-fs",{l:"l",xl:"xl"}[f]||"m")}catch(e){}</script>
 </head>
 <body>
-<div class="wrap">
-
-<header>
-  <a href="index.html"><h1 class="logo" style="font-size:1.3rem">이슈<span>피클</span></h1><div class="tag">지금 뜨는 이슈, 톡 쏘게 한눈에</div></a>
-  <div class="ctrl">
-    <div class="seg" id="theme"><button data-v="light">밝게</button><button data-v="soft">편하게</button><button data-v="dark">어둡게</button></div>
-    <div class="seg" id="fsize"><button data-v="s" style="font-size:.7rem">가</button><button data-v="m">가</button><button data-v="l" style="font-size:.95rem">가</button></div>
+<header class="top">
+  <div class="wrap top-in">
+    <div class="logo"><a href="index.html">이슈<span>피클</span></a></div>
+    <button class="icon-btn" id="settings-btn" aria-label="화면 설정" aria-haspopup="dialog" aria-controls="settings">
+      <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.8-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1.1-1.5 1.7 1.7 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.8 1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.5-1.1 1.7 1.7 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.8.3H9a1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.8V9a1.7 1.7 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1z"/></svg>
+    </button>
   </div>
 </header>
 
-<div class="status"><i class="dot"></i><span id="updated">연결 중…</span></div>
-<a class="back" href="index.html" onclick="if(history.length>1&&document.referrer){history.back();return false}">‹ 뒤로</a>
+<main class="wrap">
+  <a class="back" href="index.html" id="back">‹ 뒤로 가기</a>
+  <div id="main" aria-live="polite">
+    <div class="sk sk-l" style="width:35%;margin-top:.5rem"></div>
+    <div class="sk" style="height:1.8rem;width:60%;margin-top:.75rem"></div>
+    <div class="box" style="margin-top:.875rem;padding:1rem"><div class="sk" style="aspect-ratio:16/9;width:38%"></div></div>
+  </div>
 
-<div id="main"><p class="empty">이슈를 불러오는 중이에요…</p></div>
+  <!-- ▼ [광고 설정] 상세 페이지 아래 광고 -->
+  <div class="ad-slot" id="ad-1"></div>
 
-<!-- ▼ [광고 설정] 상세 페이지 아래 광고 -->
-<div class="ad-slot" id="ad-1"></div>
+  <footer class="foot">
+    <p><b>이슈피클</b> — 기사 제목과 링크만 보여드리며, 기사 저작권은 각 언론사에 있습니다.</p>
+    <nav aria-label="사이트 안내"><a href="about.html">이슈피클이란?</a><a href="copyright.html">저작권 정책</a><a href="privacy.html">개인정보처리방침</a><a href="terms.html">이용약관</a><a href="#" class="mail" data-u="etis+uumelqip" data-d="moc.liamg">문의</a></nav>
+    <p>© 2026 이슈피클</p>
+  </footer>
+</main>
+<div class="toast" id="toast" role="status">링크를 복사했어요</div>
 
-<footer>
-  <p><b>이슈피클</b> — 기사 제목과 링크만 보여드리며, 기사 저작권은 각 언론사에 있습니다.</p>
-  <nav><a href="about.html">이슈피클이란?</a><a href="copyright.html">저작권 정책</a><a href="privacy.html">개인정보처리방침</a><a href="terms.html">이용약관</a><a href="#" class="mail" data-u="etis+uumelqip" data-d="moc.liamg">문의</a></nav>
-  <p>© 2026 이슈피클</p>
-</footer>
-</div>
-<div class="toast" id="toast">링크를 복사했어요</div>
-
-<nav class="bnav">
-  <a href="index.html"><svg viewBox="0 0 24 24"><path d="M3 11l9-7 9 7v9a1 1 0 0 1-1 1h-5v-6H9v6H4a1 1 0 0 1-1-1z"/></svg>홈</a>
-  <a href="index.html#sec-top"><svg viewBox="0 0 24 24"><path d="M6 20V10M12 20V4M18 20v-7"/></svg>이슈 랭킹</a>
-  <a href="index.html#sec-people"><svg viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M4 21c1-4 4-6 8-6s7 2 8 6"/></svg>인물</a>
-  <a href="content.html"><svg viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="M10 9l5 3-5 3z"/></svg>콘텐츠</a>
-  <a href="memes.html"><svg viewBox="0 0 24 24"><path d="M4 5h16v11H9l-5 4z"/><path d="M8 10h.01M12 10h.01M16 10h.01"/></svg>밈절임</a>
-</nav>
-
+<nav class="bnav" data-here=""></nav>
+<script src="ui.js"></script>
 <script>
 const $ = id => document.getElementById(id);
 const esc = s => String(s ?? "").replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
 const url = u => /^https?:\/\//.test(u || "") ? u : "#";
 const tempWord = t => t >= 80 ? "뜨거움" : t >= 60 ? "들썩임" : t >= 40 ? "따끈함" : "잔잔함";
+const M = (...a) => a.filter(Boolean).map(x => `<span class="nw">${x}</span>`).join(" · ");
+const EXT = '<span class="ext" aria-hidden="true">원문 ↗</span>';
 function ago(iso) {
+  if (!iso) return "";
   const m = Math.round((Date.now() - new Date(iso)) / 60000);
   if (m < 1) return "방금"; if (m < 60) return m + "분 전";
   const h = Math.floor(m / 60); return h < 24 ? h + "시간 전" : Math.floor(h / 24) + "일 전";
 }
 const link = k => "issue.html?k=" + encodeURIComponent(k);
-
-function gauge(t) {                        // 반원 게이지 (0~100)
-  const seg = [[0, 40, "#c9d6b8"], [40, 60, "#a9b98f"], [60, 80, "#7e9a63"], [80, 100, "#5f7a47"]];
-  const pt = (v, r) => { const a = Math.PI * (1 - v / 100); return [80 + r * Math.cos(a), 84 - r * Math.sin(a)]; };
-  const arcs = seg.map(([a, b, c]) => { const [x1, y1] = pt(a, 62), [x2, y2] = pt(b, 62);
-    return `<path d="M${x1} ${y1} A62 62 0 0 1 ${x2} ${y2}" stroke="${c}" stroke-width="14" fill="none" stroke-linecap="butt" opacity="${t >= a ? 1 : .35}"/>`; }).join("");
-  const [nx, ny] = pt(t, 46);
-  return `<svg viewBox="0 0 160 100" aria-hidden="true">${arcs}
-    <line x1="80" y1="84" x2="${nx}" y2="${ny}" stroke="var(--text)" stroke-width="4" stroke-linecap="round"/>
-    <circle cx="80" cy="84" r="6" fill="var(--text)"/></svg>`;
+function chg(c) {
+  if (c === "new") return ' <span class="lbl new">NEW</span>';
+  if (c > 0) return ` <span class="chg up">▲${c}</span>`;
+  if (c < 0) return ` <span class="chg down">▼${-c}</span>`;
+  return "";
 }
 
-function chart(h, t) {                     // 온도 추이
-  if (!h || h.length < 2) return `<p class="empty">기록이 쌓이는 중이에요. 30분마다 한 점씩 늘어나요.</p>`;
-  const W = 320, H = 120, P = 14;
+function chart(h, t) {                     // 온도 추이 (30분마다 한 점)
+  const wait = `<p class="state">기록이 쌓이는 중이에요. 30분마다 한 점씩 늘어나요.</p>`;
+  if (!h || h.length < 2) return wait;
+  const W = 320, H = 130, P = 16;
   const ts = h.map(x => new Date(x[0]).getTime()), t0 = Math.min(...ts), t1 = Math.max(...ts);
-  if (t1 - t0 < 10 * 60000) return `<p class="empty">기록이 쌓이는 중이에요. 30분마다 한 점씩 늘어나요.</p>`;
-  const xs = ts.map(v => P + (W - 2 * P) * (t1 === t0 ? 1 : (v - t0) / (t1 - t0)));
+  if (t1 - t0 < 10 * 60000) return wait;
+  const xs = ts.map(v => P + (W - 2 * P) * ((v - t0) / (t1 - t0)));
   const vals = h.map(x => x[1]), lo = Math.max(0, Math.min(...vals) - 8), hi = Math.min(100, Math.max(...vals) + 8);
-  const ys = h.map(x => H - 22 - (H - 44) * ((x[1] - lo) / Math.max(hi - lo, 1)));
+  const ys = h.map(x => H - 24 - (H - 48) * ((x[1] - lo) / Math.max(hi - lo, 1)));
   const line = xs.map((x, i) => `${i ? "L" : "M"}${x.toFixed(1)} ${ys[i].toFixed(1)}`).join(" ");
-  const area = line + ` L${xs[xs.length - 1].toFixed(1)} ${H - 22} L${xs[0].toFixed(1)} ${H - 22} Z`;
   const hrs = ((t1 - t0) / 36e5).toFixed(1).replace(/\.0$/, "");
   const lx = xs[xs.length - 1], ly = ys[ys.length - 1];
-  return `<svg viewBox="0 0 ${W} ${H}" role="img" aria-label="최근 ${hrs}시간 온도 추이">
-    <path d="${area}" fill="rgba(126,154,99,.12)"/><path d="${line}" stroke="var(--hot)" stroke-width="3" fill="none" stroke-linejoin="round"/>
-    <circle cx="${lx}" cy="${ly}" r="4.5" fill="var(--hot)"/>
-    <text x="${Math.min(lx, W - 30)}" y="${ly - 10}" text-anchor="middle" font-size="12" font-weight="800" fill="var(--hot)">${t}도</text>
-    <text x="${P}" y="${H - 4}" font-size="10" fill="var(--sub)">${hrs}시간 전</text>
-    <text x="${W - P}" y="${H - 4}" font-size="10" fill="var(--sub)" text-anchor="end">지금</text></svg>`;
+  return `<svg viewBox="0 0 ${W} ${H}" role="img" aria-label="최근 ${hrs}시간 온도 추이, 지금 ${t}도">
+    <line x1="${P}" y1="${H - 24}" x2="${W - P}" y2="${H - 24}" stroke="var(--line)"/>
+    <path d="${line}" stroke="var(--text)" stroke-width="2.5" fill="none" stroke-linejoin="round"/>
+    <circle cx="${lx}" cy="${ly}" r="4" fill="var(--text)"/>
+    <text x="${Math.min(lx, W - 24)}" y="${ly - 10}" text-anchor="middle" font-size="12" font-weight="700" fill="var(--text)">${t}°</text>
+    <text x="${P}" y="${H - 6}" font-size="11" fill="var(--sub)">${hrs}시간 전</text>
+    <text x="${W - P}" y="${H - 6}" font-size="11" fill="var(--sub)" text-anchor="end">지금</text></svg>`;
 }
 
-let D = null, E = null;
+let D = null, E = null, VIDEOS = [];
+function findThumb(word) {
+  const w = String(word || "").toLowerCase();
+  if (w.length < 2) return "";
+  const v = VIDEOS.find(x => x.title && x.title.toLowerCase().includes(w));
+  return v ? v.thumb : "";
+}
 function render(k) {
   E = D.issues[k];
-  if (!E) { $("main").innerHTML = `<div class="box"><p>이 이슈는 지금 순위에서 빠졌어요.</p><a class="btn" href="index.html">지금 뜨는 이슈 보러 가기 ›</a></div>`; return; }
+  if (!E) {
+    $("main").innerHTML = `<div class="box state" style="margin-top:.75rem">이 이슈는 지금 순위에서 빠졌어요.<a class="more" href="index.html">지금 뜨는 이슈 보기 ›</a></div>`;
+    return;
+  }
   document.title = `${E.keyword} - 지금 왜 화제일까? | 이슈피클`;
-  const sig = E.signals, names = {news: "뉴스", search: "검색", video: "영상", community: "커뮤니티"};
-  const on = Object.keys(names).filter(x => sig[x] != null).map(x => names[x]);
-  const cnt = ["", "한", "두", "세", "네"][on.length] || on.length;
-  const rankTag = E.rank ? `${E.rank}위 이슈` : E.kind === "인물" ? "화제의 인물" : E.cat ? `${E.cat.name} ${E.cat.rank}위` : "이슈";
-  const speed = E.ratio != null ? [`${E.ratio}배`, "3시간 전보다"] : E.last3 ? [`${E.last3}건`, "최근 3시간 · 그 전엔 없음"] : ["–", "최근 3시간 새 기사 없음"];
-  const others = E.source_names.length < E.sources ? ` 외 ${E.sources - E.source_names.length}` : "";
-  const rk = E.rank ? [`${E.rank}위`, E.change === "new" ? "새로 올랐어요" : E.change > 0 ? `▲${E.change} 올랐어요` : E.change < 0 ? `▼${-E.change} 내려갔어요` : "순위 그대로"]
-    : E.cat ? [`${E.cat.rank}위`, `${E.cat.name} 분야`] : ["–", E.kind === "인물" ? "인물 순위" : "순위 밖"];
+  const names = {news: "뉴스", search: "검색", video: "영상", community: "커뮤니티"}, sig = E.signals || {};
+  const kinds = Object.keys(names).filter(x => sig[x] != null);
+  const cat = E.cat ? `${esc(E.cat.name)} · ${E.cat.rank}위` : E.kind === "인물" ? "화제의 인물" : "이슈";
+  const rank = E.rank ? `실시간 ${E.rank}위${chg(E.change)}` : "";
+  const lead = E.news?.[0];
+  const img = E.img || E.news.find(n => n.img)?.img || findThumb(E.keyword);
+  const others = E.source_names.length < E.sources ? ` 외 ${E.sources - E.source_names.length}곳` : "";
   let same = [];
-  if (E.cat && D.cats[E.cat.id]) same = D.cats[E.cat.id].list.filter(x => x !== k && D.issues[x]).slice(0, 4);
+  if (E.cat && D.cats?.[E.cat.id]) same = D.cats[E.cat.id].list.filter(x => x !== k && D.issues[x]).slice(0, 4);
   $("main").innerHTML = `
-    <div class="tags"><span>${esc(rankTag)}</span>${E.cat ? `<span>${esc(E.cat.name)}</span>` : ""}</div>
+    <p class="crumb">${M(cat, rank, `${new Date(D.updated).toLocaleString("ko-KR", {month: "numeric", day: "numeric", hour: "2-digit", minute: "2-digit"})} 업데이트`)}</p>
     <h1 class="ititle">${esc(E.keyword)}</h1>
-    <p class="ihead">${esc(E.headline)}</p>
 
-    <section class="box">
-      <div class="gwrap">
-        <div>${gauge(E.temp)}<div class="gnum"><b>${E.temp}</b><small>도</small><div>${tempWord(E.temp)}</div></div></div>
-        <div class="gtxt"><h3>${on.join("·")} ${cnt} 곳에서 확인했어요</h3>
-          <p>온도는 여러 언론사가 얼마나 함께 다뤘는지를 0~100으로 나타낸 값이에요. 지금은 <b>${tempWord(E.temp)}</b> 구간이에요.</p></div>
-      </div>
-      <div class="bars">${Object.keys(names).map(x => `<div class="bar"><span>${names[x]}</span><div class="t"><i style="width:${sig[x] || 0}%"></i></div><span class="v ${sig[x] == null ? "none" : ""}">${sig[x] == null ? "없음" : sig[x]}</span></div>`).join("")}</div>
-    </section>
+    <a class="box lead ${img ? "has-img" : ""}" href="${esc(url(lead?.link))}" target="_blank" rel="noopener nofollow" aria-label="대표 기사 원문 보기 (새 창): ${esc(E.headline)}">
+      ${img ? `<span class="ph"><img src="${esc(img)}" alt="" loading="lazy" referrerpolicy="no-referrer" decoding="async" onerror="this.closest('.lead').classList.remove('has-img');this.parentNode.remove()"></span>` : ""}
+      <span><span class="ltt">${esc(E.headline)}</span>
+        <small>${M(lead ? esc(lead.source) : "", lead ? ago(lead.time) : "")} ${EXT}</small></span>
+    </a>
 
-    <button class="share" id="share">💬 친구에게 알려주기 — 지금 <b>${E.temp}도</b></button>
-
-    <div class="sec-h"><h2>온도 추이</h2><p>30분마다 잰 온도가 어떻게 움직였는지예요</p></div>
-    <section class="box chart">${chart(E.hist, E.temp)}</section>
-
-    <div class="stats">
-      <div><div class="q">얼마나 빨라요?</div><div class="a">${speed[0]}</div><div class="s">${speed[1]}</div></div>
-      <div><div class="q">어디서 다뤘어요?</div><div class="a">${E.sources}곳</div><div class="s">${esc(E.source_names.join("·"))}${others}</div></div>
-      <div><div class="q">순위는요?</div><div class="a">${rk[0]}</div><div class="s">${rk[1]}</div></div>
+    <div class="box kpis">
+      <div><b>${E.temp}°</b><small>온도 · ${tempWord(E.temp)}</small></div>
+      <div><b>${E.sources}곳</b><small>보도한 언론사</small></div>
+      <div><b>${E.articles}건</b><small>관련 기사</small></div>
     </div>
+    <button class="share" id="share">이 이슈 공유하기</button>
 
-    <div class="sec-h"><h2>관련 기사</h2><p>제목을 누르면 언론사 원문으로 이동해요</p></div>
-    <section class="box"><ul class="nl">${E.news.map(n => `<li><a href="${esc(url(n.link))}" target="_blank" rel="noopener nofollow"><div class="tt">${esc(n.title)}</div><small>${esc(n.source)} · ${ago(n.time)}</small></a></li>`).join("")}</ul></section>
+    <section class="sec"><div class="sec-head"><div><h2>관련 기사</h2><p>누르면 언론사 원문이 새 창으로 열려요</p></div></div>
+      <div class="box"><ul class="nlist">${E.news.map(n => `<li><a class="${n.img ? "has-img" : ""}" href="${esc(url(n.link))}" target="_blank" rel="noopener nofollow">
+        ${n.img ? `<img class="nth" src="${esc(n.img)}" alt="" loading="lazy" referrerpolicy="no-referrer" decoding="async" onerror="this.parentNode.classList.remove('has-img');this.remove()">` : ""}<span><span class="tt">${esc(n.title)}</span><small>${M(esc(n.source), ago(n.time))}</small></span>${EXT}<span class="sr">(새 창에서 원문 열기)</span></a></li>`).join("")}</ul></div></section>
 
-    ${same.length ? `<div class="sec-h"><h2>${esc(E.cat.name)} 다른 이슈</h2><p>이어서 볼 만한 이슈를 골랐어요</p></div>
-    <section class="box"><ul class="nl ol">${same.map(x => { const o = D.issues[x];
-      return `<li><a href="${link(x)}"><div><div class="k">${esc(o.keyword)}</div><div class="m">온도 ${o.temp}도 · ${tempWord(o.temp)} · 매체 ${o.sources}곳</div></div><span class="r">${o.change === "new" ? "NEW" : o.cat ? esc(o.cat.name) + " " + o.cat.rank + "위" : ""} ›</span></a></li>`; }).join("")}</ul></section>` : ""}
+    <section class="sec"><div class="sec-head"><div><h2>온도 추이</h2><p>30분마다 잰 온도예요</p></div></div>
+      <div class="box chart">${chart(E.hist, E.temp)}</div></section>
 
-    <div class="sec-h"><h2>이렇게 확인했어요</h2><p>뉴스 밖 신호의 실제 근거예요 — 눌러서 직접 확인할 수 있어요</p></div>
-    <section class="box ev">${E.evidence.length ? `<ul class="nl">${E.evidence.map(v => `<li><a href="${esc(url(v.link))}" target="_blank" rel="noopener nofollow"><span class="tp">${esc(v.type)}</span><span class="tt">${esc(v.title)}</span></a></li>`).join("")}</ul>` : `<p class="empty" style="padding:8px 0">아직 뉴스 밖 신호는 없어요.</p>`}</section>`;
+    ${same.length ? `<section class="sec"><div class="sec-head"><div><h2>연관 이슈</h2><p>같은 ${esc(E.cat.name)} 분야의 다른 이슈예요</p></div></div>
+      <div class="box"><ol class="rlist">${same.map(x => { const o = D.issues[x];
+        return `<li><a class="row" href="${link(x)}"><span class="rank">${o.cat ? o.cat.rank : "·"}</span><span class="mid"><span class="kw">${esc(o.keyword)}</span>${chg(o.change)}<span class="hl">${esc(o.headline)}</span><span class="meta">${M(`매체 ${o.sources}곳`, `기사 ${o.articles}건`)}</span></span><span class="end"><b>${o.temp}°</b><small>${tempWord(o.temp)}</small></span></a></li>`; }).join("")}</ol></div></section>` : ""}
+
+    <section class="sec">
+      <details class="box how"><summary>집계 방식·출처 안내</summary><div class="in">
+        <p><b>온도</b>는 최근 24시간 동안 여러 언론사가 이 이슈를 얼마나 함께 다뤘는지를 30~100으로 나타낸 값이에요. 가장 많이 다뤄진 이슈가 100°예요.</p>
+        <p><b>확인한 신호 종류</b>: ${kinds.map(x => names[x]).join(" · ") || "뉴스"} (${kinds.length || 1}종류)<br>
+           <b>보도한 언론사</b>: ${E.sources}곳 — ${esc(E.source_names.join(", "))}${others}</p>
+        <div class="box" style="box-shadow:none"><ol class="rlist">${Object.keys(names).map(x => `<li><div class="row" style="grid-template-columns:5rem minmax(0,1fr) auto;align-items:center;padding:.625rem .875rem"><span>${names[x]}</span><span class="meta" style="margin:0">${sig[x] == null ? "신호 없음" : "신호 세기 0~100 중"}</span><span class="end"><b style="font-size:1rem">${sig[x] == null ? "–" : sig[x]}</b></span></div></li>`).join("")}</ol></div>
+        ${E.evidence?.length ? `<p style="margin-top:.875rem"><b>뉴스 밖 근거</b></p><ul class="nlist">${E.evidence.map(v => `<li><a href="${esc(url(v.link))}" target="_blank" rel="noopener nofollow" style="padding:.625rem 0"><span><span class="lbl cat">${esc(v.type)}</span><span class="tt">${esc(v.title)}</span></span>${EXT}</a></li>`).join("")}</ul>` : ""}
+        <p>기사 제목과 링크만 보여드리며, 기사 저작권은 각 언론사에 있어요. <a href="about.html" style="text-decoration:underline">이슈피클이란?</a></p>
+      </div></details>
+    </section>`;
   $("share").onclick = async () => {
-    const data = {title: `${E.keyword} — 지금 ${E.temp}도 | 이슈피클`, url: location.href};
+    const data = {title: `${E.keyword} — 지금 ${E.temp}° | 이슈피클`, url: location.href};
     try { if (navigator.share) { await navigator.share(data); return; } } catch (e) { return; }
     try { await navigator.clipboard.writeText(location.href); } catch (e) {}
     $("toast").classList.add("on"); setTimeout(() => $("toast").classList.remove("on"), 1600);
   };
 }
 
-function pref(key, attr, def) {
-  let v = def; try { v = localStorage.getItem(key) || def; } catch (e) {}
-  const set = val => {
-    document.documentElement.setAttribute(attr, val);
-    document.querySelectorAll(`#${key} button`).forEach(b => b.classList.toggle("on", b.dataset.v === val));
-    try { localStorage.setItem(key, val); } catch (e) {}
-  };
-  set(v);
-  $(key).onclick = e => { const b = e.target.closest("button"); if (b) set(b.dataset.v); };
-}
-pref("theme", "data-theme", matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light");
-pref("fsize", "data-fs", "m");
+$("back").onclick = e => { if (history.length > 1 && document.referrer) { e.preventDefault(); history.back(); } };
 
-(async () => {
+async function load() {
   const k = new URLSearchParams(location.search).get("k") || "";
   try {
     D = window.__ISSUES__ || await (await fetch("issues.json?t=" + Date.now())).json();
-    $("updated").textContent = new Date(D.updated).toLocaleString("ko-KR", {month: "numeric", day: "numeric", hour: "2-digit", minute: "2-digit"}) + " 업데이트";
+    try { VIDEOS = (await (await fetch("content.json?t=" + Date.now())).json()).youtube || []; } catch (e) {}
     render(k);
-  } catch (e) { $("main").innerHTML = '<p class="empty">데이터를 불러오지 못했어요. 잠시 후 다시 시도해 주세요.</p>'; }
-})();
-</script>
-<script>/* 스팸 봇이 이메일을 못 긁어 가도록, 누를 때만 주소를 만듭니다 */
-document.querySelectorAll("a.mail").forEach(function(a){a.onclick=function(e){
-var m=a.dataset.u.split("").reverse().join("")+"@"+a.dataset.d.split("").reverse().join("");
-if(a.dataset.shown){return true;} e.preventDefault(); a.textContent=m; a.href="mailto:"+m; a.dataset.shown=1;};});
+  } catch (e) {
+    $("main").innerHTML = `<div class="alert" role="alert"><span>이슈 정보를 불러오지 못했어요.</span><button id="retry">다시 시도</button></div>`;
+    $("retry").onclick = load;
+  }
+}
+load();
 </script>
 </body>
 </html>

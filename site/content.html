@@ -2,7 +2,7 @@
 <html lang="ko">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>콘텐츠 랭킹 - 유튜브 인기 급상승 · 박스오피스 · 넷플릭스 순위 | 이슈피클</title>
 <meta name="description" content="지금 조회수가 가장 빨리 오르는 유튜브 영상 TOP 100, 어제 박스오피스 순위, 이번 주 한국 넷플릭스 TOP 10을 한 곳에서.">
 <meta name="keywords" content="유튜브 인기 급상승, 유튜브 순위, 박스오피스 순위, 영화 순위, 넷플릭스 순위, 넷플릭스 TOP 10">
@@ -15,120 +15,63 @@
 -->
 
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.min.css">
+<link rel="stylesheet" href="style.css">
+<script>try{var d=document.documentElement,t=localStorage.getItem("theme"),f=localStorage.getItem("fsize");d.setAttribute("data-theme",t||(matchMedia("(prefers-color-scheme: dark)").matches?"dark":"light"));d.setAttribute("data-fs",{l:"l",xl:"xl"}[f]||"m")}catch(e){}</script>
 <style>
-:root{--bg:#fafaf6;--card:#ffffff;--text:#111111;--sub:#86867f;--line:#e7e7e0;--soft:#eeeee8;--hot:#7e9a63;--warm:#a9b98f;--cool:#6e7f8d;--fs:16px}
-html[data-theme=soft]{--bg:#f3f0e6;--card:#faf8f1;--text:#1c1b17;--sub:#7d786b;--line:#e3ddcd;--soft:#ebe6d8}
-html[data-theme=dark]{--bg:#11120f;--card:#1a1b17;--text:#f2f2ec;--sub:#9c9c94;--line:#2b2c26;--soft:#22231e;--hot:#9db883;--warm:#7f8f68;--cool:#8fa0ad}
-html[data-fs=s]{--fs:14px}html[data-fs=l]{--fs:18px}
-*{box-sizing:border-box}
-html{font-size:var(--fs)}
-body{margin:0;background:var(--bg);color:var(--text);font-family:"Pretendard Variable",Pretendard,-apple-system,BlinkMacSystemFont,"Apple SD Gothic Neo","Noto Sans KR","Malgun Gothic",sans-serif;line-height:1.5;-webkit-text-size-adjust:100%;padding-bottom:72px}
-a{color:inherit;text-decoration:none}
-button{font:inherit;color:inherit}
-.wrap{max-width:760px;margin:0 auto;padding:0 16px}
-header{padding:18px 0 6px;display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap}
-.logo{margin:0;font-size:1.45rem;font-weight:800;letter-spacing:-.5px}
-.logo span{color:var(--hot)}
-.tag{color:var(--sub);font-size:.82rem}
-.ctrl{display:flex;gap:6px;flex-wrap:wrap}
-.seg{display:flex;border:1px solid var(--line);border-radius:999px;overflow:hidden;background:var(--card)}
-.seg button{border:0;background:none;padding:5px 10px;font-size:.78rem;cursor:pointer;color:var(--sub)}
-.seg button.on{background:var(--text);color:var(--bg)}
-.status{display:flex;justify-content:flex-end;align-items:center;gap:6px;color:var(--sub);font-size:.8rem;margin:10px 0}
-.dot{width:8px;height:8px;border-radius:50%;background:var(--hot);box-shadow:0 0 0 3px rgba(126,154,99,.22)}
-
-/* 큰 탭 */
-.sticky{position:sticky;top:0;z-index:5;background:var(--bg);padding:6px 0 4px}
-.tabs{display:grid;grid-template-columns:repeat(3,1fr);background:var(--soft);border-radius:14px;padding:4px}
-.tabs button{border:0;background:none;padding:10px 0;border-radius:11px;font-weight:700;color:var(--sub);cursor:pointer}
-.tabs button.on{background:var(--card);color:var(--text);box-shadow:0 1px 3px rgba(0,0,0,.08)}
-.chips{display:flex;gap:6px;overflow-x:auto;scrollbar-width:none;padding:10px 0 4px}
-.chips::-webkit-scrollbar{display:none}
-.chips button{flex:0 0 auto;border:1px solid var(--line);background:var(--card);padding:6px 14px;border-radius:999px;font-size:.88rem;font-weight:600;cursor:pointer}
-.chips button.on{background:var(--text);color:var(--bg);border-color:var(--text)}
-.chips:empty{display:none}
-
-/* 순위 카드 */
-.list{list-style:none;margin:6px 0 0;padding:0}
-.card{display:grid;grid-template-columns:2.2rem auto 1fr auto;gap:12px;align-items:center;background:var(--card);border:1px solid var(--line);border-radius:16px;padding:12px;margin:8px 0}
-.card.noimg{grid-template-columns:2.2rem 1fr auto}
-.rk{width:2.2rem;height:2.2rem;border-radius:10px;background:var(--soft);display:flex;align-items:center;justify-content:center;font-weight:800;color:var(--sub);font-variant-numeric:tabular-nums;font-size:.95rem}
-.card:nth-child(-n+3) .rk{color:var(--hot)}
-.th{width:116px;aspect-ratio:16/9;border-radius:10px;object-fit:cover;background:var(--soft);display:block}
-.body{min-width:0}
-.t{font-weight:700;font-size:.98rem;line-height:1.35;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
-.m{color:var(--sub);font-size:.8rem;margin-top:3px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-.side{text-align:right;white-space:nowrap;font-variant-numeric:tabular-nums}
-.gain{color:var(--hot);font-weight:800;font-size:.9rem}
-.v{color:var(--sub);font-size:.78rem;margin-top:2px}
-.chg{font-size:.78rem;font-weight:800;margin-top:2px}
-.up{color:var(--hot)}.down{color:var(--cool)}.same{color:var(--sub)}.new{color:var(--cool);letter-spacing:.5px}
-.more{display:block;width:100%;margin:8px 0;padding:12px;border:1px solid var(--line);border-radius:14px;background:var(--card);cursor:pointer;font-weight:600}
-.note{color:var(--sub);font-size:.78rem;margin:10px 2px}
-.empty{background:var(--card);border:1px dashed var(--line);border-radius:16px;padding:32px 16px;text-align:center;color:var(--sub);font-size:.9rem;margin-top:10px}
-.ad-slot{margin:10px 0;min-height:90px;display:flex;align-items:center;justify-content:center;border:1px dashed var(--line);border-radius:14px;color:var(--sub);font-size:.8rem}
-.ad-slot:empty{display:none}
-@media (max-width:480px){.th{width:92px}.card{gap:9px;padding:10px}.t{font-size:.92rem}}
-
-footer{padding:22px 0 24px;color:var(--sub);font-size:.8rem}
-footer nav a{margin-right:12px;text-decoration:underline}
-
-/* 아래 메뉴 */
-.bnav{position:fixed;left:0;right:0;bottom:0;background:var(--card);border-top:1px solid var(--line);display:flex;justify-content:center;z-index:9;padding-bottom:env(safe-area-inset-bottom)}
-.bnav a{flex:1;max-width:150px;display:flex;flex-direction:column;align-items:center;gap:2px;padding:8px 0;font-size:.72rem;color:var(--sub)}
-.bnav a.on{color:var(--text);font-weight:700}
-.bnav svg{width:22px;height:22px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
-.more[hidden]{display:none}
-h1,h2,h3,.logo,.ttl,.kw,.k,.w,.t,.gain,.deg,.rk,.num{letter-spacing:-.03em}
-.logo{font-weight:900;letter-spacing:-.05em}
-h1,h2{font-weight:800}
+.ctabs{display:grid;grid-template-columns:repeat(3,1fr);gap:.375rem;margin-top:.875rem}
+.ctabs button{min-height:2.75rem;border:1px solid var(--line);background:var(--card);border-radius:10px;font-size:.9375rem;font-weight:600;cursor:pointer;color:var(--text)}
+.ctabs button[aria-selected=true]{background:var(--navy);color:var(--on-navy);border-color:var(--navy)}
+.sub-chips{display:flex;gap:.375rem;margin-top:.625rem}
+.sub-chips:empty{display:none}
+.sub-chips button{min-height:2.75rem;padding:0 1rem;border:1px solid var(--line);background:var(--card);border-radius:999px;font-weight:600;cursor:pointer;font-size:.9375rem}
+.sub-chips button[aria-pressed=true]{background:var(--navy);color:var(--on-navy);border-color:var(--navy)}
+.vrow{grid-template-columns:1.75rem 6.5rem minmax(0,1fr) auto;align-items:center}
+.vth{position:relative;aspect-ratio:16/9;border-radius:6px;overflow:hidden;background:var(--soft);display:block}
+.vth img{width:100%;height:100%;object-fit:cover;display:block}
+.vth .play{width:1.75rem;height:1.75rem}
+.t2{display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;font-size:.9375rem;font-weight:600;line-height:1.45}
+.meta.g{color:var(--red);font-weight:600}
+@media (max-width:359px){.vrow{grid-template-columns:1.5rem 5rem minmax(0,1fr) auto;gap:.5rem}}
 </style>
 </head>
 <body>
-<div class="wrap">
-
-<header>
-  <a href="index.html"><h1 class="logo">이슈<span>피클</span></h1><div class="tag">지금 뜨는 이슈, 톡 쏘게 한눈에</div></a>
-  <div class="ctrl">
-    <div class="seg" id="theme"><button data-v="light">밝게</button><button data-v="soft">편하게</button><button data-v="dark">어둡게</button></div>
-    <div class="seg" id="fsize"><button data-v="s" style="font-size:.7rem">가</button><button data-v="m">가</button><button data-v="l" style="font-size:.95rem">가</button></div>
+<header class="top">
+  <div class="wrap top-in">
+    <div class="logo"><a href="index.html">이슈<span>피클</span></a></div>
+    <button class="icon-btn" id="settings-btn" aria-label="화면 설정" aria-haspopup="dialog" aria-controls="settings">
+      <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.8-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1.1-1.5 1.7 1.7 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.8 1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.5-1.1 1.7 1.7 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.8.3H9a1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.8V9a1.7 1.7 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1z"/></svg>
+    </button>
   </div>
 </header>
 
-<div class="status"><i class="dot"></i><span id="updated">연결 중…</span></div>
-
-<div class="sticky">
-  <div class="tabs" id="tabs">
-    <button data-t="youtube">유튜브</button><button data-t="boxoffice">박스오피스</button><button data-t="netflix">넷플릭스</button>
+<main class="wrap">
+  <p class="status"><i class="dot" aria-hidden="true"></i><span id="updated">불러오는 중…</span></p>
+  <div class="alert" id="alert" role="alert" hidden><span>콘텐츠 순위를 불러오지 못했어요.</span><button id="retry">다시 시도</button></div>
+  <h1 class="sr">콘텐츠 랭킹</h1>
+  <div class="ctabs" id="tabs" role="tablist" aria-label="콘텐츠 종류">
+    <button role="tab" data-t="youtube">유튜브</button><button role="tab" data-t="boxoffice">박스오피스</button><button role="tab" data-t="netflix">넷플릭스</button>
   </div>
-  <div class="chips" id="chips"></div>
-</div>
+  <div class="sub-chips" id="chips"></div>
 
-<!-- ▼ [광고 설정 2] 목록 위 광고 -->
-<div class="ad-slot" id="ad-1"></div>
+  <!-- ▼ [광고 설정 2] 목록 위 광고 -->
+  <div class="ad-slot" id="ad-1"></div>
 
-<p class="note" id="desc"></p>
-<ol class="list" id="list"></ol>
-<button class="more" id="more" hidden></button>
+  <p class="note" id="desc"></p>
+  <div class="box" style="margin-top:.5rem"><ol class="rlist" id="list"><li class="state">불러오는 중…</li></ol></div>
+  <button class="more" id="more" hidden></button>
 
-<!-- ▼ [광고 설정 3] 목록 아래 광고 -->
-<div class="ad-slot" id="ad-2"></div>
+  <!-- ▼ [광고 설정 3] 목록 아래 광고 -->
+  <div class="ad-slot" id="ad-2"></div>
 
-<footer>
-  <p><b>이슈피클</b> — 유튜브 영상은 YouTube 공식 API, 박스오피스는 영화진흥위원회 통합전산망, 넷플릭스는 넷플릭스 공식 주간 TOP 10 자료를 바탕으로 해요.</p>
-  <nav><a href="about.html">이슈피클이란?</a><a href="copyright.html">저작권 정책</a><a href="privacy.html">개인정보처리방침</a><a href="terms.html">이용약관</a><a href="#" class="mail" data-u="etis+uumelqip" data-d="moc.liamg">문의</a></nav>
-  <p>© 2026 이슈피클</p>
-</footer>
-</div>
+  <footer class="foot">
+    <p><b>이슈피클</b> — 유튜브 영상은 YouTube 공식 API, 박스오피스는 영화진흥위원회 통합전산망, 넷플릭스는 넷플릭스 공식 주간 TOP 10 자료를 바탕으로 해요.</p>
+    <nav aria-label="사이트 안내"><a href="about.html">이슈피클이란?</a><a href="copyright.html">저작권 정책</a><a href="privacy.html">개인정보처리방침</a><a href="terms.html">이용약관</a><a href="#" class="mail" data-u="etis+uumelqip" data-d="moc.liamg">문의</a></nav>
+    <p>© 2026 이슈피클</p>
+  </footer>
+</main>
 
-<nav class="bnav">
-  <a href="index.html"><svg viewBox="0 0 24 24"><path d="M3 11l9-7 9 7v9a1 1 0 0 1-1 1h-5v-6H9v6H4a1 1 0 0 1-1-1z"/></svg>홈</a>
-  <a href="index.html#sec-top"><svg viewBox="0 0 24 24"><path d="M6 20V10M12 20V4M18 20v-7"/></svg>이슈 랭킹</a>
-  <a href="index.html#sec-people"><svg viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M4 21c1-4 4-6 8-6s7 2 8 6"/></svg>인물</a>
-  <a href="content.html" class="on"><svg viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="M10 9l5 3-5 3z"/></svg>콘텐츠</a>
-  <a href="memes.html"><svg viewBox="0 0 24 24"><path d="M4 5h16v11H9l-5 4z"/><path d="M8 10h.01M12 10h.01M16 10h.01"/></svg>밈절임</a>
-</nav>
-
+<nav class="bnav" data-here="content"></nav>
+<script src="ui.js"></script>
 <script>
 const $ = id => document.getElementById(id);
 const esc = s => String(s ?? "").replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
@@ -141,23 +84,25 @@ function kn(n) {                       // 1234567 → 123만
   return n.toLocaleString("ko-KR");
 }
 function chg(c) {
-  if (c === "new") return '<div class="chg new">NEW</div>';
-  if (c > 0) return `<div class="chg up">▲${c}</div>`;
-  if (c < 0) return `<div class="chg down">▼${-c}</div>`;
-  return '<div class="chg same">–</div>';
+  if (c === "new") return '<small><span class="lbl new">NEW</span></small>';
+  if (c > 0) return `<small class="chg up" style="margin:0">▲${c}</small>`;
+  if (c < 0) return `<small class="chg down" style="margin:0">▼${-c}</small>`;
+  return '<small class="chg same" style="margin:0">–</small>';
 }
+const PLAY = '<svg class="play" viewBox="0 0 48 48" aria-hidden="true"><circle cx="24" cy="24" r="22" fill="rgba(0,0,0,.55)"/><path d="M19 15l14 9-14 9z" fill="#fff"/></svg>';
+const M = (...a) => a.filter(Boolean).map(x => `<span class="nw">${x}</span>`).join(" · ");
 const YT_CHIPS = ["전체", "기타", "뉴스·정치", "음악", "스포츠", "엔터", "영화·애니", "게임", "인물"];
 let D = null, tab = "youtube", chip = "전체", nfChip = "tv", limit = 30;
 
 function setTab(t) {
   tab = ["youtube", "boxoffice", "netflix"].includes(t) ? t : "youtube";
   limit = 30;
-  document.querySelectorAll("#tabs button").forEach(b => b.classList.toggle("on", b.dataset.t === tab));
+  document.querySelectorAll("#tabs button").forEach(b => b.setAttribute("aria-selected", b.dataset.t === tab));
   try { history.replaceState(null, "", "#" + tab); } catch (e) {}
   render();
 }
 
-function emptyBox(msg) { $("list").innerHTML = `<li class="empty">${msg}</li>`; $("more").hidden = true; }
+function emptyBox(msg) { $("list").innerHTML = `<li class="state">${msg}</li>`; $("more").hidden = true; }
 
 function renderYoutube() {
   $("chips").innerHTML = "";          // 분야 버튼 없이 전체만 보여줌
@@ -167,13 +112,13 @@ function renderYoutube() {
   $("desc").textContent = `최근 ${D.youtube_hours || 6}시간 사이 조회수가 많이 오른 순서예요 · 한국 유튜브 인기 영상 기준`;
   if (!list.length) return emptyBox("이 분야의 영상이 아직 없어요.");
   $("list").innerHTML = list.slice(0, limit).map((v, i) => `
-    <li><a class="card" href="${esc(url(v.link))}" target="_blank" rel="noopener">
-      <div class="rk">${v.rank}</div>
-      <img class="th" src="${esc(url(v.thumb))}" alt="" loading="lazy">
-      <div class="body"><div class="t">${esc(v.title)}</div>
-        <div class="m">${esc(v.channel)}${v.subs ? " 구독 " + kn(v.subs) : ""} · ${esc(v.cat)}</div></div>
-      <div class="side">${v.gain != null ? `<div class="gain">+${kn(v.gain)}·${v.hrs}시간</div>` : ""}
-        <div class="v">${kn(v.views)}회</div>${chg(v.change)}</div>
+    <li><a class="row vrow" href="${esc(url(v.link))}" target="_blank" rel="noopener" aria-label="${esc(v.title)} (유튜브에서 보기)">
+      <span class="rank">${v.rank}</span>
+      <span class="vth">${v.thumb ? `<img src="${esc(url(v.thumb))}" alt="" loading="lazy">` : ""}${PLAY}</span>
+      <span class="mid"><span class="t2">${esc(v.title)}</span>
+        <span class="meta">${M(esc(v.channel), v.subs ? "구독 " + kn(v.subs) : "", `조회수 ${kn(v.views)}회`)}</span>
+        ${v.gain != null ? `<span class="meta g">▲${kn(v.gain)}회 · 최근 ${v.hrs}시간</span>` : ""}</span>
+      <span class="end">${chg(v.change)}</span>
     </a></li>`).join("");
   $("more").hidden = list.length <= limit;
   $("more").textContent = `${Math.min(list.length, limit + 30)}위까지 더 보기`;
@@ -186,29 +131,28 @@ function renderBox() {
   const d = new Date(bo.date);
   $("desc").textContent = `${d.getMonth() + 1}월 ${d.getDate()}일 하루 관객 수 기준 순위예요 · 영화진흥위원회 통합전산망`;
   $("list").innerHTML = bo.items.map(m => `
-    <li><a class="card noimg" href="https://search.naver.com/search.naver?query=${encodeURIComponent("영화 " + m.title)}" target="_blank" rel="noopener">
-      <div class="rk">${m.rank}</div>
-      <div class="body"><div class="t">${esc(m.title)}</div>
-        <div class="m">개봉 ${esc(m.open)} · 누적 ${kn(m.acc)}명${m.share ? " · 매출 점유 " + esc(m.share) + "%" : ""}</div></div>
-      <div class="side"><div class="gain">${kn(m.audi)}명</div><div class="v">하루 관객</div>${chg(m.change)}</div>
+    <li><a class="row" href="https://search.naver.com/search.naver?query=${encodeURIComponent("영화 " + m.title)}" target="_blank" rel="noopener">
+      <span class="rank">${m.rank}</span>
+      <span class="mid"><span class="t2">${esc(m.title)}</span>
+        <span class="meta">${M(`개봉 ${esc(m.open)}`, `누적 ${kn(m.acc)}명`, m.share ? "매출 점유 " + esc(m.share) + "%" : "")}</span></span>
+      <span class="end"><b>${kn(m.audi)}명</b><small>하루 관객</small>${chg(m.change)}</span>
     </a></li>`).join("");
   $("more").hidden = true;
 }
 
 function renderNetflix() {
   $("chips").innerHTML = [["tv", "시리즈"], ["films", "영화"]].map(([k, n]) =>
-    `<button class="${k === nfChip ? "on" : ""}" data-nf="${k}">${n}</button>`).join("");
+    `<button aria-pressed="${k === nfChip}" data-nf="${k}">${n}</button>`).join("");
   const nf = D.netflix;
   if (!nf || !(nf[nfChip] || []).length) return emptyBox("넷플릭스 순위를 준비 중이에요. 잠시 후 다시 확인해 주세요.");
   const end = new Date(nf.week), start = new Date(end - 6 * 864e5);
   const f = d => `${d.getMonth() + 1}/${d.getDate()}`;
   $("desc").textContent = `${f(start)} ~ ${f(end)} 한 주 동안 한국에서 많이 본 넷플릭스 ${nfChip === "tv" ? "시리즈" : "영화"}예요 · 넷플릭스 공식 TOP 10 (매주 화요일 갱신)`;
   $("list").innerHTML = nf[nfChip].map(m => `
-    <li><a class="card noimg" href="https://www.netflix.com/search?q=${encodeURIComponent(m.title)}" target="_blank" rel="noopener">
-      <div class="rk">${m.rank}</div>
-      <div class="body"><div class="t">${esc(m.season || m.title)}</div>
-        <div class="m">${m.weeks}주째 TOP 10</div></div>
-      <div class="side">${chg(m.change)}</div>
+    <li><a class="row" href="https://www.netflix.com/search?q=${encodeURIComponent(m.title)}" target="_blank" rel="noopener">
+      <span class="rank">${m.rank}</span>
+      <span class="mid"><span class="t2">${esc(m.season || m.title)}</span><span class="meta">${m.weeks}주째 TOP 10</span></span>
+      <span class="end">${chg(m.change)}</span>
     </a></li>`).join("");
   $("more").hidden = true;
 }
@@ -228,37 +172,22 @@ $("chips").onclick = e => {
 };
 $("more").onclick = () => { limit += 30; render(); };
 
-function pref(key, attr, def) {
-  let v = def; try { v = localStorage.getItem(key) || def; } catch (e) {}
-  const set = val => {
-    document.documentElement.setAttribute(attr, val);
-    document.querySelectorAll(`#${key} button`).forEach(b => b.classList.toggle("on", b.dataset.v === val));
-    try { localStorage.setItem(key, val); } catch (e) {}
-  };
-  set(v);
-  $(key).onclick = e => { const b = e.target.closest("button"); if (b) set(b.dataset.v); };
-}
-pref("theme", "data-theme", matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light");
-pref("fsize", "data-fs", "m");
 
 async function load() {
   try {
     D = window.__CONTENT__ || await (await fetch("content.json?t=" + Date.now())).json();
     const d = new Date(D.updated);
     $("updated").textContent = d.toLocaleString("ko-KR", {month: "numeric", day: "numeric", hour: "2-digit", minute: "2-digit"}) + " 업데이트";
+    $("alert").hidden = true;
   } catch (e) {
-    D = {}; $("updated").textContent = "아직 데이터가 없어요";
+    D = {}; $("updated").textContent = "업데이트 정보를 불러오지 못했어요"; $("alert").hidden = false;
   }
   render();
 }
 setTab(location.hash.slice(1));
+$("retry").onclick = load;
 load();
 setInterval(load, 10 * 60 * 1000);
-</script>
-<script>/* 스팸 봇이 이메일을 못 긁어 가도록, 누를 때만 주소를 만듭니다 */
-document.querySelectorAll("a.mail").forEach(function(a){a.onclick=function(e){
-var m=a.dataset.u.split("").reverse().join("")+"@"+a.dataset.d.split("").reverse().join("");
-if(a.dataset.shown){return true;} e.preventDefault(); a.textContent=m; a.href="mailto:"+m; a.dataset.shown=1;};});
 </script>
 </body>
 </html>

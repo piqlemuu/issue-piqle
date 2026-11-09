@@ -249,7 +249,107 @@ def build_index(explains):
                    f'<div class="box" style="margin-top:.75rem"><ul class="nlist">{items or "<li class=state>아직 해설이 없어요.</li>"}</ul></div>') + FOOT
 
 
-def build_all(details, old_snaps, now_iso, memes_dict):
+# ───────────── 날짜별 '오늘의 이슈' 페이지 (b/2026-11-10.html) ─────────────
+# 순위 기록만 있는 날은 검색에 내보내지 않고(noindex), 새콤기자 해설이 있는 날만 검색에 내보내요.
+DAY_DIR = SITE / "b"
+WEEK = "월화수목금토일"
+
+
+def day_label(day):
+    d = datetime.strptime(day, "%Y-%m-%d")
+    return f"{d.month}월 {d.day}일 ({WEEK[d.weekday()]})"
+
+
+def small(t):
+    return f"<small>{e(t['headline'])}</small>" if t.get("headline") else ""
+
+
+def build_day(day, rec, day_explains, prev_day, next_day, now_iso):
+    url = SITE_URL + f"b/{day}.html"
+    label = day_label(day)
+    tops = sorted(rec.get("top", {}).items(), key=lambda kv: (-kv[1]["count"], kv[1]["best"]))[:10]
+    indexable = bool(day_explains)
+    is_today = now_iso[:10] == day
+    lead = ""
+    if tops:
+        k, t = tops[0]
+        lead = (f"{label} 이슈피클 실시간 순위 상위 10위 안에 오른 이슈는 {len(rec['top'])}개였어요. "
+                f"그중 가장 오래 상위권에 머문 이슈는 '{t['title']}'(최고 {t['best']}위)예요.")
+    if day_explains:
+        lead += " 새콤기자가 이날의 주요 이슈를 직접 정리했어요."
+    desc = (lead or f"{label} 이슈 정리")[:150]
+    ld = {"@context": "https://schema.org", "@type": "CollectionPage", "name": f"{label} 오늘의 이슈", "url": url,
+          "datePublished": day, "dateModified": (rec.get("last") or day)[:10], "inLanguage": "ko",
+          "publisher": {"@type": "Organization", "name": SITE_NAME, "url": SITE_URL}}
+    head = HEAD.format(title=e(f"{label} 오늘의 이슈 정리 — 무슨 일이 화제였나 | 이슈피클"), desc=e(desc), url=e(url),
+                       ogtitle=e(f"{label} 오늘의 이슈 — 이슈피클"), ogimg="",
+                       ld=json.dumps(ld, ensure_ascii=False).replace("</", "<\\/"))
+    if not indexable:
+        head = head.replace("<title>", '<meta name="robots" content="noindex,follow">\n<title>', 1)
+    head = head.replace('href="../rss.xml"', 'href="../rss.xml"').replace("</style>",
+        ".ex .tl{list-style:none;margin:0;padding:0}.ex .tl li{padding:.5rem 1rem;border-top:1px solid var(--line);font-size:.9375rem;line-height:1.55}"
+        ".ex .tl li:first-child{border-top:0}.ex .tl small{display:block;color:var(--sub);font-size:.8125rem}"
+        ".ex .dnav{display:flex;justify-content:space-between;gap:.5rem;margin-top:1rem}.ex .dnav a{color:var(--sub);font-size:.875rem;font-weight:600}</style>", 1)
+    body = ['<a class="back" href="../index.html">‹ 홈으로</a>',
+            f'<p class="crumb">오늘의 이슈 · {e(day.replace("-", "."))}{" · " + e(now_iso[11:16]) + "까지 집계" if is_today else ""}</p>',
+            f"<h1>{e(label)} 이슈 정리</h1>"]
+    if lead:
+        body.append(f'<p class="note" style="margin-top:.5rem;font-size:.9375rem;line-height:1.7">{e(lead)}</p>')
+    if day_explains:
+        items = "".join(
+            f'<li><a href="../i/{e(slug(x["title"]))}.html"><span><span class="tt">{e(x["title"])}</span>'
+            f'<small>{e((x["summary"] or [x["what"]])[0][:90])}</small></span></a></li>' for x in day_explains)
+        body.append('<section class="sec"><div class="sec-head"><div><h2>📝 새콤기자 해설</h2><p>이날 화제가 된 이슈를 직접 정리했어요</p></div></div>'
+                    f'<div class="box"><ul class="nlist">{items}</ul></div></section>')
+    if tops:
+        rows = "".join(f'<li><b>{e(t["title"])}</b> · 최고 {t["best"]}위{" · " + e(t["cat"]) if t.get("cat") else ""}'
+                       f'{small(t)}</li>'
+                       for _, t in tops)
+        body.append('<section class="sec"><div class="sec-head"><div><h2>하루 동안 오래 머문 이슈</h2>'
+                    '<p>실시간 순위 10위 안에 머문 시간이 긴 순서예요</p></div></div>'
+                    f'<div class="box"><ol class="tl">{rows}</ol></div></section>')
+    if rec.get("briefs"):
+        bl = ""
+        for b in rec["briefs"]:
+            h = int(b["slot"][11:13])
+            lines = "".join(f'<li>{e(l["icon"])} {e(l["label"])}: <b>{e(l["text"])}</b></li>' for l in b["lines"])
+            bl += f'<h3 style="font-size:.9375rem;margin:.875rem 0 .25rem">{"자정" if h == 0 else str(h) + "시"} 브리핑</h3><div class="box"><ul class="tl">{lines}</ul></div>'
+        body.append(f'<section class="sec"><div class="sec-head"><div><h2>시간대별 브리핑</h2><p>3시간마다 순위가 어떻게 바뀌었는지예요</p></div></div>{bl}</section>')
+    nav = '<nav class="dnav" aria-label="다른 날">'
+    nav += f'<a href="{prev_day}.html">‹ {e(day_label(prev_day))}</a>' if prev_day else "<span></span>"
+    nav += '<a href="index.html">날짜별 모아 보기</a>'
+    nav += f'<a href="{next_day}.html">{e(day_label(next_day))} ›</a>' if next_day else "<span></span>"
+    body.append(nav + "</nav>")
+    return head + "\n".join(body) + FOOT, indexable
+
+
+def build_days(daily, explains, now_iso):
+    """날짜별 페이지를 만들고, 검색에 내보낼(해설이 있는) 날짜 목록을 돌려줘요"""
+    DAY_DIR.mkdir(parents=True, exist_ok=True)
+    days = sorted(daily or {})
+    good = []
+    for i, day in enumerate(days):
+        exs = [x for x in explains if x["date"] == day]
+        html_, ok = build_day(day, daily[day], exs, days[i - 1] if i else None,
+                              days[i + 1] if i + 1 < len(days) else None, now_iso)
+        (DAY_DIR / f"{day}.html").write_text(html_, encoding="utf-8")
+        if ok:
+            good.append(day)
+    url = SITE_URL + "b/"
+    ld = {"@context": "https://schema.org", "@type": "CollectionPage", "name": "날짜별 오늘의 이슈", "url": url}
+    head = HEAD.format(title="날짜별 오늘의 이슈 | 이슈피클", desc="하루 동안 화제가 된 이슈와 새콤기자 해설을 날짜별로 모았어요.",
+                       url=url, ogtitle="날짜별 오늘의 이슈 — 이슈피클", ogimg="", ld=json.dumps(ld, ensure_ascii=False))
+    items = "".join(f'<li><a href="{d}.html"><span><span class="tt">{e(day_label(d))}</span>'
+                    f'<small>{"📝 해설 " + str(sum(1 for x in explains if x["date"] == d)) + "개 · " if d in good else ""}'
+                    f'순위에 오른 이슈 {len(daily[d].get("top", {}))}개</small></span></a></li>' for d in reversed(days))
+    (DAY_DIR / "index.html").write_text(head + '<a class="back" href="../index.html">‹ 홈으로</a><h1>날짜별 오늘의 이슈</h1>'
+        '<p class="note">하루 동안 화제가 된 이슈를 날짜별로 모았어요.</p>'
+        f'<div class="box" style="margin-top:.75rem"><ul class="nlist">{items or "<li class=state>아직 기록이 없어요.</li>"}</ul></div>' + FOOT,
+        encoding="utf-8")
+    return good
+
+
+def build_all(details, old_snaps, now_iso, memes_dict, daily=None):
     """해설 페이지·sitemap·rss 를 만들고, 이슈→해설 주소 지도와 스냅숏을 돌려줘요."""
     explains = sorted(read_explains(), key=lambda x: x["date"], reverse=True)
     snaps = dict(old_snaps or {})
@@ -270,6 +370,7 @@ def build_all(details, old_snaps, now_iso, memes_dict):
             snap["live"] = bool(cur)
         (OUT_DIR / f"{s}.html").write_text(build_page(ex, snap or None, explains), encoding="utf-8")
     (OUT_DIR / "index.html").write_text(build_index(explains), encoding="utf-8")
+    good_days = build_days(daily, explains, now_iso)
     keep = {slug(x["title"]) for x in explains}
     snaps = {k: v for k, v in snaps.items() if k in keep}
 
@@ -281,6 +382,9 @@ def build_all(details, old_snaps, now_iso, memes_dict):
     if explains:
         urls.append((SITE_URL + "i/", explains[0]["date"] or today, "daily", "0.8"))
     urls += [(page_url(x["title"]), x["updated"] or x["date"] or None, "weekly", "0.8") for x in explains]
+    if good_days:
+        urls.append((SITE_URL + "b/", good_days[-1], "daily", "0.7"))
+    urls += [(SITE_URL + f"b/{d}.html", d, "monthly", "0.6") for d in good_days]
     sm = ['<?xml version="1.0" encoding="UTF-8"?>', '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">']
     for loc, lm, fq, pr in urls:
         sm.append(f"  <url><loc>{e(loc)}</loc>{f'<lastmod>{lm}</lastmod>' if lm else ''}<changefreq>{fq}</changefreq><priority>{pr}</priority></url>")
@@ -303,5 +407,5 @@ def build_all(details, old_snaps, now_iso, memes_dict):
            f"<title>이슈피클</title><link>{SITE_URL}</link><description>요즘 뜨는 이슈와 밈을 짧게 정리해요</description>"
            f"<language>ko</language>{''.join(items)}</channel></rss>\n")
     (SITE / "rss.xml").write_text(rss, encoding="utf-8")
-    print(f"검색용 페이지: 해설 {len(explains)}개 · 사이트맵 {len(urls)}개 주소")
+    print(f"검색용 페이지: 해설 {len(explains)}개 · 날짜별 {len(daily or {})}일(검색 노출 {len(good_days)}일) · 사이트맵 {len(urls)}개 주소")
     return link_map, snaps

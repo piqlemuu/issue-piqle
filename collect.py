@@ -1203,6 +1203,93 @@ def build_details(result, kw_arts, vids, community, now, old_hist):
     return {"updated": result["updated"], "issues": entries, "cats": cats, "community_sites": sites}, hist
 
 
+# ───────────── 브리핑 (첫 화면 맨 위 '지금 한눈에') ─────────────
+# 이번 수집 결과를 지난번과 비교해서, 사람이 쓰지 않아도 되는 '사실만' 몇 줄로 정리해요.
+BRIEF_KEEP = 6          # 지난 브리핑을 몇 개까지 보관할지 (화면에서 '지난 브리핑'으로 볼 수 있음)
+BRIEF_HOURS = [0, 9, 12, 15, 18, 21]   # 브리핑을 새로 쓰는 시각 (새벽 3·6시는 뉴스가 적어 건너뜀)
+
+
+def brief_slot(now):
+    """지금 시각이 속한 브리핑 시각 (예: 14시 → 12시)"""
+    h = max([x for x in BRIEF_HOURS if x <= now.hour] or [0])
+    return now.replace(hour=h, minute=0, second=0, microsecond=0)
+
+
+def update_brief(result, old, now):
+    """정해진 시각이 바뀌었을 때만 새 브리핑을 쓰고, 그 사이에는 이전 브리핑을 그대로 둬요"""
+    slot = brief_slot(now).isoformat(timespec="minutes")
+    ob = old.get("brief") or {}
+    if ob.get("slot") == slot:
+        return ob, old.get("brief_hist") or [ob], old.get("_brief_snap") or []
+    prev_top = old.get("_brief_snap") or []               # 지난 브리핑 시각의 순위와 비교
+    brief, hist = make_brief(result, {"top": prev_top, "brief_hist": old.get("brief_hist")}, now)
+    brief["slot"] = slot
+    hist[0] = brief
+    snap = [{"keyword": it["keyword"], "title": it.get("title", "")} for it in result.get("top", [])[:10]]
+    return brief, hist, snap
+
+
+def make_brief(result, old, now):
+    name = lambda it: it.get("title") or it["keyword"]
+    top, lines = result.get("top", []), []
+    if top:
+        t = top[0]
+        lines.append({"icon": "🔥", "label": "지금 1위", "text": name(t), "sub": t.get("headline", ""),
+                      "k": t["keyword"]})
+    old_top = {it["keyword"] for it in (old.get("top") or [])[:10]}
+    new_in = [it for it in top[:10] if it["keyword"] not in old_top] if old_top else []
+    if new_in:
+        lines.append({"icon": "🆕", "label": "새로 10위 안에", "text": ", ".join(name(it) for it in new_in[:3]),
+                      "k": new_in[0]["keyword"]})
+    up = [it for it in top[:10] if isinstance(it.get("change"), int) and it["change"] >= 3]
+    up = [it for it in up if it not in new_in and it is not (top[0] if top else None)]
+    if up:
+        u = max(up, key=lambda it: it["change"])
+        lines.append({"icon": "⬆️", "label": "순위 급상승", "text": f"{name(u)} ({u['change']}계단 ▲)", "k": u["keyword"]})
+    r = (result.get("rising") or [None])[0]
+    if r:
+        how = f"3시간 전보다 {r['ratio']}배" if r.get("ratio") else "새로 등장"
+        lines.append({"icon": "📈", "label": "가장 빨리 뜨는 중", "text": f"{name(r)} ({how})", "k": r["keyword"]})
+    now_kw = {x["keyword"] for x in top[:10]}
+    gone = [it for it in (old.get("top") or [])[:5] if it["keyword"] not in now_kw]
+    if gone:
+        lines.append({"icon": "💤", "label": "관심이 식은 이슈", "text": ", ".join(name(it) for it in gone[:2])})
+    if result.get("search"):
+        lines.append({"icon": "🔎", "label": "검색 1위", "text": result["search"][0]["keyword"]})
+    b = (result.get("buzz") or {}).get("auto") or []
+    if b:
+        lines.append({"icon": "💬", "label": "커뮤니티 화제", "text": b[0]["title"], "link": b[0]["link"]})
+    brief = {"time": now.isoformat(timespec="minutes"), "lines": lines[:6]}
+    hist = [brief] + [x for x in (old.get("brief_hist") or []) if x.get("time", "") < brief["time"] and x.get("slot")]
+    return brief, hist[:BRIEF_KEEP]
+
+
+# ───────────── 날짜별 '오늘의 이슈' 기록 (seo.py 가 b/날짜.html 페이지로 만들어요) ─────────────
+DAILY_KEEP_DAYS = 60     # 며칠 치를 보관할지
+
+
+def update_daily(result, old, now):
+    daily = dict(old.get("_daily") or {})
+    day = now.strftime("%Y-%m-%d")
+    d = daily.get(day) or {"top": {}, "briefs": [], "runs": 0}
+    d["runs"] += 1
+    for i, it in enumerate(result.get("top", [])[:10]):
+        rec = d["top"].get(it["keyword"]) or {"title": it.get("title") or it["keyword"], "best": i + 1, "count": 0,
+                                              "headline": it.get("headline", ""), "cat": it.get("cat", "")}
+        rec["count"] += 1
+        if i + 1 <= rec["best"]:
+            rec["best"], rec["headline"] = i + 1, it.get("headline", "") or rec["headline"]
+        d["top"][it["keyword"]] = rec
+    b = result.get("brief")
+    if b and b.get("slot", "")[:10] == day and all(x.get("slot") != b["slot"] for x in d["briefs"]):
+        d["briefs"].append({"slot": b["slot"], "lines": b["lines"]})
+    d["last"] = now.isoformat(timespec="minutes")
+    daily[day] = d
+    for k in sorted(daily)[:-DAILY_KEEP_DAYS]:
+        daily.pop(k)
+    return daily
+
+
 # ───────────── 실행 ─────────────
 def main():
     now = datetime.now(KST)
@@ -1292,11 +1379,14 @@ def main():
     clean(result["top"]); clean(result["people"])
     for c in result["categories"].values():
         clean(c["issues"])
+    result["brief"], result["brief_hist"], result["_brief_snap"] = update_brief(result, old, now)
+    result["_daily"] = update_daily(result, old, now)
     # 검색 노출용: 직접 쓴 이슈 해설 페이지 + 사이트맵 + RSS (seo.py)
     try:
         import seo
         link_map, result["_explain"] = seo.build_all(details, old.get("_explain"),
-                                                     now.isoformat(timespec="minutes"), read_meme_dictionary())
+                                                     now.isoformat(timespec="minutes"), read_meme_dictionary(),
+                                                     result["_daily"])
         for kw, v in link_map.items():
             details["issues"][kw]["explain"] = v
         for g in [result["top"], result["rising"], result["people"]] + [c["issues"] for c in result["categories"].values()]:

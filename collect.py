@@ -738,6 +738,60 @@ def collect_community(now):
     return posts
 
 
+# ───────────── 커뮤니티 화제 (언론 보도로 거꾸로 찾기 + 운영자 직접 고른 것) ─────────────
+# 커뮤니티를 직접 긁지 않고, 기자들이 "커뮤니티에서 화제"라고 쓴 기사를 구글 뉴스 검색 RSS로 모아요.
+BUZZ_QUERIES = ['"온라인 커뮤니티" 화제', '누리꾼 갑론을박', '커뮤니티 갑론을박', '"온라인에서 화제"', '"누리꾼들" 반응']
+BUZZ_N = 10            # 화면에 보여 줄 자동 수집 개수
+BUZZ_PIN_DAYS = 7      # community.md 에 적은 항목을 며칠 동안 보여 줄지
+BUZZ_SKIP = ["사망", "숨져", "숨진", "살해", "자살", "극단적", "성폭", "성추행", "시신", "유족", "참사", "흉기"]
+
+
+def collect_buzz(cutoff):
+    """같은 이야기를 다룬 기사끼리 묶고, 여러 매체가 다룬 것부터 보여 줘요"""
+    arts = []
+    for a in collect_feeds([search(q) for q in BUZZ_QUERIES], cutoff).values():
+        if not any(w in a["title"] for w in BUZZ_SKIP):
+            arts.append(a)
+    groups = []                                            # [대표 기사, 단어 집합, 매체 집합, 기사 수]
+    for a in sorted(arts, key=lambda x: x["time"], reverse=True):
+        ws = set(keywords(a["title"])) - QUERY_WORDS - {"누리꾼", "커뮤니티", "온라인", "갑론을박", "화제", "반응"}
+        for g in groups:
+            if ws and g[1] and len(ws & g[1]) / min(len(ws), len(g[1])) >= 0.5:
+                g[2].add(a["source"]); g[3] += 1; g[1] |= ws
+                break
+        else:
+            groups.append([a, ws, {a["source"]}, 1])
+    groups.sort(key=lambda g: (len(g[2]), g[0]["time"]), reverse=True)
+    out = []
+    for a, _, srcs, n in groups[:BUZZ_N]:
+        out.append({"title": a["title"], "link": a["link"], "source": a["source"],
+                    "time": a["time"], "sources": len(srcs)})
+    print(f"[커뮤니티 화제] 기사 {len(arts)}건 → 이야기 {len(groups)}개")
+    return out
+
+
+def read_buzz_picks(now):
+    """community.md 에 운영자가 직접 적은 '커뮤니티 화제' (## 제목 / 설명: / 링크: / 날짜:)"""
+    path = ROOT / "community.md"
+    if not path.exists():
+        return []
+    since = (now - timedelta(days=BUZZ_PIN_DAYS)).strftime("%Y-%m-%d")
+    items = []
+    for block in re.split(r"^## ", path.read_text(encoding="utf-8"), flags=re.M)[1:]:
+        lines = block.strip().splitlines()
+        it = {"title": lines[0].strip(), "desc": "", "link": "", "date": ""}
+        for ln in lines[1:]:
+            m = re.match(r"^\s*(설명|링크|날짜)\s*[:：]\s*(.*)$", ln)
+            if m:
+                it[{"설명": "desc", "링크": "link", "날짜": "date"}[m.group(1)]] = m.group(2).strip()
+        if it["title"] and not it["title"].startswith("(") and it["date"] >= since:
+            if not it["link"].startswith("http"):
+                it["link"] = ""
+            items.append(it)
+    items.sort(key=lambda x: x["date"], reverse=True)
+    return items
+
+
 def datalab_check(words, state, now):
     """네이버 검색어 트렌드(NAVER API HUB)로 후보 단어의 최근 검색량 변화 확인. 키가 없으면 건너뜀.
     약관상 API 결과를 광고와 함께 화면에 보여주면 안 되므로, 결과는 순위 계산에만 쓰고 화면에는 내보내지 않음"""
@@ -1216,6 +1270,7 @@ def main():
     result["_nf"] = collect_netflix(old.get("_nf"), now)
 
     community = collect_community(now)
+    result["buzz"] = {"picks": read_buzz_picks(now), "auto": collect_buzz(cutoff)}
     memes, result["_meme"] = find_memes(vids, result["search"], articles, community, old.get("_meme"), now)
     result["_dl"] = datalab_check([m["word"] for m in memes[:10]], old.get("_dl"), now)
     # 네이버 검색량이 실제로 늘어난 단어를 위로 (결과 숫자 자체는 화면에 내보내지 않음)

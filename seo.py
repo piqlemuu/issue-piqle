@@ -92,8 +92,21 @@ def read_explains():
     return out
 
 
+def plain(t):
+    """검색 설명·미리보기처럼 형광펜을 쓸 수 없는 곳에서는 == 기호를 빼요"""
+    return (t or "").replace("==", "").replace("!!", "")
+
+
+def hl(escaped):
+    """==핵심 문장== 은 굵은 글씨+민트 밑줄, !!주의 문구!! 는 빨간 물결 밑줄로 바꿔요. 이미 e()로 감싼 글자에 써요."""
+    if "==" in escaped and "!!" in escaped:      # 한 문단에 강조는 하나만: 핵심 문장이 있으면 주의 표시는 빼요
+        escaped = escaped.replace("!!", "")
+    escaped = re.sub(r"==(.+?)==", r'<mark class="hl">\1</mark>', escaped)       # 핵심 문장
+    return re.sub(r"!!(.+?)!!", r'<mark class="warn">\1</mark>', escaped)          # 주의 문구 (과태료·마감일 등)
+
+
 def paras(text):
-    return "".join(f"<p>{e(p.strip())}</p>" for p in re.split(r"\n\s*\n", text) if p.strip())
+    return "".join(f"<p>{hl(e(p.strip()))}</p>" for p in re.split(r"\n\s*\n", text) if p.strip())
 
 
 def chart_svg(hist, temp):
@@ -173,7 +186,7 @@ def build_page(ex, snap, all_explains):
     date = ex["date"] or (snap or {}).get("first", "")[:10]
     updated = ex["updated"] or date
     summary = ex["summary"][:3]
-    desc = (" ".join(summary) or ex["what"])[:150]
+    desc = plain(" ".join(summary) or ex["what"])[:150]
     img = (snap or {}).get("img", "")
     ld = {"@context": "https://schema.org", "@graph": [
         {"@type": "Article", "headline": title[:110], "description": desc,
@@ -196,7 +209,7 @@ def build_page(ex, snap, all_explains):
             f'<h1>{e(title)}</h1>']
     if summary:
         body.append('<section class="box sum" aria-labelledby="h-sum"><h2 id="h-sum">3줄 요약</h2><ul>'
-                    + "".join(f"<li>{e(s)}</li>" for s in summary) + "</ul></section>")
+                    + "".join(f"<li>{hl(e(s))}</li>" for s in summary) + "</ul></section>")
     art = []
     for key, head_txt in (("what", "무슨 일이야?"), ("why", "왜 화제야?"), ("next", "앞으로 볼 점")):
         if ex[key]:
@@ -244,7 +257,7 @@ def build_index(explains):
     head = HEAD.format(title="이슈 해설 모아 보기 | 이슈피클", desc="요즘 화제가 된 이슈를 무슨 일인지, 왜 화제인지 짧게 정리한 이슈피클 해설 모음이에요.",
                        url=url, ogtitle="이슈피클 이슈 해설", ogimg=e(OG_IMG), ld=json.dumps(ld, ensure_ascii=False))
     items = "".join(f'<li><a href="{e(slug(x["title"]))}.html"><span><span class="tt">{e(x["title"])}</span>'
-                    f'<small>{e(x["date"].replace("-", "."))} · {e((x["summary"] or [x["what"]])[0][:60])}</small></span></a></li>'
+                    f'<small>{e(x["date"].replace("-", "."))} · {e(plain((x["summary"] or [x["what"]])[0])[:60])}</small></span></a></li>'
                     for x in explains)
     return head + ('<a class="back" href="../index.html">‹ 홈으로</a><h1>이슈 해설</h1>'
                    '<p class="note">요즘 화제가 된 이슈를 새콤기자가 짧게 정리했어요.</p>'
@@ -300,7 +313,7 @@ def build_day(day, rec, day_explains, prev_day, next_day, now_iso):
     if day_explains:
         items = "".join(
             f'<li><a href="../i/{e(slug(x["title"]))}.html"><span><span class="tt">{e(x["title"])}</span>'
-            f'<small>{e((x["summary"] or [x["what"]])[0][:90])}</small></span></a></li>' for x in day_explains)
+            f'<small>{e(plain((x["summary"] or [x["what"]])[0])[:90])}</small></span></a></li>' for x in day_explains)
         body.append('<section class="sec"><div class="sec-head"><div><h2>📝 새콤기자 해설</h2><p>이날 화제가 된 이슈를 직접 정리했어요</p></div></div>'
                     f'<div class="box"><ul class="nlist">{items}</ul></div></section>')
     if tops:
@@ -351,6 +364,138 @@ def build_days(daily, explains, now_iso):
     return good
 
 
+# ───────────── 이번 달 달라지는 것 (calendar.md → m/2026-11.html) ─────────────
+CAL_FILE = ROOT / "calendar.md"
+MON_DIR = SITE / "m"
+CAL_MIN_INDEX = 3   # 이 개수 이상 적힌 달만 검색에 내보내요
+CAL_FIELDS = {"날짜": "date", "분류": "cat", "대상": "who", "내용": "body", "출처": "source"}
+
+
+def read_calendar():
+    if not CAL_FILE.exists():
+        return []
+    out = []
+    for block in re.split(r"^##\s+", CAL_FILE.read_text(encoding="utf-8"), flags=re.M)[1:]:
+        lines = block.splitlines()
+        it = {"title": lines[0].strip(), "date": "", "cat": "", "who": "", "body": "", "source": []}
+        cur = None
+        for ln in lines[1:]:
+            m = re.match(r"^\s*(날짜|분류|대상|내용|출처)\s*[:：]\s*(.*)$", ln)
+            if m:
+                cur, val = CAL_FIELDS[m.group(1)], m.group(2).strip()
+                if cur == "source":
+                    name, _, link = val.partition("|")
+                    if link.strip().startswith("http"):
+                        it["source"].append({"name": name.strip(), "link": link.strip()})
+                else:
+                    it[cur] = val
+            elif cur == "body" and ln.strip():
+                it["body"] += " " + ln.strip()
+        it["date"] = (re.match(r"\d{4}-\d{2}(-\d{2})?", it["date"]) or [""])[0]
+        blob = " ".join([it["title"], it["who"], it["body"]])
+        if "[확인 필요" in blob:
+            print(f"[달력] '{it['title']}' 에 [확인 필요] 가 남아 있어서 올리지 않았어요.")
+            continue
+        if it["title"] and it["date"] and it["body"] and not it["title"].startswith("("):
+            out.append(it)
+    out.sort(key=lambda x: (x["date"][:7], x["date"] if len(x["date"]) == 10 else x["date"] + "-99"))
+    return out
+
+
+def cal_when(it, today):
+    """날짜 표시와 D-day 글자"""
+    d = it["date"]
+    if len(d) == 7:
+        return f"{int(d[5:])}월 중", "이달 중"
+    dt = datetime.strptime(d, "%Y-%m-%d")
+    left = (dt.date() - datetime.strptime(today, "%Y-%m-%d").date()).days
+    label = f"{dt.month}월 {dt.day}일 ({WEEK[dt.weekday()]})"
+    return label, ("오늘" if left == 0 else f"D-{left}" if left > 0 else "시행 중")
+
+
+def calendar_home(today, n=5):
+    """첫 화면용: 오늘 이후 일정 먼저, 남으면 이번 달 지난 일정"""
+    items = read_calendar()
+    month = today[:7]
+    up = [x for x in items if (len(x["date"]) == 10 and x["date"] >= today) or (len(x["date"]) == 7 and x["date"] == month)]
+    past = [x for x in items if len(x["date"]) == 10 and x["date"][:7] == month and x["date"] < today]
+    out = []
+    for it in (up + list(reversed(past)))[:n]:
+        when, dd = cal_when(it, today)
+        out.append({"title": it["title"], "when": when, "dday": dd, "cat": it["cat"], "month": it["date"][:7],
+                    "anchor": slug(it["title"])})
+    return out
+
+
+def who_html(x):
+    return f'<p class="who">대상: {e(x["who"])}</p>' if x["who"] else ""
+
+
+def build_months(today):
+    items = read_calendar()
+    MON_DIR.mkdir(parents=True, exist_ok=True)
+    months = sorted({x["date"][:7] for x in items})
+    for i, mon in enumerate(months):
+        y, m = int(mon[:4]), int(mon[5:])
+        its = [x for x in items if x["date"][:7] == mon]
+        url = SITE_URL + f"m/{mon}.html"
+        title = f"{y}년 {m}월 달라지는 것 총정리"
+        lead = plain(f"{y}년 {m}월에 시행되거나 바뀌는 생활 제도와 일정 {len(its)}가지를 날짜순으로 정리했어요. "
+                + " · ".join(x["title"] for x in its[:3]) + (" 등" if len(its) > 3 else "") + ".")
+        ld = {"@context": "https://schema.org", "@graph": [
+            {"@type": "Article", "headline": title, "description": lead[:150], "inLanguage": "ko",
+             "datePublished": f"{mon}-01", "dateModified": today, "image": OG_IMG, "mainEntityOfPage": url,
+             "author": {"@type": "Person", "name": "새콤기자", "url": SITE_URL + "about.html"},
+             "publisher": {"@type": "Organization", "name": SITE_NAME, "url": SITE_URL}},
+            {"@type": "ItemList", "itemListElement": [
+                {"@type": "ListItem", "position": k + 1, "name": f'{cal_when(x, today)[0]} {x["title"]}'} for k, x in enumerate(its)]}]}
+        head = HEAD.format(title=e(f"{title} — 날짜별 시행일 정리 | 이슈피클"), desc=e(lead[:150]), url=e(url),
+                           ogtitle=e(f"{title} — 이슈피클"), ogimg=e(OG_IMG),
+                           ld=json.dumps(ld, ensure_ascii=False).replace("</", "<\\/"))
+        if len(its) < CAL_MIN_INDEX:      # 일정이 너무 적은 달은 검색에 내보내지 않아요 (얕은 페이지 방지)
+            head = head.replace("<title>", '<meta name="robots" content="noindex,follow">\n<title>', 1)
+        head = head.replace("</style>",
+            ".ex .cal{list-style:none;margin:0;padding:0}.ex .cal>li{padding:1rem;border-top:1px solid var(--line)}.ex .cal>li:first-child{border-top:0}"
+            ".ex .cal .d{display:flex;align-items:center;gap:.5rem;font-size:.875rem;color:var(--sub);font-weight:600}"
+            ".ex .cal .dd{font-size:.75rem;font-weight:700;padding:.0625rem .4375rem;border-radius:999px;background:var(--soft);color:var(--text)}"
+            ".ex .cal .dd.on{background:var(--logo);color:#fff}"
+            ".ex .cal h2{font-size:1.0625rem;font-weight:700;margin:.375rem 0 .25rem;line-height:1.45}"
+            ".ex .cal p{margin:.25rem 0;line-height:1.7;font-size:.9375rem}.ex .cal .who{color:var(--sub);font-size:.875rem}"
+            ".ex .cal .src{margin:.375rem 0 0;padding-left:1.1rem;font-size:.8125rem}.ex .cal .src a{color:var(--sub);text-decoration:underline}"
+            ".ex .dnav{display:flex;justify-content:space-between;gap:.5rem;margin-top:1rem}.ex .dnav a{color:var(--sub);font-size:.875rem;font-weight:600}</style>", 1)
+        rows = []
+        for x in its:
+            when, dd = cal_when(x, today)
+            src = "".join(f'<li><a href="{e(s["link"])}" target="_blank" rel="noopener nofollow">{e(s["name"] or s["link"])}</a></li>' for s in x["source"])
+            rows.append(f'<li id="{e(slug(x["title"]))}"><div class="d">{e(when)}<span class="dd{" on" if dd.startswith("D-") or dd == "오늘" else ""}">{e(dd)}</span>'
+                        f'{"<span>· " + e(x["cat"]) + "</span>" if x["cat"] else ""}</div>'
+                        f'<h2>{e(x["title"])}</h2>{who_html(x)}'
+                        f'<p>{hl(e(x["body"]))}</p>{f"<ol class=src>{src}</ol>" if src else ""}</li>')
+        body = ['<a class="back" href="../index.html">‹ 홈으로</a>',
+                f'<p class="crumb">이번 달 달라지는 것 · {today.replace("-", ".")} 기준</p>',
+                f"<h1>{e(title)}</h1>",
+                f'<p class="note" style="margin-top:.5rem;font-size:.9375rem;line-height:1.7">{e(lead)}</p>',
+                f'<div class="box" style="margin-top:.875rem"><ul class="cal">{"".join(rows)}</ul></div>',
+                '<p class="note" style="margin-top:.75rem">공식 발표와 언론 보도를 2곳 이상 확인해 새콤기자가 정리했어요. 세부 조건은 출처와 담당 기관 안내를 꼭 확인하세요.</p>']
+        prev_m, next_m = (months[i - 1] if i else None), (months[i + 1] if i + 1 < len(months) else None)
+        nav = '<nav class="dnav" aria-label="다른 달">'
+        nav += f'<a href="{prev_m}.html">‹ {int(prev_m[5:])}월</a>' if prev_m else "<span></span>"
+        nav += '<a href="index.html">월별 모아 보기</a>'
+        nav += f'<a href="{next_m}.html">{int(next_m[5:])}월 ›</a>' if next_m else "<span></span>"
+        body.append(nav + "</nav>")
+        (MON_DIR / f"{mon}.html").write_text(head + "\n".join(body) + FOOT, encoding="utf-8")
+    url = SITE_URL + "m/"
+    ld = {"@context": "https://schema.org", "@type": "CollectionPage", "name": "월별 달라지는 것", "url": url}
+    head = HEAD.format(title="월별 달라지는 것 모아 보기 | 이슈피클", desc="달마다 시행되거나 바뀌는 생활 제도와 일정을 날짜순으로 정리했어요.",
+                       url=url, ogtitle="월별 달라지는 것 — 이슈피클", ogimg=e(OG_IMG), ld=json.dumps(ld, ensure_ascii=False))
+    lis = "".join(f'<li><a href="{mm}.html"><span><span class="tt">{int(mm[:4])}년 {int(mm[5:])}월 달라지는 것</span>'
+                  f'<small>{sum(1 for x in items if x["date"][:7] == mm)}가지</small></span></a></li>' for mm in reversed(months))
+    (MON_DIR / "index.html").write_text(head + '<a class="back" href="../index.html">‹ 홈으로</a><h1>월별 달라지는 것</h1>'
+        f'<div class="box" style="margin-top:.75rem"><ul class="nlist">{lis or "<li class=state>아직 정리한 달이 없어요.</li>"}</ul></div>' + FOOT,
+        encoding="utf-8")
+    return [mm for mm in months if sum(1 for x in items if x["date"][:7] == mm) >= CAL_MIN_INDEX]
+
+
 def build_all(details, old_snaps, now_iso, memes_dict, daily=None):
     """해설 페이지·sitemap·rss 를 만들고, 이슈→해설 주소 지도와 스냅숏을 돌려줘요."""
     explains = sorted(read_explains(), key=lambda x: x["date"], reverse=True)
@@ -366,13 +511,14 @@ def build_all(details, old_snaps, now_iso, memes_dict, daily=None):
                         "articles": cur.get("articles"), "hist": cur.get("hist"), "news": cur.get("news", [])[:8],
                         "cat": (cur.get("cat") or {}).get("name", ""), "img": cur.get("img", ""),
                         "first": snaps.get(s, {}).get("first", now_iso)}
-            link_map[ex["keyword"]] = {"url": page_path(ex["title"]), "summary": ex["summary"][:3]}
+            link_map[ex["keyword"]] = {"url": page_path(ex["title"]), "summary": [plain(x) for x in ex["summary"][:3]]}
         snap = dict(snaps.get(s) or {})
         if snap:
             snap["live"] = bool(cur)
         (OUT_DIR / f"{s}.html").write_text(build_page(ex, snap or None, explains), encoding="utf-8")
     (OUT_DIR / "index.html").write_text(build_index(explains), encoding="utf-8")
     good_days = build_days(daily, explains, now_iso)
+    months = build_months(now_iso[:10])
     keep = {slug(x["title"]) for x in explains}
     snaps = {k: v for k, v in snaps.items() if k in keep}
 
@@ -386,6 +532,9 @@ def build_all(details, old_snaps, now_iso, memes_dict, daily=None):
     urls += [(page_url(x["title"]), x["updated"] or x["date"] or None, "weekly", "0.8") for x in explains]
     if good_days:
         urls.append((SITE_URL + "b/", good_days[-1], "daily", "0.7"))
+    if months:
+        urls.append((SITE_URL + "m/", now_iso[:10], "weekly", "0.8"))
+        urls += [(SITE_URL + f"m/{mm}.html", now_iso[:10], "weekly", "0.8") for mm in months]
     urls += [(SITE_URL + f"b/{d}.html", d, "monthly", "0.6") for d in good_days]
     sm = ['<?xml version="1.0" encoding="UTF-8"?>', '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">']
     for loc, lm, fq, pr in urls:
@@ -394,7 +543,7 @@ def build_all(details, old_snaps, now_iso, memes_dict, daily=None):
     (SITE / "sitemap.xml").write_text("\n".join(sm) + "\n", encoding="utf-8")
 
     # rss: 해설 + 밈절임 글
-    feed = [(x["date"], x["title"] + " — 이슈피클 해설", page_url(x["title"]), " ".join(x["summary"]) or x["what"][:200]) for x in explains]
+    feed = [(x["date"], x["title"] + " — 이슈피클 해설", page_url(x["title"]), plain(" ".join(x["summary"]) or x["what"][:200])) for x in explains]
     feed += [(m.get("date", ""), m["word"] + " — 밈절임", SITE_URL + m["page"], m.get("meaning", "")) for m in memes_pages]
     feed = sorted([f for f in feed if f[0]], reverse=True)[:30]
     items = []

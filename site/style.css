@@ -64,7 +64,7 @@ html[data-theme=dark] :focus-visible{outline-color:#9fc0ff}
 .icon-btn{width:2.75rem;height:2.75rem;display:inline-flex;align-items:center;justify-content:center;border:0;background:none;border-radius:50%;cursor:pointer;color:var(--text);margin-right:-.5rem}
 .icon-btn:hover{background:var(--soft)}
 .icon-btn svg{width:1.375rem;height:1.375rem;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
-.status{text-align:right;color:var(--sub);font-size:.8125rem;line-height:1.5;margin:.75rem 0 0;font-variant-numeric:tabular-nums}
+.status{text-align:left;color:var(--sub);font-size:.8125rem;line-height:1.5;margin:.75rem 0 0;font-variant-numeric:tabular-nums}
 .dot{display:inline-block;width:.5rem;height:.5rem;border-radius:50%;background:var(--live);margin-right:.375rem;vertical-align:.08em}
 
 /* ── 화면 설정 ── */
@@ -314,7 +314,7 @@ html[data-theme=dark] .doc a{color:#9fc0ff}
 .bhead h2{font-size:1.0625rem;font-weight:700}
 .bhead span{color:var(--sub);font-size:.8125rem}
 .blist{list-style:none;margin:0;padding:0}
-.blist li>a,.blist li>div{display:grid;grid-template-columns:7rem minmax(0,1fr);column-gap:.5rem;padding:.4375rem 0;border-top:1px solid var(--line);color:var(--text)}
+.blist li>a,.blist li>div{display:grid;grid-template-columns:4.75rem minmax(0,1fr);column-gap:.5rem;padding:.4375rem 0;border-top:1px solid var(--line);color:var(--text)}
 .blist li:first-child>a,.blist li:first-child>div{border-top:0}
 .blist a:hover b{text-decoration:underline}
 .blist .bl{color:var(--sub);font-size:.8125rem;line-height:1.6;white-space:nowrap}
@@ -327,5 +327,33 @@ html[data-theme=dark] .doc a{color:#9fc0ff}
 html[data-fs=l] .blist li>a,html[data-fs=l] .blist li>div,html[data-fs=xl] .blist li>a,html[data-fs=xl] .blist li>div{grid-template-columns:1fr}
 html[data-fs=l] .blist small,html[data-fs=xl] .blist small{grid-column:1}
 .bday{display:block;margin-top:.5rem;padding-top:.5rem;border-top:1px solid var(--line);font-size:.875rem;font-weight:600;color:var(--logo)}
-.intro{margin:.875rem 0 0;font-size:.9375rem;line-height:1.5;color:var(--text)}
+.intro{margin:.875rem 0 0;font-size:.875rem;line-height:1.5;color:var(--sub)}.intro b{color:var(--text);font-weight:600}
 .intro+.status{margin-top:.25rem}
+
+/* 순위 한 줄을 촘촘하게 (첫 화면에 4~5개 보이게) */
+.row .l1{display:flex;align-items:center;gap:.375rem;min-width:0;white-space:nowrap}
+.row .l1 .kw{min-width:0;overflow:hidden;text-overflow:ellipsis}
+.row .l1 .lbl,.row .l1 .chg{flex:0 0 auto;margin:0;vertical-align:0}
+.row .l1 .lbl.cat{margin-right:0}
+.row .meta{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.row .meta .nw{white-space:nowrap}
+@media (max-width:47.99rem){
+  .row{gap:.625rem;padding:.75rem .875rem}
+  .row.has-img{grid-template-columns:1.5rem 3.5rem minmax(0,1fr) auto}
+  .row .th{width:3.5rem;aspect-ratio:1/1}
+  .row .end{min-width:2.75rem}
+  .row .l1 .lbl.cat{display:none}          /* 좁은 화면에선 분야를 아래 회색 줄로 내려서 이슈 이름 칸을 넓혀요 */
+}
+.row .mc{display:none}
+@media (max-width:47.99rem){.row .mc{display:inline}}
+/* 브리핑 이름표: 이모지 대신 작은 점 */
+.blist .bl{display:flex;align-items:center;gap:.375rem}
+.blist .bl::before{content:"";width:.375rem;height:.375rem;border-radius:50%;background:var(--logo);flex:0 0 auto}
+@media (max-width:47.99rem){
+  .rcard{padding:.75rem .875rem;gap:.625rem}
+  .rcard.has-img{grid-template-columns:3.5rem minmax(0,1fr) auto}
+  .rcard .th{width:3.5rem;aspect-ratio:1/1}
+  .rcard .kw{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .rcard .kw .lbl.cat{display:none}
+  .rcard .hl{-webkit-line-clamp:1}
+}

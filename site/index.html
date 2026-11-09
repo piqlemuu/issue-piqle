@@ -165,9 +165,9 @@ function korNum(n) {
   return Number(n).toLocaleString("ko-KR");
 }
 function chg(c) {                                   // 순위 변동: 화살표 + 숫자
-  if (c === "new") return ' <span class="lbl new">NEW</span>';
-  if (c > 0) return ` <span class="chg up"><span class="sr">순위 </span>▲${c}<span class="sr">계단 상승</span></span>`;
-  if (c < 0) return ` <span class="chg down"><span class="sr">순위 </span>▼${-c}<span class="sr">계단 하락</span></span>`;
+  if (c === "new") return '<span class="lbl new">NEW</span>';
+  if (c > 0) return `<span class="chg up"><span class="sr">순위 </span>▲${c}<span class="sr">계단 상승</span></span>`;
+  if (c < 0) return `<span class="chg down"><span class="sr">순위 </span>▼${-c}<span class="sr">계단 하락</span></span>`;
   return "";
 }
 function findThumb(word) {                          // 관련 유튜브 썸네일 (뉴스 사진은 저작권 때문에 안 써요)
@@ -186,12 +186,12 @@ function stateMsg(kind, colspan) {                  // 데이터 없음과 불�
 // ── 순위 한 줄 ──
 function row(it, i, opt = {}) {
   const latest = it.news?.[0]?.time;
-  const meta = opt.meta ?? M(`매체 ${it.sources}곳`, `기사 ${it.articles}건`, latest ? ago(latest) : "");
+  const meta = opt.meta ?? ((!opt.noCat && it.cat ? `<span class="mc">${esc(it.cat)} · </span>` : "") + M(`매체 ${it.sources}곳`, latest ? ago(latest) : ""));
   const th = opt.thumb ? (it.img || findThumb(it.keyword)) : "";
   return `<li><a class="row ${th ? "has-img" : ""}" href="${issueLink(it.keyword)}">
     <span class="rank">${i}</span>
     ${th ? `<img class="th" src="${esc(th)}" alt="" loading="lazy" referrerpolicy="no-referrer" decoding="async" width="74" height="51" onerror="this.parentNode.classList.remove('has-img');this.remove()">` : ""}
-    <span class="mid">${!opt.noCat ? catLbl(it.cat) : ""}<span class="kw">${esc(opt.useKw ? it.keyword : (it.title || it.keyword))}</span>${opt.noChg ? "" : chg(it.change)}${it.explain ? '<span class="lbl ex">해설</span>' : ""}
+    <span class="mid"><span class="l1">${!opt.noCat ? catLbl(it.cat) : ""}<span class="kw">${esc(opt.useKw ? it.keyword : (it.title || it.keyword))}</span>${opt.noChg ? "" : chg(it.change)}${it.explain ? '<span class="lbl ex">해설</span>' : ""}</span>
       ${it.headline ? `<span class="hl">${esc(it.headline)}</span>` : ""}
       <span class="meta">${meta}</span></span>
     <span class="end">${opt.end ?? `<b class="${tempLv(it.temp)}">${it.temp}°</b><small>${tempWord(it.temp)}</small>`}</span>
@@ -265,7 +265,9 @@ function renderSearch() {
 // ── 브리핑 ──
 function briefLines(lines, small) {
   return lines.map(l => {
-    const body = `<span class="bl">${l.icon} ${esc(l.label)}</span><b>${esc(l.text)}</b>${!small && l.sub ? `<small>${esc(l.sub)}</small>` : ""}`;
+    const SHORT = {"지금 1위": "지금 1위", "새로 10위 안에": "새로 진입", "순위 급상승": "순위 상승", "가장 빨리 뜨는 중": "급부상",
+                   "관심이 식은 이슈": "관심 하락", "검색 1위": "검색 1위", "커뮤니티 화제": "커뮤니티"};
+    const body = `<span class="bl">${esc(SHORT[l.label] || l.label)}</span><b>${esc(l.text)}</b>${!small && l.sub ? `<small>${esc(l.sub)}</small>` : ""}`;
     if (l.k) return `<li><a href="${issueLink(l.k)}">${body}</a></li>`;
     if (l.link) return `<li><a href="${esc(url(l.link))}" target="_blank" rel="noopener nofollow">${body}</a></li>`;
     return `<li><div>${body}</div></li>`;

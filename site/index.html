@@ -183,8 +183,10 @@ function stateMsg(kind, colspan) {                  // 데이터 없음과 불�
 function row(it, i, opt = {}) {
   const latest = it.news?.[0]?.time;
   const meta = opt.meta ?? M(`매체 ${it.sources}곳`, `기사 ${it.articles}건`, latest ? ago(latest) : "");
-  return `<li><a class="row" href="${issueLink(it.keyword)}">
+  const th = opt.thumb ? (it.img || findThumb(it.keyword)) : "";
+  return `<li><a class="row ${th ? "has-img" : ""}" href="${issueLink(it.keyword)}">
     <span class="rank">${i}</span>
+    ${th ? `<img class="th" src="${esc(th)}" alt="" loading="lazy" referrerpolicy="no-referrer" decoding="async" width="74" height="51" onerror="this.parentNode.classList.remove('has-img');this.remove()">` : ""}
     <span class="mid">${!opt.noCat ? catLbl(it.cat) : ""}<span class="kw">${esc(opt.useKw ? it.keyword : (it.title || it.keyword))}</span>${opt.noChg ? "" : chg(it.change)}${it.explain ? '<span class="lbl ex">해설</span>' : ""}
       ${it.headline ? `<span class="hl">${esc(it.headline)}</span>` : ""}
       <span class="meta">${meta}</span></span>
@@ -194,7 +196,7 @@ function row(it, i, opt = {}) {
 
 function renderTop() {
   const list = DATA?.top || [];
-  $("top").innerHTML = list.length ? (topOpen ? list : list.slice(0, 5)).map((it, i) => row(it, i + 1)).join("") : stateMsg("이슈");
+  $("top").innerHTML = list.length ? (topOpen ? list : list.slice(0, 5)).map((it, i) => row(it, i + 1, {thumb: true})).join("") : stateMsg("이슈");
   $("top-more").hidden = list.length <= 5;
   $("top-more").setAttribute("aria-expanded", topOpen);
   $("top-more").textContent = topOpen ? "접기" : `실시간 이슈 ${list.length}위까지 더 보기`;

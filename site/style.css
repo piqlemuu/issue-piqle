@@ -100,6 +100,8 @@ a.row:hover{background:var(--soft)}
 .rlist>li:last-child .row{border-radius:0 0 var(--r-card) var(--r-card)}
 .row .rank{font-size:1.0625rem;font-weight:700;line-height:1.5;font-variant-numeric:tabular-nums;text-align:center}
 .row .mid{min-width:0}
+.row.has-img{grid-template-columns:1.75rem 4.625rem minmax(0,1fr) auto;align-items:center}
+.row .th{width:4.625rem;aspect-ratio:16/11;border-radius:var(--r-thumb);object-fit:cover;object-position:center 30%;background:var(--soft);display:block}
 .row .kw{display:inline;font-size:1rem;font-weight:700;line-height:1.45;letter-spacing:-.02em}
 .row .hl{font-size:.9375rem;margin-top:.125rem;font-weight:400;line-height:1.55;margin-top:.125rem;display:-webkit-box;-webkit-line-clamp:1;-webkit-box-orient:vertical;overflow:hidden}
 .row .meta{display:block;color:var(--sub);font-size:.8125rem;line-height:1.5;margin-top:.25rem;font-variant-numeric:tabular-nums}
@@ -299,6 +301,8 @@ html[data-theme=dark] .doc a{color:#9fc0ff}
   .vc{flex-basis:15rem}
   .rcard.has-img{grid-template-columns:6rem minmax(0,1fr) auto}
   .rcard .th{width:6rem}
+  .row.has-img{grid-template-columns:1.75rem 6rem minmax(0,1fr) auto}
+  .row .th{width:6rem}
 }
 @media (prefers-reduced-motion:reduce){
   *{scroll-behavior:auto!important;animation:none!important;transition:none!important}

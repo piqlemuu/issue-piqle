@@ -358,7 +358,3 @@ html[data-fs=l] .blist small,html[data-fs=xl] .blist small{grid-column:1}
   .rcard .hl{-webkit-line-clamp:1}
 }
 #cal .row{grid-template-columns:2.75rem minmax(0,1fr) auto}#cal .rank{white-space:nowrap;text-align:left}
-/* 강조 표시: ==핵심 문장== 은 굵게 + 민트 두꺼운 밑줄, !!주의 문구!! 는 얇은 빨간 바닥 띠 (한 문단에 하나만) */
-mark.hl{background:none;color:inherit;font-weight:700;text-decoration:underline;text-decoration-color:#B9F2E0;text-decoration-thickness:.375em;text-underline-offset:-.125em;text-decoration-skip-ink:none}
-html[data-theme=dark] mark.hl{text-decoration-color:rgba(185,242,224,.45)}
-mark.warn{background:linear-gradient(transparent 84%,rgba(229,72,77,.55) 84%);color:inherit;padding:0 .0625rem;-webkit-box-decoration-break:clone;box-decoration-break:clone}

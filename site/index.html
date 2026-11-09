@@ -73,6 +73,13 @@
     <div class="cards" id="rising"></div>
   </section>
 
+  <!-- ⑤-2 이번 달 달라지는 것 (calendar.md) -->
+  <section class="sec" id="sec-cal" aria-labelledby="h-cal" hidden>
+    <div class="sec-head"><div><h2 id="h-cal">📅 다가오는 생활 일정</h2><p>이번 달 시행되거나 바뀌는 제도와 일정이에요</p></div></div>
+    <div class="box"><ol class="rlist" id="cal"></ol></div>
+    <a class="more" id="cal-more" href="m/">월별 달라지는 것 전체 보기 ›</a>
+  </section>
+
   <!-- ▼ [광고 설정 2] 첫 번째 광고: 애드센스 광고 단위 코드를 이 div 안에 붙여넣으세요 -->
   <div class="ad-slot" id="ad-1"></div>
 
@@ -296,6 +303,18 @@ function renderBrief() {
   $("bprev-list").innerHTML = prev.map(x => `<p class="bt">${new Date(x.slot || x.time).getHours()}시 브리핑</p><ul class="blist sm">${briefLines(x.lines, true)}</ul>`).join("");
 }
 
+// ── 다가오는 생활 일정 ──
+function renderCal() {
+  const c = DATA?.calendar || [];
+  $("sec-cal").hidden = !c.length;
+  if (!c.length) return;
+  $("cal").innerHTML = c.map(it => `<li><a class="row" href="m/${esc(it.month)}.html#${encodeURIComponent(it.anchor || "")}">
+      <span class="rank" style="font-size:.8125rem;line-height:1.4;font-weight:700">${/중$/.test(it.when) ? "이달" : esc(it.when.replace(/ \(.\)$/, "").replace("월 ", "/").replace("일", ""))}</span>
+      <span class="mid"><span class="l1"><span class="kw">${esc(it.title)}</span></span>
+        <span class="meta">${M(esc(it.when), esc(it.cat || ""))}</span></span>
+      <span class="end"><b class="${/^D-[0-7]$|오늘/.test(it.dday) ? "lv4" : ""}">${esc(it.dday)}</b></span></a></li>`).join("");
+}
+
 // ── 커뮤니티 화제 ──
 // [제보 버튼] 구글 설문지 주소를 따옴표 안에 넣으면 '제보하기' 버튼이 나타나요
 const REPORT_URL = "";
@@ -361,7 +380,7 @@ function renderMemes() {
 }
 
 function render() {
-  renderBrief(); renderTop(); renderRising(); renderCats(); renderPeople(); renderBuzz(); renderSearch(); renderWiki(); renderVideos(); renderMemes();
+  renderBrief(); renderTop(); renderRising(); renderCal(); renderCats(); renderPeople(); renderBuzz(); renderSearch(); renderWiki(); renderVideos(); renderMemes();
 }
 
 async function loadExtra() {                       // 썸네일 찾기용 영상 목록 + 밈절임

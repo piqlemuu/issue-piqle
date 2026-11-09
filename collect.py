@@ -111,7 +111,7 @@ STOPWORDS = set("""
 이유 방법 모습 의미 효과 영향 우려 가운데 사이 직후 직전 당일 연속 이틀 사흘 매년 처음
 청년 시민 주민 학생 아이 부모 노인 어린이 가족 남성 여성 국민들 업계 기업 회사 단체
 씨 등 것 수 때 중
-""".split())
+ quot amp nbsp apos lt gt QUOT AMP NBSP APOS LT GT""".split())
 
 # 이슈人: 이 단어 바로 앞(또는 뒤)에 붙은 2~4글자를 사람 이름으로 봅니다.
 TITLES_AFTER = set("""
@@ -169,7 +169,12 @@ def child(el, name):
 
 def text(el, name):
     c = child(el, name)
-    return (c.text or "").strip() if c is not None else ""
+    if c is None or not c.text:
+        return ""
+    t = c.text
+    for _ in range(2):                    # 일부 언론사 RSS는 &amp;quot; 처럼 두 번 감싸서 보내요 → 진짜 글자로 풀기
+        t = htmllib.unescape(t)
+    return re.sub(r"\s+", " ", t.replace("\xa0", " ")).strip()
 
 
 # ───────────── 뉴스 ─────────────

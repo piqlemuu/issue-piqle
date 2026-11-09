@@ -307,3 +307,23 @@ html[data-theme=dark] .doc a{color:#9fc0ff}
 @media (prefers-reduced-motion:reduce){
   *{scroll-behavior:auto!important;animation:none!important;transition:none!important}
 }
+
+/* 브리핑 (첫 화면 맨 위) */
+.brief{margin-top:.75rem;background:var(--card);border:1px solid var(--line);border-left:4px solid var(--logo);border-radius:var(--r-card);box-shadow:var(--shadow);padding:.875rem 1rem}
+.bhead{display:flex;flex-wrap:wrap;align-items:baseline;gap:.25rem .625rem;margin-bottom:.375rem}
+.bhead h2{font-size:1.0625rem;font-weight:700}
+.bhead span{color:var(--sub);font-size:.8125rem}
+.blist{list-style:none;margin:0;padding:0}
+.blist li>a,.blist li>div{display:grid;grid-template-columns:7rem minmax(0,1fr);column-gap:.5rem;padding:.4375rem 0;border-top:1px solid var(--line);color:var(--text)}
+.blist li:first-child>a,.blist li:first-child>div{border-top:0}
+.blist a:hover b{text-decoration:underline}
+.blist .bl{color:var(--sub);font-size:.8125rem;line-height:1.6;white-space:nowrap}
+.blist b{font-size:.9375rem;font-weight:600;line-height:1.5;min-width:0;overflow:hidden;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical}
+.blist small{grid-column:2;color:var(--sub);font-size:.8125rem;line-height:1.45;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.blist.sm b{font-size:.875rem;font-weight:500}
+.bprev{margin-top:.375rem;border-top:1px solid var(--line);padding-top:.5rem}
+.bprev summary{cursor:pointer;color:var(--sub);font-size:.8125rem;font-weight:600}
+.bprev .bt{margin:.625rem 0 .125rem;font-size:.8125rem;font-weight:700;color:var(--sub)}
+html[data-fs=l] .blist li>a,html[data-fs=l] .blist li>div,html[data-fs=xl] .blist li>a,html[data-fs=xl] .blist li>div{grid-template-columns:1fr}
+html[data-fs=l] .blist small,html[data-fs=xl] .blist small{grid-column:1}
+.bday{display:block;margin-top:.5rem;padding-top:.5rem;border-top:1px solid var(--line);font-size:.875rem;font-weight:600;color:var(--logo)}

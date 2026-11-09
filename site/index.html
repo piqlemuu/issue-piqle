@@ -37,6 +37,14 @@
   <p class="status" id="status"><i class="dot" aria-hidden="true"></i><span id="updated">불러오는 중…</span></p>
   <div class="alert" id="alert" role="alert" hidden><span>데이터를 불러오지 못했어요. 인터넷 연결을 확인해 주세요.</span><button id="retry">다시 시도</button></div>
 
+  <!-- ②-2 브리핑: 1시간마다 바뀐 점만 몇 줄로 -->
+  <section class="brief" id="brief" aria-labelledby="h-brief" hidden>
+    <div class="bhead"><h2 id="h-brief">브리핑</h2><span id="brief-sub">3시간마다 바뀐 점만 정리해요</span></div>
+    <ul class="blist" id="blist"></ul>
+    <a class="bday" id="bday" hidden>📅 오늘 하루 이슈 정리 보기 ›</a>
+    <details class="bprev" id="bprev" hidden><summary>지난 브리핑 보기</summary><div id="bprev-list"></div></details>
+  </section>
+
   <!-- ③ 대표 이슈 슬라이드 (자동으로 넘어가지 않아요) -->
   <section class="hero" id="hero" aria-roledescription="carousel" aria-label="대표 이슈">
     <div class="hs" id="hs" aria-live="polite">
@@ -266,6 +274,32 @@ function renderSearch() {
   }).join("") : stateMsg("검색어");
 }
 
+// ── 브리핑 ──
+function briefLines(lines, small) {
+  return lines.map(l => {
+    const body = `<span class="bl">${l.icon} ${esc(l.label)}</span><b>${esc(l.text)}</b>${!small && l.sub ? `<small>${esc(l.sub)}</small>` : ""}`;
+    if (l.k) return `<li><a href="${issueLink(l.k)}">${body}</a></li>`;
+    if (l.link) return `<li><a href="${esc(url(l.link))}" target="_blank" rel="noopener nofollow">${body}</a></li>`;
+    return `<li><div>${body}</div></li>`;
+  }).join("");
+}
+const hourLabel = iso => { const d = new Date(iso); return `${d.getHours()}시 ${String(d.getMinutes()).padStart(2, "0")}분`; };
+function renderBrief() {
+  const b = DATA?.brief;
+  if (!b || !b.lines?.length) { $("brief").hidden = true; return; }
+  $("brief").hidden = false;
+  const H = [0, 9, 12, 15, 18, 21], h = new Date(b.slot || b.time).getHours();
+  const nx = H.find(x => x > h);
+  $("h-brief").textContent = `⏱ ${h === 0 ? "자정" : h + "시"} 브리핑`;
+  $("brief-sub").textContent = `직전 브리핑과 비교해 바뀐 점 · 다음 브리핑 ${nx == null ? "자정" : nx + "시"}`;
+  $("blist").innerHTML = briefLines(b.lines);
+  const day = (DATA.updated || "").slice(0, 10);
+  if (/^\d{4}-\d{2}-\d{2}$/.test(day)) { $("bday").href = `b/${day}.html`; $("bday").hidden = false; }
+  const prev = (DATA.brief_hist || []).filter(x => x.time !== b.time);
+  $("bprev").hidden = !prev.length;
+  $("bprev-list").innerHTML = prev.map(x => `<p class="bt">${new Date(x.slot || x.time).getHours()}시 브리핑</p><ul class="blist sm">${briefLines(x.lines, true)}</ul>`).join("");
+}
+
 // ── 커뮤니티 화제 ──
 // [제보 버튼] 구글 설문지 주소를 따옴표 안에 넣으면 '제보하기' 버튼이 나타나요
 const REPORT_URL = "";
@@ -391,7 +425,7 @@ function setPaused(p) {
 }
 
 function render() {
-  renderHero(); renderTop(); renderRising(); renderCats(); renderPeople(); renderBuzz(); renderSearch(); renderWiki(); renderVideos(); renderMemes();
+  renderBrief(); renderHero(); renderTop(); renderRising(); renderCats(); renderPeople(); renderBuzz(); renderSearch(); renderWiki(); renderVideos(); renderMemes();
 }
 
 async function loadExtra() {                       // 썸네일 찾기용 영상 목록 + 밈절임

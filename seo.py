@@ -92,21 +92,8 @@ def read_explains():
     return out
 
 
-def plain(t):
-    """검색 설명·미리보기처럼 형광펜을 쓸 수 없는 곳에서는 == 기호를 빼요"""
-    return (t or "").replace("==", "").replace("!!", "")
-
-
-def hl(escaped):
-    """==핵심 문장== 은 굵은 글씨+민트 밑줄, !!주의 문구!! 는 빨간 물결 밑줄로 바꿔요. 이미 e()로 감싼 글자에 써요."""
-    if "==" in escaped and "!!" in escaped:      # 한 문단에 강조는 하나만: 핵심 문장이 있으면 주의 표시는 빼요
-        escaped = escaped.replace("!!", "")
-    escaped = re.sub(r"==(.+?)==", r'<mark class="hl">\1</mark>', escaped)       # 핵심 문장
-    return re.sub(r"!!(.+?)!!", r'<mark class="warn">\1</mark>', escaped)          # 주의 문구 (과태료·마감일 등)
-
-
 def paras(text):
-    return "".join(f"<p>{hl(e(p.strip()))}</p>" for p in re.split(r"\n\s*\n", text) if p.strip())
+    return "".join(f"<p>{e(p.strip())}</p>" for p in re.split(r"\n\s*\n", text) if p.strip())
 
 
 def chart_svg(hist, temp):
@@ -186,7 +173,7 @@ def build_page(ex, snap, all_explains):
     date = ex["date"] or (snap or {}).get("first", "")[:10]
     updated = ex["updated"] or date
     summary = ex["summary"][:3]
-    desc = plain(" ".join(summary) or ex["what"])[:150]
+    desc = (" ".join(summary) or ex["what"])[:150]
     img = (snap or {}).get("img", "")
     ld = {"@context": "https://schema.org", "@graph": [
         {"@type": "Article", "headline": title[:110], "description": desc,
@@ -209,7 +196,7 @@ def build_page(ex, snap, all_explains):
             f'<h1>{e(title)}</h1>']
     if summary:
         body.append('<section class="box sum" aria-labelledby="h-sum"><h2 id="h-sum">3줄 요약</h2><ul>'
-                    + "".join(f"<li>{hl(e(s))}</li>" for s in summary) + "</ul></section>")
+                    + "".join(f"<li>{e(s)}</li>" for s in summary) + "</ul></section>")
     art = []
     for key, head_txt in (("what", "무슨 일이야?"), ("why", "왜 화제야?"), ("next", "앞으로 볼 점")):
         if ex[key]:
@@ -257,7 +244,7 @@ def build_index(explains):
     head = HEAD.format(title="이슈 해설 모아 보기 | 이슈피클", desc="요즘 화제가 된 이슈를 무슨 일인지, 왜 화제인지 짧게 정리한 이슈피클 해설 모음이에요.",
                        url=url, ogtitle="이슈피클 이슈 해설", ogimg=e(OG_IMG), ld=json.dumps(ld, ensure_ascii=False))
     items = "".join(f'<li><a href="{e(slug(x["title"]))}.html"><span><span class="tt">{e(x["title"])}</span>'
-                    f'<small>{e(x["date"].replace("-", "."))} · {e(plain((x["summary"] or [x["what"]])[0])[:60])}</small></span></a></li>'
+                    f'<small>{e(x["date"].replace("-", "."))} · {e((x["summary"] or [x["what"]])[0][:60])}</small></span></a></li>'
                     for x in explains)
     return head + ('<a class="back" href="../index.html">‹ 홈으로</a><h1>이슈 해설</h1>'
                    '<p class="note">요즘 화제가 된 이슈를 새콤기자가 짧게 정리했어요.</p>'
@@ -313,7 +300,7 @@ def build_day(day, rec, day_explains, prev_day, next_day, now_iso):
     if day_explains:
         items = "".join(
             f'<li><a href="../i/{e(slug(x["title"]))}.html"><span><span class="tt">{e(x["title"])}</span>'
-            f'<small>{e(plain((x["summary"] or [x["what"]])[0])[:90])}</small></span></a></li>' for x in day_explains)
+            f'<small>{e((x["summary"] or [x["what"]])[0][:90])}</small></span></a></li>' for x in day_explains)
         body.append('<section class="sec"><div class="sec-head"><div><h2>📝 새콤기자 해설</h2><p>이날 화제가 된 이슈를 직접 정리했어요</p></div></div>'
                     f'<div class="box"><ul class="nlist">{items}</ul></div></section>')
     if tops:
@@ -440,7 +427,7 @@ def build_months(today):
         its = [x for x in items if x["date"][:7] == mon]
         url = SITE_URL + f"m/{mon}.html"
         title = f"{y}년 {m}월 달라지는 것 총정리"
-        lead = plain(f"{y}년 {m}월에 시행되거나 바뀌는 생활 제도와 일정 {len(its)}가지를 날짜순으로 정리했어요. "
+        lead = (f"{y}년 {m}월에 시행되거나 바뀌는 생활 제도와 일정 {len(its)}가지를 날짜순으로 정리했어요. "
                 + " · ".join(x["title"] for x in its[:3]) + (" 등" if len(its) > 3 else "") + ".")
         ld = {"@context": "https://schema.org", "@graph": [
             {"@type": "Article", "headline": title, "description": lead[:150], "inLanguage": "ko",
@@ -470,7 +457,7 @@ def build_months(today):
             rows.append(f'<li id="{e(slug(x["title"]))}"><div class="d">{e(when)}<span class="dd{" on" if dd.startswith("D-") or dd == "오늘" else ""}">{e(dd)}</span>'
                         f'{"<span>· " + e(x["cat"]) + "</span>" if x["cat"] else ""}</div>'
                         f'<h2>{e(x["title"])}</h2>{who_html(x)}'
-                        f'<p>{hl(e(x["body"]))}</p>{f"<ol class=src>{src}</ol>" if src else ""}</li>')
+                        f'<p>{e(x["body"])}</p>{f"<ol class=src>{src}</ol>" if src else ""}</li>')
         body = ['<a class="back" href="../index.html">‹ 홈으로</a>',
                 f'<p class="crumb">이번 달 달라지는 것 · {today.replace("-", ".")} 기준</p>',
                 f"<h1>{e(title)}</h1>",
@@ -511,7 +498,7 @@ def build_all(details, old_snaps, now_iso, memes_dict, daily=None):
                         "articles": cur.get("articles"), "hist": cur.get("hist"), "news": cur.get("news", [])[:8],
                         "cat": (cur.get("cat") or {}).get("name", ""), "img": cur.get("img", ""),
                         "first": snaps.get(s, {}).get("first", now_iso)}
-            link_map[ex["keyword"]] = {"url": page_path(ex["title"]), "summary": [plain(x) for x in ex["summary"][:3]]}
+            link_map[ex["keyword"]] = {"url": page_path(ex["title"]), "summary": ex["summary"][:3]}
         snap = dict(snaps.get(s) or {})
         if snap:
             snap["live"] = bool(cur)
@@ -543,7 +530,7 @@ def build_all(details, old_snaps, now_iso, memes_dict, daily=None):
     (SITE / "sitemap.xml").write_text("\n".join(sm) + "\n", encoding="utf-8")
 
     # rss: 해설 + 밈절임 글
-    feed = [(x["date"], x["title"] + " — 이슈피클 해설", page_url(x["title"]), plain(" ".join(x["summary"]) or x["what"][:200])) for x in explains]
+    feed = [(x["date"], x["title"] + " — 이슈피클 해설", page_url(x["title"]), " ".join(x["summary"]) or x["what"][:200]) for x in explains]
     feed += [(m.get("date", ""), m["word"] + " — 밈절임", SITE_URL + m["page"], m.get("meaning", "")) for m in memes_pages]
     feed = sorted([f for f in feed if f[0]], reverse=True)[:30]
     items = []

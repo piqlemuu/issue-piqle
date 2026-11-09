@@ -1387,6 +1387,7 @@ def main():
         link_map, result["_explain"] = seo.build_all(details, old.get("_explain"),
                                                      now.isoformat(timespec="minutes"), read_meme_dictionary(),
                                                      result["_daily"])
+        result["calendar"] = seo.calendar_home(now.strftime("%Y-%m-%d"))
         for kw, v in link_map.items():
             details["issues"][kw]["explain"] = v
         for g in [result["top"], result["rising"], result["people"]] + [c["issues"] for c in result["categories"].values()]:

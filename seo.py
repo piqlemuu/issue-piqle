@@ -151,7 +151,7 @@ HEAD = """<!DOCTYPE html>
 
 FOOT = """
 <footer class="foot">
-<p><b>이슈피클</b> — 해설은 절임장이 근거 기사를 바탕으로 직접 정리했어요. 기사 저작권은 각 언론사에 있어요.</p>
+<p><b>이슈피클</b> — 해설은 새콤기자가 근거 기사를 바탕으로 직접 정리했어요. 기사 저작권은 각 언론사에 있어요.</p>
 <nav aria-label="사이트 안내"><a href="../about.html">이슈피클이란?</a><a href="../copyright.html">저작권 정책</a><a href="../privacy.html">개인정보처리방침</a><a href="../terms.html">이용약관</a></nav>
 <p>© 2026 이슈피클</p></footer>
 </main>
@@ -173,7 +173,7 @@ def build_page(ex, snap, all_explains):
     ld = {"@context": "https://schema.org", "@graph": [
         {"@type": "Article", "headline": title[:110], "description": desc,
          "datePublished": date, "dateModified": updated, "inLanguage": "ko",
-         "author": {"@type": "Organization", "name": "이슈피클 절임장"},
+         "author": {"@type": "Person", "name": "새콤기자", "url": SITE_URL + "about.html"}, "publisher": {"@type": "Organization", "name": "이슈피클"},
          "publisher": {"@type": "Organization", "name": SITE_NAME, "url": SITE_URL},
          "mainEntityOfPage": url, **({"image": img} if img else {})},
         {"@type": "BreadcrumbList", "itemListElement": [
@@ -198,7 +198,7 @@ def build_page(ex, snap, all_explains):
             art.append(f"<h2>{head_txt}</h2>{paras(ex[key])}")
     if art:
         body.append('<article class="box" style="margin-top:.75rem">' + "".join(art)
-                    + '<p class="by">이슈피클 절임장이 아래 근거 기사를 바탕으로 정리했어요.</p></article>')
+                    + '<p class="by"><b>새콤기자</b> · 긴 기사도 새콤하게 세 줄로 🥒<br>아래 근거 기사를 바탕으로 정리했어요.</p></article>')
     if ex["source"]:
         body.append('<section class="sec"><div class="sec-head"><div><h2>근거 기사</h2><p>누르면 원문이 새 창으로 열려요</p></div></div>'
                     '<div class="box"><ul class="nlist">' + "".join(
@@ -242,7 +242,7 @@ def build_index(explains):
                     f'<small>{e(x["date"].replace("-", "."))} · {e((x["summary"] or [x["what"]])[0][:60])}</small></span></a></li>'
                     for x in explains)
     return head + ('<a class="back" href="../index.html">‹ 홈으로</a><h1>이슈 해설</h1>'
-                   '<p class="note">요즘 화제가 된 이슈를 절임장이 짧게 정리했어요.</p>'
+                   '<p class="note">요즘 화제가 된 이슈를 새콤기자가 짧게 정리했어요.</p>'
                    f'<div class="box" style="margin-top:.75rem"><ul class="nlist">{items or "<li class=state>아직 해설이 없어요.</li>"}</ul></div>') + FOOT
 
 

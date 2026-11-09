@@ -19,6 +19,7 @@ import os
 _repo = os.environ.get("GITHUB_REPOSITORY", "piqlemuu/issue-piqle")
 SITE_URL = f"https://{_repo.split('/')[0].lower()}.github.io/{_repo.split('/')[1]}/"
 SITE_NAME = "이슈피클"
+OG_IMG = SITE_URL + "og.jpg"   # 카톡·SNS 공유 미리보기 그림 (site/og.jpg)
 ROOT = Path(__file__).resolve().parent
 EXPLAIN_FILE = ROOT / "explain.md"
 SITE = ROOT / "site"
@@ -128,7 +129,8 @@ HEAD = """<!DOCTYPE html>
 <link rel="canonical" href="{url}">
 <meta property="og:type" content="article"><meta property="og:site_name" content="이슈피클">
 <meta property="og:title" content="{ogtitle}"><meta property="og:description" content="{desc}"><meta property="og:url" content="{url}">
-{ogimg}<meta name="twitter:card" content="summary_large_image">
+<meta property="og:image" content="{ogimg}"><meta property="og:image:width" content="1200"><meta property="og:image:height" content="630">
+<meta name="twitter:card" content="summary_large_image">
 <link rel="alternate" type="application/rss+xml" title="이슈피클" href="../rss.xml">
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.min.css">
 <link rel="stylesheet" href="../style.css">
@@ -178,14 +180,14 @@ def build_page(ex, snap, all_explains):
          "datePublished": date, "dateModified": updated, "inLanguage": "ko",
          "author": {"@type": "Person", "name": "새콤기자", "url": SITE_URL + "about.html"}, "publisher": {"@type": "Organization", "name": "이슈피클"},
          "publisher": {"@type": "Organization", "name": SITE_NAME, "url": SITE_URL},
-         "mainEntityOfPage": url, **({"image": img} if img else {})},
+         "mainEntityOfPage": url, "image": OG_IMG},
         {"@type": "BreadcrumbList", "itemListElement": [
             {"@type": "ListItem", "position": 1, "name": SITE_NAME, "item": SITE_URL},
             {"@type": "ListItem", "position": 2, "name": "이슈 해설", "item": SITE_URL + "i/"},
             {"@type": "ListItem", "position": 3, "name": title, "item": url}]}]}
     head = HEAD.format(title=e(f"{title} — 무슨 일이야? 왜 화제? | 이슈피클"), desc=e(desc), url=e(url),
                        ogtitle=e(f"{title} — 이슈피클 해설"),
-                       ogimg=f'<meta property="og:image" content="{e(img)}">\n' if img else "",
+                       ogimg=e(OG_IMG),
                        ld=json.dumps(ld, ensure_ascii=False).replace("</", "<\\/"))
     body = [f'<a class="back" href="../index.html">‹ 홈으로</a>',
             f'<p class="crumb">이슈 해설{" · " + e(snap["cat"]) if snap and snap.get("cat") else ""}'
@@ -240,7 +242,7 @@ def build_index(explains):
     url = SITE_URL + "i/"
     ld = {"@context": "https://schema.org", "@type": "CollectionPage", "name": "이슈피클 이슈 해설", "url": url}
     head = HEAD.format(title="이슈 해설 모아 보기 | 이슈피클", desc="요즘 화제가 된 이슈를 무슨 일인지, 왜 화제인지 짧게 정리한 이슈피클 해설 모음이에요.",
-                       url=url, ogtitle="이슈피클 이슈 해설", ogimg="", ld=json.dumps(ld, ensure_ascii=False))
+                       url=url, ogtitle="이슈피클 이슈 해설", ogimg=e(OG_IMG), ld=json.dumps(ld, ensure_ascii=False))
     items = "".join(f'<li><a href="{e(slug(x["title"]))}.html"><span><span class="tt">{e(x["title"])}</span>'
                     f'<small>{e(x["date"].replace("-", "."))} · {e((x["summary"] or [x["what"]])[0][:60])}</small></span></a></li>'
                     for x in explains)
@@ -282,7 +284,7 @@ def build_day(day, rec, day_explains, prev_day, next_day, now_iso):
           "datePublished": day, "dateModified": (rec.get("last") or day)[:10], "inLanguage": "ko",
           "publisher": {"@type": "Organization", "name": SITE_NAME, "url": SITE_URL}}
     head = HEAD.format(title=e(f"{label} 오늘의 이슈 정리 — 무슨 일이 화제였나 | 이슈피클"), desc=e(desc), url=e(url),
-                       ogtitle=e(f"{label} 오늘의 이슈 — 이슈피클"), ogimg="",
+                       ogtitle=e(f"{label} 오늘의 이슈 — 이슈피클"), ogimg=e(OG_IMG),
                        ld=json.dumps(ld, ensure_ascii=False).replace("</", "<\\/"))
     if not indexable:
         head = head.replace("<title>", '<meta name="robots" content="noindex,follow">\n<title>', 1)
@@ -338,7 +340,7 @@ def build_days(daily, explains, now_iso):
     url = SITE_URL + "b/"
     ld = {"@context": "https://schema.org", "@type": "CollectionPage", "name": "날짜별 오늘의 이슈", "url": url}
     head = HEAD.format(title="날짜별 오늘의 이슈 | 이슈피클", desc="하루 동안 화제가 된 이슈와 새콤기자 해설을 날짜별로 모았어요.",
-                       url=url, ogtitle="날짜별 오늘의 이슈 — 이슈피클", ogimg="", ld=json.dumps(ld, ensure_ascii=False))
+                       url=url, ogtitle="날짜별 오늘의 이슈 — 이슈피클", ogimg=e(OG_IMG), ld=json.dumps(ld, ensure_ascii=False))
     items = "".join(f'<li><a href="{d}.html"><span><span class="tt">{e(day_label(d))}</span>'
                     f'<small>{"📝 해설 " + str(sum(1 for x in explains if x["date"] == d)) + "개 · " if d in good else ""}'
                     f'순위에 오른 이슈 {len(daily[d].get("top", {}))}개</small></span></a></li>' for d in reversed(days))

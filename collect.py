@@ -1232,6 +1232,20 @@ def main():
     clean(result["top"]); clean(result["people"])
     for c in result["categories"].values():
         clean(c["issues"])
+    # 검색 노출용: 직접 쓴 이슈 해설 페이지 + 사이트맵 + RSS (seo.py)
+    try:
+        import seo
+        link_map, result["_explain"] = seo.build_all(details, old.get("_explain"),
+                                                     now.isoformat(timespec="minutes"), read_meme_dictionary())
+        for kw, v in link_map.items():
+            details["issues"][kw]["explain"] = v
+        for g in [result["top"], result["rising"], result["people"]] + [c["issues"] for c in result["categories"].values()]:
+            for it in g:
+                if it["keyword"] in link_map:
+                    it["explain"] = link_map[it["keyword"]]["url"]
+    except Exception as ex:
+        print(f"[경고] 해설 페이지 만들기 실패 ({type(ex).__name__}: {ex})", file=sys.stderr)
+        result["_explain"] = old.get("_explain", {})
     ISSUES_OUT.write_text(json.dumps(details, ensure_ascii=False, separators=(",", ":")), encoding="utf-8")
 
     MEME_OUT.write_text(json.dumps({"updated": result["updated"], "candidates": memes,

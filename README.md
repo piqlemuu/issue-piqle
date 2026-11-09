@@ -52,7 +52,7 @@
 5. **사이트 켜기**: `Settings` → 왼쪽 `Pages` → **Source** 를 `GitHub Actions` 로 선택
 6. **첫 실행**: 위쪽 `Actions` 탭 → `이슈 자동 수집` → `Run workflow` 버튼
    - 1~2분 뒤 초록색 체크가 뜨면 성공!
-   - 사이트 주소: `https://내아이디.github.io/issue-radar/`
+   - 사이트 주소: `https://내아이디.github.io/issue-piqle/` (저장소 이름이 주소가 돼요)
 
 이제 30분마다 저절로 갱신돼요. 🎉
 

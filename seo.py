@@ -14,7 +14,10 @@ from datetime import datetime
 from email.utils import format_datetime
 from pathlib import Path
 
-SITE_URL = "https://piqlemuu.github.io/issue-rader/"
+import os
+# 사이트 주소: GitHub Actions에서는 저장소 이름으로 자동으로 맞춰요 (저장소 이름을 바꿔도 따로 고칠 필요 없음)
+_repo = os.environ.get("GITHUB_REPOSITORY", "piqlemuu/issue-piqle")
+SITE_URL = f"https://{_repo.split('/')[0].lower()}.github.io/{_repo.split('/')[1]}/"
 SITE_NAME = "이슈피클"
 ROOT = Path(__file__).resolve().parent
 EXPLAIN_FILE = ROOT / "explain.md"

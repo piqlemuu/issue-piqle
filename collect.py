@@ -478,7 +478,7 @@ def collect_trends():
 # ───────────── 위키백과 많이 본 문서 (한국어, 하루 단위) ─────────────
 WIKI_N = 10
 WIKI_EVERY_H = 3            # 새 날짜 자료가 아직 없으면 3시간 뒤에 다시 시도
-WIKI_UA = "IssuePickle/1.0 (https://piqlemuu.github.io/issue-rader/)"   # 위키미디어가 요구하는 봇 이름
+WIKI_UA = "IssuePickle/1.0 (https://piqlemuu.github.io/issue-piqle/)"   # 위키미디어가 요구하는 봇 이름
 WIKI_SKIP = ("대문", "위키백과:대문")
 
 

@@ -1,0 +1,27 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 800" width="800" height="800">
+<defs><linearGradient id="bg" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#8FD8F0"/><stop offset=".55" stop-color="#C3B1FF"/><stop offset="1" stop-color="#4AD1B0"/></linearGradient>
+<pattern id="dots" width="18" height="18" patternUnits="userSpaceOnUse"><circle cx="3" cy="3" r="2.2" fill="#fff" opacity=".35"/></pattern></defs>
+<g font-family="'Pretendard Variable',Pretendard,'Apple SD Gothic Neo','Noto Sans KR','Malgun Gothic',sans-serif"><rect width="800" height="800" fill="url(#bg)"/><rect width="800" height="800" fill="url(#dots)"/>
+
+<g transform="rotate(-6 400 470)">
+<path d="M250 300 L400 200 L550 300 Z" fill="#cfe3ef" stroke="#111" stroke-width="7" stroke-linejoin="round"/>
+<rect x="250" y="300" width="300" height="420" rx="10" fill="#fff" stroke="#111" stroke-width="7"/>
+<rect x="250" y="360" width="300" height="80" fill="#8FD8F0" stroke="#111" stroke-width="5"/>
+<text x="400" y="415" text-anchor="middle" font-size="46" font-weight="900" fill="#111">MILK</text>
+<rect x="280" y="600" width="240" height="80" rx="10" fill="#FFE14D" stroke="#111" stroke-width="5"/>
+<text x="400" y="633" text-anchor="middle" font-size="20" font-weight="800" fill="#111">유통기한</text>
+<text x="400" y="666" text-anchor="middle" font-size="30" font-weight="900" fill="#FF4D6D">2026.11</text>
+</g>
+<g transform="translate(150 610) rotate(-20)"><circle r="64" fill="#FF4D6D" stroke="#111" stroke-width="6"/><text y="-6" text-anchor="middle" font-size="26" font-weight="900" fill="#fff">이것도</text><text y="26" text-anchor="middle" font-size="26" font-weight="900" fill="#fff">11월!</text></g>
+<g transform="translate(630 560) rotate(8) scale(0.62)">
+  <circle cx="-62" cy="-60" r="28" fill="#fff" stroke="#111" stroke-width="7"/><circle cx="-62" cy="-60" r="13" fill="#cfe3ef"/>
+  <circle cx="62" cy="-60" r="28" fill="#fff" stroke="#111" stroke-width="7"/><circle cx="62" cy="-60" r="13" fill="#cfe3ef"/>
+  <ellipse cx="0" cy="0" rx="98" ry="88" fill="#fff" stroke="#111" stroke-width="7"/>
+  <ellipse cx="0" cy="24" rx="46" ry="36" fill="#eef5fa" stroke="#111" stroke-width="5"/>
+  <circle cx="-36" cy="-14" r="9" fill="#111"/><circle cx="36" cy="-14" r="9" fill="#111"/>
+  <circle cx="-33" cy="-17" r="3" fill="#fff"/><circle cx="39" cy="-17" r="3" fill="#fff"/>
+  <ellipse cx="0" cy="8" rx="14" ry="10" fill="#111"/>
+  <ellipse cx="0" cy="34" rx="16" ry="20" fill="#3b1d2a" stroke="#111" stroke-width="5"/><ellipse cx="0" cy="44" rx="9" ry="6" fill="#ff7a8a"/>
+  <ellipse cx="-62" cy="18" rx="12" ry="7" fill="#ffb3c1" opacity=".8"/><ellipse cx="62" cy="18" rx="12" ry="7" fill="#ffb3c1" opacity=".8"/>
+</g><g transform="translate(690 420) rotate(14)" fill="#FFE14D" stroke="#111" stroke-width="3"><ellipse cx="0" cy="22" rx="13" ry="10"/><rect x="10" y="-26" width="6" height="48"/><path d="M16 -26 Q40 -16 30 4 Q34 -10 16 -12Z"/></g>
+<text x="60" y="110" text-anchor="start" font-size="58" font-weight="900" letter-spacing="-2" stroke="#111" stroke-linejoin="round" paint-order="stroke" fill="#111" stroke-width="4" transform="translate(7 7)">날짜만 보이면 출동</text><text x="60" y="110" text-anchor="start" font-size="58" font-weight="900" letter-spacing="-2" stroke="#111" stroke-linejoin="round" paint-order="stroke" fill="#ffffff" stroke-width="5">날짜만 보이면 출동</text></g></svg>

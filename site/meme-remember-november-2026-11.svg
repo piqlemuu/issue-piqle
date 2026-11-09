@@ -1,0 +1,25 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1050 600" width="1050" height="600">
+<defs><linearGradient id="bg" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#8FD8F0"/><stop offset=".55" stop-color="#C3B1FF"/><stop offset="1" stop-color="#4AD1B0"/></linearGradient>
+<pattern id="dots" width="18" height="18" patternUnits="userSpaceOnUse"><circle cx="3" cy="3" r="2.2" fill="#fff" opacity=".35"/></pattern></defs>
+<g font-family="'Pretendard Variable',Pretendard,'Apple SD Gothic Neo','Noto Sans KR','Malgun Gothic',sans-serif"><rect width="1050" height="600" fill="url(#bg)"/><rect width="1050" height="600" fill="url(#dots)"/>
+
+<g transform="rotate(-6 525 300)"><rect x="-80" y="462" width="1210" height="64" fill="#FFE14D" stroke="#111" stroke-width="5"/>
+<text x="525" y="506" text-anchor="middle" font-size="30" font-weight="900" fill="#111" letter-spacing="5">기억해 · 11월이 왔어 · 기억해 · 11월이 왔어 · 기억해</text></g>
+<g transform="translate(190 250) rotate(-8) scale(1.15)">
+  <circle cx="-62" cy="-60" r="28" fill="#fff" stroke="#111" stroke-width="7"/><circle cx="-62" cy="-60" r="13" fill="#cfe3ef"/>
+  <circle cx="62" cy="-60" r="28" fill="#fff" stroke="#111" stroke-width="7"/><circle cx="62" cy="-60" r="13" fill="#cfe3ef"/>
+  <ellipse cx="0" cy="0" rx="98" ry="88" fill="#fff" stroke="#111" stroke-width="7"/>
+  <ellipse cx="0" cy="24" rx="46" ry="36" fill="#eef5fa" stroke="#111" stroke-width="5"/>
+  <circle cx="-36" cy="-14" r="9" fill="#111"/><circle cx="36" cy="-14" r="9" fill="#111"/>
+  <circle cx="-33" cy="-17" r="3" fill="#fff"/><circle cx="39" cy="-17" r="3" fill="#fff"/>
+  <ellipse cx="0" cy="8" rx="14" ry="10" fill="#111"/>
+  <ellipse cx="0" cy="34" rx="16" ry="20" fill="#3b1d2a" stroke="#111" stroke-width="5"/><ellipse cx="0" cy="44" rx="9" ry="6" fill="#ff7a8a"/>
+  <ellipse cx="-62" cy="18" rx="12" ry="7" fill="#ffb3c1" opacity=".8"/><ellipse cx="62" cy="18" rx="12" ry="7" fill="#ffb3c1" opacity=".8"/>
+</g>
+<g transform="translate(320 120) rotate(12)" fill="#FF4D6D" stroke="#111" stroke-width="3"><ellipse cx="0" cy="22" rx="13" ry="10"/><rect x="10" y="-26" width="6" height="48"/><path d="M16 -26 Q40 -16 30 4 Q34 -10 16 -12Z"/></g><g transform="translate(80 90) rotate(-14)" fill="#FFE14D" stroke="#111" stroke-width="3"><ellipse cx="0" cy="22" rx="13" ry="10"/><rect x="10" y="-26" width="6" height="48"/><path d="M16 -26 Q40 -16 30 4 Q34 -10 16 -12Z"/></g>
+<text x="630" y="200" text-anchor="middle" font-size="104" font-weight="900" letter-spacing="-4" stroke="#111" stroke-linejoin="round" paint-order="stroke" fill="#111" stroke-width="7" transform="translate(7 7)">Remember</text><text x="630" y="200" text-anchor="middle" font-size="104" font-weight="900" letter-spacing="-4" stroke="#111" stroke-linejoin="round" paint-order="stroke" fill="#ffffff" stroke-width="9">Remember</text>
+<text x="630" y="335" text-anchor="middle" font-size="120" font-weight="900" letter-spacing="-4" stroke="#111" stroke-linejoin="round" paint-order="stroke" fill="#111" stroke-width="8" transform="translate(7 7)">November</text><text x="630" y="335" text-anchor="middle" font-size="120" font-weight="900" letter-spacing="-4" stroke="#111" stroke-linejoin="round" paint-order="stroke" fill="#FF4D6D" stroke-width="11">November</text>
+<g transform="translate(962 392) rotate(12) scale(.8)"><rect x="-92" y="-40" width="184" height="80" rx="18" fill="#111"/><rect x="-84" y="-32" width="168" height="64" rx="12" fill="#FFE14D"/>
+<text y="16" text-anchor="middle" font-size="44" font-weight="900" fill="#111">2026</text></g>
+<text x="600" y="405" text-anchor="middle" font-size="30" font-weight="800" fill="#111">"2026년 11월이 온다" 노래하는 북극곰</text>
+<g transform="translate(40 548)"><rect width="232" height="40" rx="20" fill="#111"/><text x="116" y="28" text-anchor="middle" font-size="22" font-weight="800" fill="#4AD1B0">#이슈피클 #밈절임</text></g><text x="1010" y="584" text-anchor="end" font-size="22" font-weight="700" fill="#111" opacity=".75">2026.11 · 요즘 뜨는 밈</text></g></svg>

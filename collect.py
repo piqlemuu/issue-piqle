@@ -1273,12 +1273,33 @@ def update_daily(result, old, now):
     day = now.strftime("%Y-%m-%d")
     d = daily.get(day) or {"top": {}, "briefs": [], "runs": 0}
     d["runs"] += 1
+    hm = now.strftime("%H:%M")
     for i, it in enumerate(result.get("top", [])[:10]):
         rec = d["top"].get(it["keyword"]) or {"title": it.get("title") or it["keyword"], "best": i + 1, "count": 0,
-                                              "headline": it.get("headline", ""), "cat": it.get("cat", "")}
+                                              "headline": it.get("headline", ""), "cat": it.get("cat", ""),
+                                              "first": hm, "best_at": hm, "titles": [], "words": {}}
         rec["count"] += 1
-        if i + 1 <= rec["best"]:
-            rec["best"], rec["headline"] = i + 1, it.get("headline", "") or rec["headline"]
+        rec["last"], rec["last_rank"] = hm, i + 1
+        if i + 1 < rec["best"] or (i + 1 == rec["best"] and not rec.get("best_at")):
+            rec["best"], rec["best_at"] = i + 1, hm
+            rec["headline"] = it.get("headline", "") or rec["headline"]
+        # 서로 다른 언론사 제목 최대 3개 (원문 주소가 있는 기사 먼저)
+        seen = {t["source"] for t in rec.setdefault("titles", [])}
+        for n in sorted(it.get("news", []), key=lambda n: "news.google.com" in n.get("link", "")):
+            if len(rec["titles"]) >= 3:
+                break
+            if n.get("source") and n["source"] not in seen and n.get("title"):
+                rec["titles"].append({"title": n["title"], "source": n["source"], "link": n.get("link", "")})
+                seen.add(n["source"])
+        # 제목에 함께 나온 단어 (이슈를 한눈에 알게)
+        w = rec.setdefault("words", {})
+        srcs = {n.get("source", "") for n in it.get("news", [])}
+        for n in it.get("news", []):
+            for t in keywords(n.get("title", "")):
+                if t != it["keyword"] and t not in it["keyword"] and t not in QUERY_WORDS and t not in srcs \
+                        and not any(t in x for x in srcs):
+                    w[t] = w.get(t, 0) + 1
+        rec["words"] = dict(sorted(w.items(), key=lambda kv: -kv[1])[:8])
         d["top"][it["keyword"]] = rec
     b = result.get("brief")
     if b and b.get("slot", "")[:10] == day and all(x.get("slot") != b["slot"] for x in d["briefs"]):

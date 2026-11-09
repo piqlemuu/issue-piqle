@@ -279,19 +279,84 @@ def small(t):
     return f"<small>{e(t['headline'])}</small>" if t.get("headline") else ""
 
 
-def build_day(day, rec, day_explains, prev_day, next_day, now_iso):
+DAILY_FILE = ROOT / "daily.md"
+DAY_MIN_SUMMARY = 5   # 한 줄 요약이 이 개수 이상 있는 날은 해설이 없어도 검색에 내보내요
+
+
+def read_daily_summaries():
+    """daily.md: '## 2026-11-10' 아래에 '- 키워드: 한 줄 요약'"""
+    out = {}
+    if not DAILY_FILE.exists():
+        return out
+    for block in re.split(r"^##\s+", DAILY_FILE.read_text(encoding="utf-8"), flags=re.M)[1:]:
+        lines = block.splitlines()
+        day = lines[0].strip()[:10]
+        if not re.fullmatch(r"\d{4}-\d{2}-\d{2}", day):
+            continue
+        for ln in lines[1:]:
+            m = re.match(r"^\s*[-•]\s*([^:：]+?)\s*[:：]\s*(.+)$", ln)
+            if m and "[확인 필요" not in m.group(2):
+                out.setdefault(day, {})[m.group(1).strip()] = m.group(2).strip()
+    return out
+
+
+def issue_card(rank, kw, t, one, ex):
+    """하루 정리 페이지의 이슈 카드: 한 줄 요약 + 매체별 제목 + 함께 나온 말 + 하루 흐름"""
+    head = (f'<div class="ih"><span class="rk">{rank}</span><b>{e(t["title"])}</b>'
+            f'{"<span class=ic>" + e(t["cat"]) + "</span>" if t.get("cat") else ""}</div>')
+    parts = [head]
+    if one:
+        parts.append(f'<p class="one">{hl(e(one))}</p>')
+    titles = t.get("titles") or ([{"title": t["headline"], "source": "", "link": ""}] if t.get("headline") else [])
+    if titles:
+        lis = "".join(
+            (f'<li><a href="{e(x["link"])}" target="_blank" rel="noopener nofollow">{e(x["title"])}</a>' if x.get("link") else f'<li>{e(x["title"])}')
+            + (f' <small>{e(x["source"])}</small>' if x.get("source") else "") + "</li>" for x in titles[:3])
+        parts.append(f'<ul class="hdl">{lis}</ul>')
+    words = [w for w in (t.get("words") or {}) if w not in t["title"]][:5]
+    if words:
+        parts.append(f'<p class="wd">함께 나온 말 · {" · ".join(e(w) for w in words)}</p>')
+    flow = []
+    if t.get("first") and t.get("first") == t.get("best_at"):
+        flow.append(f'{t["first"]} 처음 10위 안 (곧바로 최고 {t["best"]}위)')
+    else:
+        if t.get("first"):
+            flow.append(f'{t["first"]} 처음 10위 안')
+        flow.append(f'{t["best_at"] + " " if t.get("best_at") else ""}최고 {t["best"]}위')
+    if t.get("last") and t.get("last_rank") and t.get("last") != t.get("best_at"):
+        flow.append(f'{t["last"]} {t["last_rank"]}위')
+    parts.append(f'<p class="fl">{" → ".join(flow)}</p>')
+    if ex:
+        parts.append(f'<a class="exl" href="../i/{e(slug(ex["title"]))}.html">📝 새콤기자 해설 읽기 ›</a>')
+    return f'<li id="{e(slug(kw))}">' + "".join(parts) + "</li>"
+
+
+DAY_CSS = (".ex .ic2{list-style:none;margin:0;padding:0}.ex .ic2>li{padding:1rem;border-top:1px solid var(--line)}.ex .ic2>li:first-child{border-top:0}"
+           ".ex .ih{display:flex;align-items:center;gap:.5rem}.ex .ih b{font-size:1.0625rem}"
+           ".ex .rk{min-width:1.5rem;font-weight:800;color:var(--sub);font-variant-numeric:tabular-nums}"
+           ".ex .ic{font-size:.75rem;color:var(--sub);background:var(--soft);border-radius:4px;padding:.0625rem .375rem}"
+           ".ex .one{margin:.5rem 0 0;font-size:.9688rem;line-height:1.65}"
+           ".ex .hdl{margin:.5rem 0 0;padding-left:1.1rem;font-size:.875rem;line-height:1.55}.ex .hdl li{margin:.125rem 0}"
+           ".ex .hdl a{color:var(--text)}.ex .hdl small{color:var(--sub);font-size:.75rem}"
+           ".ex .wd{margin:.5rem 0 0;font-size:.8125rem;color:var(--sub)}"
+           ".ex .fl{margin:.25rem 0 0;font-size:.8125rem;color:var(--sub);font-variant-numeric:tabular-nums}"
+           ".ex .exl{display:inline-block;margin-top:.5rem;font-size:.875rem;font-weight:600;color:var(--logo)}")
+
+
+def build_day(day, rec, day_explains, prev_day, next_day, now_iso, summaries=None, all_explains=()):
     url = SITE_URL + f"b/{day}.html"
     label = day_label(day)
     tops = sorted(rec.get("top", {}).items(), key=lambda kv: (-kv[1]["count"], kv[1]["best"]))[:10]
-    indexable = bool(day_explains)
+    summaries = summaries or {}
+    indexable = bool(day_explains) or len(summaries) >= DAY_MIN_SUMMARY
     is_today = now_iso[:10] == day
     lead = ""
     if tops:
         k, t = tops[0]
         lead = (f"{label} 이슈피클 실시간 순위 상위 10위 안에 오른 이슈는 {len(rec['top'])}개였어요. "
                 f"그중 가장 오래 상위권에 머문 이슈는 '{t['title']}'(최고 {t['best']}위)예요.")
-    if day_explains:
-        lead += " 새콤기자가 이날의 주요 이슈를 직접 정리했어요."
+    if day_explains or summaries:
+        lead += " 이슈마다 새콤기자가 핵심을 한 줄로 정리했어요." if summaries else " 새콤기자가 이날의 주요 이슈를 직접 정리했어요."
     desc = (lead or f"{label} 이슈 정리")[:150]
     ld = {"@context": "https://schema.org", "@type": "CollectionPage", "name": f"{label} 오늘의 이슈", "url": url,
           "datePublished": day, "dateModified": (rec.get("last") or day)[:10], "inLanguage": "ko",
@@ -304,7 +369,7 @@ def build_day(day, rec, day_explains, prev_day, next_day, now_iso):
     head = head.replace('href="../rss.xml"', 'href="../rss.xml"').replace("</style>",
         ".ex .tl{list-style:none;margin:0;padding:0}.ex .tl li{padding:.5rem 1rem;border-top:1px solid var(--line);font-size:.9375rem;line-height:1.55}"
         ".ex .tl li:first-child{border-top:0}.ex .tl small{display:block;color:var(--sub);font-size:.8125rem}"
-        ".ex .dnav{display:flex;justify-content:space-between;gap:.5rem;margin-top:1rem}.ex .dnav a{color:var(--sub);font-size:.875rem;font-weight:600}</style>", 1)
+        ".ex .dnav{display:flex;justify-content:space-between;gap:.5rem;margin-top:1rem}.ex .dnav a{color:var(--sub);font-size:.875rem;font-weight:600}" + DAY_CSS + "</style>", 1)
     body = ['<a class="back" href="../index.html">‹ 홈으로</a>',
             f'<p class="crumb">오늘의 이슈 · {e(day.replace("-", "."))}{" · " + e(now_iso[11:16]) + "까지 집계" if is_today else ""}</p>',
             f"<h1>{e(label)} 이슈 정리</h1>"]
@@ -317,12 +382,15 @@ def build_day(day, rec, day_explains, prev_day, next_day, now_iso):
         body.append('<section class="sec"><div class="sec-head"><div><h2>📝 새콤기자 해설</h2><p>이날 화제가 된 이슈를 직접 정리했어요</p></div></div>'
                     f'<div class="box"><ul class="nlist">{items}</ul></div></section>')
     if tops:
-        rows = "".join(f'<li><b>{e(t["title"])}</b> · 최고 {t["best"]}위{" · " + e(t["cat"]) if t.get("cat") else ""}'
-                       f'{small(t)}</li>'
-                       for _, t in tops)
+        ex_by_kw = {x["keyword"]: x for x in all_explains}
+        rows = []
+        for n, (kw, t) in enumerate(tops, 1):
+            ex = ex_by_kw.get(kw)
+            one = summaries.get(kw) or (plain(ex["summary"][0]) if ex and ex.get("summary") else "")
+            rows.append(issue_card(n, kw, t, one, ex))
         body.append('<section class="sec"><div class="sec-head"><div><h2>하루 동안 오래 머문 이슈</h2>'
-                    '<p>실시간 순위 10위 안에 머문 시간이 긴 순서예요</p></div></div>'
-                    f'<div class="box"><ol class="tl">{rows}</ol></div></section>')
+                    '<p>실시간 순위 10위 안에 오래 머문 순서예요 · 제목을 누르면 원문이 열려요</p></div></div>'
+                    f'<div class="box"><ol class="ic2">{"".join(rows)}</ol></div></section>')
     if rec.get("briefs"):
         bl = ""
         for b in rec["briefs"]:
@@ -342,11 +410,12 @@ def build_days(daily, explains, now_iso):
     """날짜별 페이지를 만들고, 검색에 내보낼(해설이 있는) 날짜 목록을 돌려줘요"""
     DAY_DIR.mkdir(parents=True, exist_ok=True)
     days = sorted(daily or {})
+    sums = read_daily_summaries()
     good = []
     for i, day in enumerate(days):
         exs = [x for x in explains if x["date"] == day]
         html_, ok = build_day(day, daily[day], exs, days[i - 1] if i else None,
-                              days[i + 1] if i + 1 < len(days) else None, now_iso)
+                              days[i + 1] if i + 1 < len(days) else None, now_iso, sums.get(day), explains)
         (DAY_DIR / f"{day}.html").write_text(html_, encoding="utf-8")
         if ok:
             good.append(day)

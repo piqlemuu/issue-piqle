@@ -1,21 +1,70 @@
-# 언론사 공식 RSS 목록 (기사 대표 사진을 찾는 데 쓰여요)
+# 분야별 주 매체 (언론사 공식 RSS)
 #
-# 구글 뉴스 링크에는 원문 주소가 없어서, 언론사가 직접 공개한 RSS에서
-# 같은 제목의 기사를 찾아 원문 주소를 알아내요. 그 원문의 대표 사진(og:image)을 작게 보여줘요.
+# 분야를 정한 매체의 기사는 그 분야 이슈를 모을 때 같이 쓰이고,
+# 원문 주소를 그대로 알 수 있어서 기사에 실린 대표 사진을 바로 가져와요.
+# 분야를  -  로 둔 매체는 이슈 계산에는 안 쓰이고, 같은 제목 기사의 사진을 찾는 데만 쓰여요.
 #
-# 한 줄에 하나씩:  언론사 이름 | RSS 주소
+# 한 줄에 하나씩:  언론사 이름 | 분야 | RSS 주소
+#   분야: 연예 · 스포츠 · 생활·경제 · 음식·카페 · 뷰티·패션 · 쇼핑·혜택 · 여행·공간 · 문화·여가 · IT·테크 · 시사 · -
 # 맨 앞에 # 을 붙이면 그 줄은 쓰지 않아요.
-# 많이 넣을수록 사진이 붙는 기사가 늘어나요.
-# 잘 되는지는 GitHub Actions 실행 기록의 '[언론사 RSS]' 줄에서 볼 수 있어요.
+# 언론사가 직접 공개한 RSS만 넣어요. 잘 되는지는 Actions 실행 기록의 '[언론사 RSS]' 줄에서 볼 수 있어요.
+# 실패로 나오는 줄은 앞에 # 을 붙여 꺼 주세요.
+#
+# 주소 출처: 한국경제·경향신문·전자신문·ZDNet Korea는 직접 열어 확인했어요(2026-11-08).
+#           나머지는 newswatcher 공개 목록(github.com/seokhoonj/newswatcher)에서 확인된 주소예요(2026-08-20 기준).
 
-# ▼ 동작 확인한 주소 (2026-11-08)
-한국경제 | https://www.hankyung.com/feed/all-news
-경향신문 | https://www.khan.co.kr/rss/rssdata/total_news.xml
+# ── 연예 ──
+한국경제 | 연예 | https://www.hankyung.com/feed/entertainment
+OSEN | 연예 | https://rss.mt.co.kr/osen_news.xml
+텐아시아 | 연예 | https://www.tenasia.co.kr/rss/music/
 
-# ▼ 아직 확인 전 (실패해도 사이트에는 문제없어요. 실행 기록에서 '실패'로 나오면 # 을 붙여 끄세요)
-연합뉴스 | https://www.yna.co.kr/rss/news.xml
-조선일보 | https://www.chosun.com/arc/outboundfeeds/rss/?outputType=xml
-동아일보 | https://rss.donga.com/total.xml
-매일경제 | https://www.mk.co.kr/rss/30000001/
-한겨레 | https://www.hani.co.kr/rss/
-연합뉴스TV | https://www.yonhapnewstv.co.kr/browse/feed/
+# ── 스포츠 ──
+한국경제 | 스포츠 | https://www.hankyung.com/feed/sports
+스포츠조선 | 스포츠 | https://www.sportschosun.com/rss/index_all.htm
+일간스포츠 | 스포츠 | https://isplus.com/rss
+
+# ── 생활·경제 (물가·금리·요금·부동산·소비자) ──
+한국경제 | 생활·경제 | https://www.hankyung.com/feed/economy
+한국경제 | 생활·경제 | https://www.hankyung.com/feed/realestate
+경향신문 | 생활·경제 | https://www.khan.co.kr/rss/rssdata/economy_news.xml
+매일경제 | 생활·경제 | https://www.mk.co.kr/rss/30000001/
+머니투데이 | 생활·경제 | http://rss.mt.co.kr/mt_news.xml
+서울경제 | 생활·경제 | https://www.sedaily.com/rss/newsall
+헤럴드경제 | 생활·경제 | https://biz.heraldcorp.com/rss/google/newsAll
+금융소비자뉴스 | 생활·경제 | https://www.newsfc.co.kr/rss/allArticle.xml
+
+# ── 문화·여가 ──
+경향신문 | 문화·여가 | https://www.khan.co.kr/rss/rssdata/culture_news.xml
+
+# ── IT·테크 ──
+한국경제 | IT·테크 | https://www.hankyung.com/feed/it
+전자신문 | IT·테크 | https://rss.etnews.com/Section901.xml
+ZDNet Korea | IT·테크 | https://zdnet.co.kr/feed
+IT동아 | IT·테크 | https://it.donga.com/feeds/rss/
+블로터 | IT·테크 | https://cdn.bloter.net/rss/gns_allArticle.xml
+아이뉴스24 | IT·테크 | https://www.inews24.com/rss/news_all.xml
+보안뉴스 | IT·테크 | https://www.boannews.com/media/news_rss.xml
+
+# ── 시사 ──
+한국경제 | 시사 | https://www.hankyung.com/feed/politics
+한국경제 | 시사 | https://www.hankyung.com/feed/society
+한국경제 | 시사 | https://www.hankyung.com/feed/international
+연합뉴스 | 시사 | https://www.yna.co.kr/rss/news.xml
+뉴시스 | 시사 | https://www.newsis.com/RSS/sokbo.xml
+
+# ── 사진 찾기에만 쓰는 종합 매체 (분야 -) ──
+한국경제 | - | https://www.hankyung.com/feed/life
+경향신문 | - | https://www.khan.co.kr/rss/rssdata/life_news.xml
+경향신문 | - | https://www.khan.co.kr/rss/rssdata/total_news.xml
+조선일보 | - | https://www.chosun.com/arc/outboundfeeds/rss/?outputType=xml
+동아일보 | - | https://rss.donga.com/total.xml
+한겨레 | - | https://www.hani.co.kr/rss/
+국민일보 | - | https://www.kmib.co.kr/rss/data/kmibRssAll.xml
+서울신문 | - | https://www.seoul.co.kr/xml/rss/google_plan.xml
+세계일보 | - | http://www.segye.com/Articles/RSSList/segye_recent.xml
+노컷뉴스 | - | https://rss.nocutnews.co.kr/news/news.xml
+SBS | - | https://news.sbs.co.kr/news/newsflashRssFeed.do
+JTBC | - | https://fs.jtbc.co.kr/RSS/newsflash.xml
+이데일리 | - | http://rss.edaily.co.kr/edaily_news.xml
+파이낸셜뉴스 | - | https://www.fnnews.com/rss/r20/fn_realnews_all.xml
+아시아경제 | - | https://view.asiae.co.kr/rss/all.htm

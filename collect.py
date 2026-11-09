@@ -67,7 +67,8 @@ CATEGORIES = {
 }
 QUERY_WORDS |= {"인상", "인하", "유출", "피해", "소비자", "혜택", "이벤트", "출시"}   # 너무 흔한 말이라 키워드로는 안 써요
 QUERY_WORDS -= {"다이소", "올리브영", "OTT"}   # 브랜드 이름은 그 자체로 이슈가 될 수 있어서 남겨요
-DEFAULT_CAT = "sisa"  # 어느 분야에도 안 잡힌 기사(전체 주요 뉴스)는 시사로 봐요
+DEFAULT_CAT = "sisa"
+CAT_BY_NAME_INIT = {c["name"]: k for k, c in CATEGORIES.items()}  # 어느 분야에도 안 잡힌 기사(전체 주요 뉴스)는 시사로 봐요
 TOP_CAT_CAP = 3       # 실시간 순위 10위마다 같은 분야는 최대 3개
 PEOPLE_CAT_CAP = 2    # 화제의 인물 5명마다 같은 분야는 최대 2명
 CAP_FREE = {"life"}   # 개수 제한 없이 다 넣는 분야 (생활·경제)
@@ -235,7 +236,8 @@ def make_title(kw, arts):
     """한 단어 키워드를 '구자욱 우승'처럼 2~4단어 제목으로 만들어요.
     1) 여러 기사 제목에 똑같이 붙어 나오는 구절(키워드 포함)을 먼저 찾고
     2) 없으면 기사 제목에 자주 같이 나오는 단어를 키워드 앞뒤에 붙여요."""
-    titles = [[_norm_tok(w) for w in tokens(a["title"])] for a in arts]
+    srcs = {_norm_tok(w) for a in arts for w in tokens(a.get("source", ""))}   # 언론사 이름은 제목에서 빼요
+    titles = [[w for w in (_norm_tok(x) for x in tokens(a["title"])) if w == kw or w not in srcs] for a in arts]
     titles = [t for t in titles if kw in t]
     n = len(titles)
     if n < 2:
@@ -300,7 +302,7 @@ def score_terms(articles, extract, min_sources=2):
 
 
 def cat_of(arts, link_cat):
-    cnt = Counter(link_cat.get(a["link"], DEFAULT_CAT) for a in arts)
+    cnt = Counter(link_cat[a["link"]] for a in arts if a["link"] in link_cat)
     return cnt.most_common(1)[0][0] if cnt else DEFAULT_CAT
 
 
@@ -941,23 +943,41 @@ def press_key(title):
     return normalize(re.sub(r"\[[^\]]*\]", "", title))[:24]
 
 
-def collect_press():
-    """언론사 공식 RSS 에서 제목 → (원문 주소, 사진) 지도를 만들어요"""
-    found = {}
+CAT_BY_NAME = CAT_BY_NAME_INIT   # '연예' → 'ent'
+
+
+def read_press():
+    """press.txt: 언론사 | 분야 | RSS 주소  (분야는 연예·스포츠·… 또는 - )"""
+    out = []
     if not PRESS_FILE.exists():
-        return found
+        return out
     for line in PRESS_FILE.read_text(encoding="utf-8").splitlines():
         if not line.strip() or line.lstrip().startswith("#") or "|" not in line:
             continue
-        name, url = [x.strip() for x in line.split("|", 1)]
+        parts = [x.strip() for x in line.split("|")]
+        name, cat, url = (parts[0], parts[1], parts[2]) if len(parts) >= 3 else (parts[0], "-", parts[1])
+        out.append((name, CAT_BY_NAME.get(cat), url))
+    return out
+
+
+def collect_press(cutoff):
+    """분야별 주 매체의 공식 RSS 기사 (원문 주소가 그대로 있어서 대표 사진을 바로 가져올 수 있어요)"""
+    arts = []
+    for name, cid, url in read_press():
         try:
             got = 0
             for it in ET.fromstring(fetch(url)).iter("item"):
-                title, link = text(it, "title"), text(it, "link")
+                title, link = text(it, "title").strip(), text(it, "link").strip()
                 if not title or not link.startswith("http"):
                     continue
+                try:
+                    pub = parsedate_to_datetime(text(it, "pubDate")).astimezone(KST).isoformat(timespec="minutes")
+                except Exception:
+                    continue                                   # 날짜 없는 기사는 최신인지 몰라서 뺌
+                if pub < cutoff or "포토" in title[:6]:
+                    continue
                 img = ""
-                for el in it.iter():                 # media:content / media:thumbnail / enclosure
+                for el in it.iter():
                     tag = local(el.tag)
                     if tag in ("content", "thumbnail", "enclosure") and el.get("url", "").startswith("http"):
                         if tag != "enclosure" or "image" in el.get("type", "image"):
@@ -965,21 +985,24 @@ def collect_press():
                 if not img:
                     m = re.search(r'<img[^>]+src=["\']([^"\']+)', text(it, "description") or "")
                     img = m.group(1) if m and m.group(1).startswith("http") else ""
-                found.setdefault(press_key(title), (link, img))
+                a = {"title": title, "source": name, "link": link, "time": pub}
+                if img:
+                    a["img"] = img
+                arts.append((a, cid))
                 got += 1
             print(f"[언론사 RSS] {name}: 기사 {got}건")
         except Exception as e:
             print(f"[언론사 RSS] {name}: 실패 ({type(e).__name__}) {url}", file=sys.stderr)
-    return found
+    return arts
 
 
-def attach_images(result, cache, now):
+def attach_images(result, cache, now, press_arts):
     """순위에 나온 이슈마다, 언론사 RSS 와 제목이 같은 기사를 찾아 대표 사진을 붙여요"""
     keep = (now - timedelta(hours=IMG_KEEP_H)).isoformat()
     cache = {k: v for k, v in (cache or {}).items() if v[1] >= keep}
     if not ARTICLE_IMAGES:
         return cache
-    press = collect_press()
+    press = {press_key(a["title"]): (a["link"], a.get("img", "")) for a in press_arts}
     groups = [result["rising"], result["top"], result["people"]] + [c["issues"] for c in result["categories"].values()]
     tried = found = 0
     for g in groups:
@@ -988,7 +1011,10 @@ def attach_images(result, cache, now):
             for a in arts:
                 if a["link"] in cache and cache[a["link"]][0]:
                     a["img"] = cache[a["link"]][0]; break
-                hit = press.get(press_key(a["title"]))
+                if "news.google.com" not in a["link"]:
+                    hit = (a["link"], a.get("img", ""))       # 주 매체 기사: 원문 주소를 이미 알아요
+                else:
+                    hit = press.get(press_key(a["title"]))
                 if not hit and KAKAO_KEY and tried < IMG_NEW_PER_RUN and a is arts[0]:
                     try:
                         u = kakao_url(a["title"], a["source"])
@@ -1130,9 +1156,26 @@ def main():
         except Exception:
             old = {}
 
-    all_seen, per_cat = collect_feeds(GENERAL_FEEDS, cutoff), {}
+    # 분야별 주 매체 기사를 먼저 넣어요. 구글 뉴스에 같은 기사가 있으면 원문 주소가 있는 이쪽을 써요.
+    press_pairs = collect_press(cutoff)
+    press_arts = [a for a, _ in press_pairs]
+    by_title, press_cat = {}, {}
+    for a, cid in press_pairs:
+        by_title.setdefault(normalize(a["title"]), a)
+        if cid:
+            press_cat.setdefault(a["link"], cid)
+    # 분야를 정한 주 매체 기사만 이슈 수집에 넣고, 분야가 '-' 인 RSS는 사진 찾기에만 써요
+    all_seen = {k: a for k, a in by_title.items() if a["link"] in press_cat}
+    per_cat = {cid: [] for cid in CATEGORIES}
+    for k, a in collect_feeds(GENERAL_FEEDS, cutoff).items():
+        all_seen.setdefault(k, by_title.get(k, a))
     for cid, cat in CATEGORIES.items():
         seen = collect_feeds(cat["feeds"], cutoff)
+        for k, a in seen.items():
+            seen[k] = by_title.get(k, a)
+        for k, a in by_title.items():
+            if press_cat.get(a["link"]) == cid:
+                seen.setdefault(k, a)
         per_cat[cid] = list(seen.values())
         for k, a in seen.items():
             all_seen.setdefault(k, a)
@@ -1181,7 +1224,7 @@ def main():
         v.pop("_tags", None)
 
     # 기사 대표 사진 (기사 목록 앞 작은 썸네일)
-    result["_img"] = attach_images(result, old.get("_img"), now)
+    result["_img"] = attach_images(result, old.get("_img"), now, press_arts)
 
     # 이슈 상세 페이지용 데이터 (issues.json) + 온도 기록
     kw_arts = {kw: arts for _, kw, _, _, arts in scored}

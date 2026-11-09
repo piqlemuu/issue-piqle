@@ -120,7 +120,7 @@ function render(k) {
   $("main").innerHTML = `
     <p class="crumb">${M(cat, rank, `${new Date(D.updated).toLocaleString("ko-KR", {month: "numeric", day: "numeric", hour: "2-digit", minute: "2-digit"})} 업데이트`)}</p>
     <h1 class="ititle">${esc(E.title || E.keyword)}</h1>
-    ${E.explain ? `<section class="box exbox" aria-labelledby="h-ex"><h2 id="h-ex">📝 절임장 해설</h2><ul>${E.explain.summary.map(x => `<li>${esc(x)}</li>`).join("")}</ul><a href="${esc(E.explain.url)}">해설 전체 보기 ›</a></section>` : ""}
+    ${E.explain ? `<section class="box exbox" aria-labelledby="h-ex"><h2 id="h-ex">📝 새콤기자 해설</h2><ul>${E.explain.summary.map(x => `<li>${esc(x)}</li>`).join("")}</ul><a href="${esc(E.explain.url)}">해설 전체 보기 ›</a></section>` : ""}
 
     <a class="box lead ${img ? "has-img" : ""}" href="${esc(url(lead?.link))}" target="_blank" rel="noopener nofollow" aria-label="대표 기사 원문 보기 (새 창): ${esc(E.headline)}">
       ${img ? `<span class="ph"><img src="${esc(img)}" alt="" loading="lazy" referrerpolicy="no-referrer" decoding="async" onerror="this.closest('.lead').classList.remove('has-img');this.parentNode.remove()"></span>` : ""}

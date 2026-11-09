@@ -327,3 +327,5 @@ html[data-theme=dark] .doc a{color:#9fc0ff}
 html[data-fs=l] .blist li>a,html[data-fs=l] .blist li>div,html[data-fs=xl] .blist li>a,html[data-fs=xl] .blist li>div{grid-template-columns:1fr}
 html[data-fs=l] .blist small,html[data-fs=xl] .blist small{grid-column:1}
 .bday{display:block;margin-top:.5rem;padding-top:.5rem;border-top:1px solid var(--line);font-size:.875rem;font-weight:600;color:var(--logo)}
+.intro{margin:.875rem 0 0;font-size:.9375rem;line-height:1.5;color:var(--text)}
+.intro+.status{margin-top:.25rem}

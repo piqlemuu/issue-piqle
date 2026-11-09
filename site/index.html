@@ -34,10 +34,11 @@
 
 <main class="wrap">
   <!-- ② 업데이트 시각 · 집계 범위 -->
+  <p class="intro">언론 보도·검색·커뮤니티 반응을 모아 <b>30분마다</b> 갱신하는 실시간 이슈 순위</p>
   <p class="status" id="status"><i class="dot" aria-hidden="true"></i><span id="updated">불러오는 중…</span></p>
   <div class="alert" id="alert" role="alert" hidden><span>데이터를 불러오지 못했어요. 인터넷 연결을 확인해 주세요.</span><button id="retry">다시 시도</button></div>
 
-  <!-- ②-2 브리핑: 1시간마다 바뀐 점만 몇 줄로 -->
+  <!-- ②-2 브리핑: 3시간마다 바뀐 점만 3줄로 -->
   <section class="brief" id="brief" aria-labelledby="h-brief" hidden>
     <div class="bhead"><h2 id="h-brief">브리핑</h2><span id="brief-sub">3시간마다 바뀐 점만 정리해요</span></div>
     <ul class="blist" id="blist"></ul>
@@ -45,24 +46,19 @@
     <details class="bprev" id="bprev" hidden><summary>지난 브리핑 보기</summary><div id="bprev-list"></div></details>
   </section>
 
-  <!-- ③ 대표 이슈 슬라이드 (자동으로 넘어가지 않아요) -->
-  <section class="hero" id="hero" aria-roledescription="carousel" aria-label="대표 이슈">
-    <div class="hs" id="hs" aria-live="polite">
-      <div class="slide" aria-hidden="true"><div class="ph sk" style="box-shadow:none"></div><div class="tx"><div class="sk sk-l" style="width:40%"></div><div class="sk" style="height:1.4rem;margin-top:.5rem;width:80%"></div><div class="sk sk-l" style="margin-top:.5rem;width:60%"></div></div></div>
-    </div>
-    <div class="hbar">
-      <button class="hnav" id="hprev" aria-label="이전 대표 이슈"><span aria-hidden="true">‹</span></button>
-      <span class="hcount" id="hcount" aria-live="off"></span>
-      <button class="hnav" id="hnext" aria-label="다음 대표 이슈"><span aria-hidden="true">›</span></button>
-      <button class="hplay" id="hplay" aria-label="자동 넘김 멈추기"><span aria-hidden="true">❚❚</span></button>
-    </div>
-  </section>
-
-  <!-- ④ 실시간 이슈 순위 -->
+  <!-- ③ 실시간 이슈 순위 -->
   <section class="sec" id="sec-top" aria-labelledby="h-top">
     <div class="sec-head"><div><h2 id="h-top">실시간 이슈 순위</h2><p>여러 언론사가 함께 다룬 이슈 순서예요</p></div></div>
     <div class="box"><ol class="rlist" id="top"></ol></div>
     <button class="more" id="top-more" hidden aria-expanded="false" aria-controls="top"></button>
+  </section>
+
+  <!-- ④ 분야별 이슈 -->
+  <section class="sec" id="sec-cat" aria-labelledby="h-cat">
+    <div class="sec-head"><div><h2 id="h-cat">분야별 이슈</h2><p>관심 있는 분야를 골라 보세요</p></div></div>
+    <div class="tabs" id="chips" role="tablist" aria-label="분야"></div>
+    <div class="box" id="cat-box" role="tabpanel"><ol class="rlist" id="cat"></ol></div>
+    <button class="more" id="cat-more" hidden aria-expanded="false" aria-controls="cat"></button>
   </section>
 
   <!-- ⑤ 급부상 이슈 -->
@@ -73,14 +69,6 @@
 
   <!-- ▼ [광고 설정 2] 첫 번째 광고: 애드센스 광고 단위 코드를 이 div 안에 붙여넣으세요 -->
   <div class="ad-slot" id="ad-1"></div>
-
-  <!-- ⑥ 분야별 이슈 -->
-  <section class="sec" id="sec-cat" aria-labelledby="h-cat">
-    <div class="sec-head"><div><h2 id="h-cat">분야별 이슈</h2><p>관심 있는 분야를 골라 보세요</p></div></div>
-    <div class="tabs" id="chips" role="tablist" aria-label="분야"></div>
-    <div class="box" id="cat-box" role="tabpanel"><ol class="rlist" id="cat"></ol></div>
-    <button class="more" id="cat-more" hidden aria-expanded="false" aria-controls="cat"></button>
-  </section>
 
   <!-- ⑦ 화제의 인물 -->
   <section class="sec" id="sec-people" aria-labelledby="h-people">
@@ -142,7 +130,7 @@
 
 <script src="ui.js"></script>
 <script>
-let DATA = null, FAILED = false, curCat = null, topOpen = false, catOpen = false, heroIdx = 0, heroTimer = null, heroPaused = false;
+let DATA = null, FAILED = false, curCat = null, topOpen = false, catOpen = false;
 let EXTRA = {videos: [], memes: []};
 const $ = id => document.getElementById(id);
 const esc = s => String(s ?? "").replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
@@ -292,7 +280,7 @@ function renderBrief() {
   const nx = H.find(x => x > h);
   $("h-brief").textContent = `⏱ ${h === 0 ? "자정" : h + "시"} 브리핑`;
   $("brief-sub").textContent = `직전 브리핑과 비교해 바뀐 점 · 다음 브리핑 ${nx == null ? "자정" : nx + "시"}`;
-  $("blist").innerHTML = briefLines(b.lines);
+  $("blist").innerHTML = briefLines(b.lines.filter(l => l.label !== "지금 1위").slice(0, 3), true);
   const day = (DATA.updated || "").slice(0, 10);
   if (/^\d{4}-\d{2}-\d{2}$/.test(day)) { $("bday").href = `b/${day}.html`; $("bday").hidden = false; }
   const prev = (DATA.brief_hist || []).filter(x => x.time !== b.time);
@@ -364,75 +352,15 @@ function renderMemes() {
   }).join("") : `<div class="box"><ul class="rlist"><li class="state">아직 정리된 밈이 없어요.</li></ul></div>`;
 }
 
-// ── 대표 슬라이드 ──
-function slideHTML(o, i, n) {
-  const ico = `<span class="ico" aria-hidden="true">${ICONS[o.icon] || ICONS.news}</span>`;
-  const img = o.img ? `${ico}<img src="${esc(o.img)}" alt="" loading="lazy" referrerpolicy="no-referrer" decoding="async" style="position:relative" onerror="this.remove()">${o.video ? PLAY : ""}` : ico;
-  const bg = "";
-  return `<a class="slide ${catCls(o.cat)}" href="${esc(o.href)}" ${o.ext ? 'target="_blank" rel="noopener"' : ""} role="group" aria-roledescription="slide" aria-label="${i + 1} / ${n}: ${esc(o.kind)}">
-    <span class="bgfx" aria-hidden="true"${bg}></span>
-    <span class="ph"><span class="kind">${o.emoji} ${esc(o.kind)}</span>${img}</span>
-    <span class="tx"><h3>${esc(o.title)}</h3>${o.desc ? `<p>${esc(o.desc)}</p>` : ""}<span class="mt">${o.meta}</span></span></a>`;
-}
-function renderHero() {
-  const S = [];
-  const t = (DATA?.top || [])[0];
-  if (t) S.push({kind: "지금 1위 이슈", emoji: "🏆", cat: t.cat, title: t.title || t.keyword, desc: t.headline, img: t.img || findThumb(t.keyword), icon: "news",
-    meta: M(t.cat || "", `<b class="${tempLv(t.temp)}">${t.temp}° ${tempWord(t.temp)}</b>`, `매체 ${t.sources}곳`, `기사 ${t.articles}건`), href: issueLink(t.keyword)});
-  const r = (DATA?.rising || [])[0];
-  if (r) S.push({kind: "급부상 1위", emoji: "🚀", cat: r.cat, title: r.title || r.keyword, desc: r.headline, img: r.img || findThumb(r.keyword), icon: "rise",
-    meta: M(r.cat || "", r.ratio != null ? `<b class="lv4">▲${r.ratio}배</b> 3시간 전보다` : `<b class="lv4">▲${r.last3 ?? r.recent}건</b> 최근 3시간`, `매체 ${r.sources}곳`), href: issueLink(r.keyword)});
-  const v = (DATA?.videos || [])[0];
-  if (v) S.push({kind: "지금 1위 영상", emoji: "🎬", cat: "", title: v.title, desc: v.channel, img: url(v.thumb) !== "#" ? v.thumb : "", video: true, ext: true, href: url(v.link),
-    meta: M(v.gain != null ? `<b class="${lv(v.gain, [5e5, 1e5, 2e4])}">▲${korNum(v.gain)}회</b> 최근 ${v.hrs}시간` : "", `조회수 <b class="${lv(v.views, [1e6, 1e5, 1e4])}">${korNum(v.views)}회</b>`)});
-  const p = (DATA?.people || [])[0];
-  if (p) S.push({kind: "가장 많이 언급된 인물", emoji: "🗣️", cat: p.cat, title: p.keyword, desc: p.headline, img: p.img || "", icon: "person",
-    meta: M(p.cat || "", `언급 <b class="${lv(p.articles, [50, 20, 10])}">${p.articles}건</b>`, `매체 ${p.sources}곳`), href: issueLink(p.keyword)});
-  const m = EXTRA.memes[0];
-  if (m) S.push({kind: "오늘의 밈절임", emoji: "🥒", cat: "", title: m.word, desc: m.meaning, img: memeImg(m), icon: "meme",
-    meta: m.date ? esc(m.date.replace(/-/g, ".")) : "요즘 뜨는 밈", href: m.page && /^[\w.-]+\.html$/.test(m.page) ? m.page : "memes.html"});
-  $("hero").hidden = !S.length;
-  $("hs").innerHTML = S.map((o, i) => slideHTML(o, i, S.length)).join("");
-  heroIdx = Math.min(heroIdx, Math.max(S.length - 1, 0));
-  $("hs").scrollLeft = heroIdx * $("hs").clientWidth;
-  updateCount();
-}
-function updateCount() {
-  const n = $("hs").children.length;
-  $("hcount").textContent = n ? `${heroIdx + 1} / ${n}` : "";
-  $("hprev").hidden = $("hnext").hidden = $("hplay").hidden = n < 2;
-}
-function goHero(d) {
-  const n = $("hs").children.length; if (!n) return;
-  heroIdx = (heroIdx + d + n) % n;
-  $("hs").scrollTo({left: heroIdx * $("hs").clientWidth});
-  updateCount();
-}
-// 자동 넘김: 5초마다. 손가락·마우스를 올리거나 키보드로 고르는 동안, 화면이 안 보일 때는 멈춰요.
-// '움직임 줄이기'를 켠 사람에게는 처음부터 멈춰 있어요.
-const REDUCE = matchMedia("(prefers-reduced-motion: reduce)").matches;
-let heroHold = false;
-function heroTick() {
-  clearTimeout(heroTimer);
-  if (heroPaused || REDUCE) return;
-  heroTimer = setTimeout(() => { if (!heroHold && !document.hidden) goHero(1); heroTick(); }, 5000);
-}
-function setPaused(p) {
-  heroPaused = p;
-  $("hplay").setAttribute("aria-label", p ? "자동 넘김 다시 시작" : "자동 넘김 멈추기");
-  $("hplay").firstElementChild.textContent = p ? "▶" : "❚❚";
-  heroTick();
-}
-
 function render() {
-  renderBrief(); renderHero(); renderTop(); renderRising(); renderCats(); renderPeople(); renderBuzz(); renderSearch(); renderWiki(); renderVideos(); renderMemes();
+  renderBrief(); renderTop(); renderRising(); renderCats(); renderPeople(); renderBuzz(); renderSearch(); renderWiki(); renderVideos(); renderMemes();
 }
 
 async function loadExtra() {                       // 썸네일 찾기용 영상 목록 + 밈절임
   try { const c = await (await fetch("content.json?t=" + Date.now())).json(); EXTRA.videos = c.youtube || []; } catch (e) {}
   try { const m = await (await fetch("memes.json?t=" + Date.now())).json(); EXTRA.memes = m.dictionary || []; } catch (e) {}
   if (window.__EXTRA__) Object.assign(EXTRA, window.__EXTRA__);
-  if (DATA) { renderHero(); renderRising(); }
+  if (DATA) { renderTop(); renderRising(); }
   renderMemes();
 }
 
@@ -453,16 +381,6 @@ async function load() {
 }
 
 // ── 버튼 ──
-$("hprev").onclick = () => { goHero(-1); heroTick(); };
-$("hnext").onclick = () => { goHero(1); heroTick(); };
-$("hplay").onclick = () => setPaused(!heroPaused);
-["pointerenter", "focusin", "touchstart"].forEach(ev => $("hero").addEventListener(ev, () => heroHold = true, {passive: true}));
-["pointerleave", "focusout", "touchend"].forEach(ev => $("hero").addEventListener(ev, () => heroHold = false, {passive: true}));
-if (REDUCE) setPaused(true); else heroTick();
-$("hs").addEventListener("scroll", () => {          // 손으로 넘겼을 때 번호 맞추기
-  const i = Math.round($("hs").scrollLeft / Math.max($("hs").clientWidth, 1));
-  if (i !== heroIdx) { heroIdx = i; updateCount(); }
-}, {passive: true});
 $("top-more").onclick = () => { topOpen = !topOpen; renderTop(); };
 $("cat-more").onclick = () => { catOpen = !catOpen; renderCats(); };
 $("chips").onclick = e => { const b = e.target.closest("button"); if (b) { curCat = b.dataset.id; catOpen = false; renderCats(); b.focus(); } };

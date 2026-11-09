@@ -19,6 +19,7 @@
 
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.min.css">
 <link rel="stylesheet" href="style.css">
+<link rel="alternate" type="application/rss+xml" title="이슈피클" href="rss.xml">
 <script>try{var d=document.documentElement,t=localStorage.getItem("theme"),f=localStorage.getItem("fsize");d.setAttribute("data-theme",t||(matchMedia("(prefers-color-scheme: dark)").matches?"dark":"light"));d.setAttribute("data-fs",{l:"l",xl:"xl"}[f]||"m")}catch(e){}</script>
 </head>
 <body>
@@ -184,7 +185,7 @@ function row(it, i, opt = {}) {
   const meta = opt.meta ?? M(`매체 ${it.sources}곳`, `기사 ${it.articles}건`, latest ? ago(latest) : "");
   return `<li><a class="row" href="${issueLink(it.keyword)}">
     <span class="rank">${i}</span>
-    <span class="mid">${!opt.noCat ? catLbl(it.cat) : ""}<span class="kw">${esc(it.keyword)}</span>${opt.noChg ? "" : chg(it.change)}
+    <span class="mid">${!opt.noCat ? catLbl(it.cat) : ""}<span class="kw">${esc(opt.useKw ? it.keyword : (it.title || it.keyword))}</span>${opt.noChg ? "" : chg(it.change)}${it.explain ? '<span class="lbl ex">해설</span>' : ""}
       ${it.headline ? `<span class="hl">${esc(it.headline)}</span>` : ""}
       <span class="meta">${meta}</span></span>
     <span class="end">${opt.end ?? `<b class="${tempLv(it.temp)}">${it.temp}°</b><small>${tempWord(it.temp)}</small>`}</span>
@@ -211,7 +212,7 @@ function renderRising() {
     const th = it.img || findThumb(it.keyword);
     return `<a class="box rcard ${th ? "has-img" : ""}" href="${issueLink(it.keyword)}">
       ${th ? `<img class="th" src="${esc(th)}" alt="" loading="lazy" referrerpolicy="no-referrer" decoding="async" width="74" height="51" onerror="this.parentNode.classList.remove('has-img');this.remove()">` : ""}
-      <span class="mid"><span class="kw">${catLbl(it.cat)}${esc(it.keyword)}</span>
+      <span class="mid"><span class="kw">${it.is_new ? '<span class="lbl new" style="margin-right:.375rem">NEW</span>' : ""}${catLbl(it.cat)}${esc(it.title || it.keyword)}${it.explain ? '<span class="lbl ex">해설</span>' : ""}</span>
         <span class="hl">${esc(it.headline)}</span>
         <span class="meta">${M(`<b class="${tempLv(it.temp)}">${it.temp}°</b> ${tempWord(it.temp)}`, it.latest ? ago(it.latest) : "", `매체 ${it.sources}곳`)}</span></span>
       <span class="end">${risingSide(it)}</span></a>`;
@@ -238,7 +239,7 @@ function renderCats() {
 function renderPeople() {
   const p = DATA?.people || [];
   $("people").innerHTML = p.length ? p.slice(0, 5).map((it, i) => row(it, i + 1, {
-    noChg: false,
+    noChg: false, useKw: true,
     meta: M(`매체 ${it.sources}곳`, it.news?.[0]?.time ? ago(it.news[0].time) : ""),
     end: `<b class="${lv(it.articles, [50, 20, 10])}">${it.articles}건</b><small>언급</small>`
   })).join("") : stateMsg("인물");
@@ -309,10 +310,10 @@ function slideHTML(o, i, n) {
 function renderHero() {
   const S = [];
   const t = (DATA?.top || [])[0];
-  if (t) S.push({kind: "지금 1위 이슈", emoji: "🏆", cat: t.cat, title: t.keyword, desc: t.headline, img: t.img || findThumb(t.keyword), icon: "news",
+  if (t) S.push({kind: "지금 1위 이슈", emoji: "🏆", cat: t.cat, title: t.title || t.keyword, desc: t.headline, img: t.img || findThumb(t.keyword), icon: "news",
     meta: M(t.cat || "", `<b class="${tempLv(t.temp)}">${t.temp}° ${tempWord(t.temp)}</b>`, `매체 ${t.sources}곳`, `기사 ${t.articles}건`), href: issueLink(t.keyword)});
   const r = (DATA?.rising || [])[0];
-  if (r) S.push({kind: "급부상 1위", emoji: "🚀", cat: r.cat, title: r.keyword, desc: r.headline, img: r.img || findThumb(r.keyword), icon: "rise",
+  if (r) S.push({kind: "급부상 1위", emoji: "🚀", cat: r.cat, title: r.title || r.keyword, desc: r.headline, img: r.img || findThumb(r.keyword), icon: "rise",
     meta: M(r.cat || "", r.ratio != null ? `<b class="lv4">▲${r.ratio}배</b> 3시간 전보다` : `<b class="lv4">▲${r.last3 ?? r.recent}건</b> 최근 3시간`, `매체 ${r.sources}곳`), href: issueLink(r.keyword)});
   const v = (DATA?.videos || [])[0];
   if (v) S.push({kind: "지금 1위 영상", emoji: "🎬", cat: "", title: v.title, desc: v.channel, img: url(v.thumb) !== "#" ? v.thumb : "", video: true, ext: true, href: url(v.link),

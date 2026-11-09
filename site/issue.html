@@ -2,6 +2,7 @@
 <html lang="ko">
 <head>
 <meta charset="utf-8">
+<meta name="robots" content="noindex,follow">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>이슈 자세히 보기 | 이슈피클</title>
 <meta name="description" content="지금 뜨는 이슈의 온도, 추이, 관련 기사와 근거를 한눈에 보여드려요.">
@@ -106,7 +107,7 @@ function render(k) {
     $("main").innerHTML = `<div class="box state" style="margin-top:.75rem">이 이슈는 지금 순위에서 빠졌어요.<a class="more" href="index.html">지금 뜨는 이슈 보기 ›</a></div>`;
     return;
   }
-  document.title = `${E.keyword} - 지금 왜 화제일까? | 이슈피클`;
+  document.title = `${E.title || E.keyword} - 지금 왜 화제일까? | 이슈피클`;
   const names = {news: "뉴스", search: "검색", video: "영상", community: "커뮤니티"}, sig = E.signals || {};
   const kinds = Object.keys(names).filter(x => sig[x] != null);
   const cat = E.cat ? `<span class="lbl cat c-${CATS[E.cat.name] || ""}" style="margin:0">${esc(E.cat.name)}</span> ${E.cat.rank}위` : E.kind === "인물" ? "화제의 인물" : "이슈";
@@ -118,7 +119,8 @@ function render(k) {
   if (E.cat && D.cats?.[E.cat.id]) same = D.cats[E.cat.id].list.filter(x => x !== k && D.issues[x]).slice(0, 4);
   $("main").innerHTML = `
     <p class="crumb">${M(cat, rank, `${new Date(D.updated).toLocaleString("ko-KR", {month: "numeric", day: "numeric", hour: "2-digit", minute: "2-digit"})} 업데이트`)}</p>
-    <h1 class="ititle">${esc(E.keyword)}</h1>
+    <h1 class="ititle">${esc(E.title || E.keyword)}</h1>
+    ${E.explain ? `<section class="box exbox" aria-labelledby="h-ex"><h2 id="h-ex">📝 절임장 해설</h2><ul>${E.explain.summary.map(x => `<li>${esc(x)}</li>`).join("")}</ul><a href="${esc(E.explain.url)}">해설 전체 보기 ›</a></section>` : ""}
 
     <a class="box lead ${img ? "has-img" : ""}" href="${esc(url(lead?.link))}" target="_blank" rel="noopener nofollow" aria-label="대표 기사 원문 보기 (새 창): ${esc(E.headline)}">
       ${img ? `<span class="ph"><img src="${esc(img)}" alt="" loading="lazy" referrerpolicy="no-referrer" decoding="async" onerror="this.closest('.lead').classList.remove('has-img');this.parentNode.remove()"></span>` : ""}
@@ -148,7 +150,7 @@ function render(k) {
 
     ${same.length ? `<section class="sec"><div class="sec-head"><div><h2>연관 이슈</h2><p>같은 ${esc(E.cat.name)} 분야의 다른 이슈예요</p></div></div>
       <div class="box"><ol class="rlist">${same.map(x => { const o = D.issues[x];
-        return `<li><a class="row" href="${link(x)}"><span class="rank">${o.cat ? o.cat.rank : "·"}</span><span class="mid"><span class="kw">${esc(o.keyword)}</span>${chg(o.change)}<span class="hl">${esc(o.headline)}</span><span class="meta">${M(`매체 ${o.sources}곳`, `기사 ${o.articles}건`)}</span></span><span class="end"><b class="${lv(o.temp, [80, 60, 40])}">${o.temp}°</b><small>${tempWord(o.temp)}</small></span></a></li>`; }).join("")}</ol></div></section>` : ""}
+        return `<li><a class="row" href="${link(x)}"><span class="rank">${o.cat ? o.cat.rank : "·"}</span><span class="mid"><span class="kw">${esc(o.title || o.keyword)}</span>${chg(o.change)}<span class="hl">${esc(o.headline)}</span><span class="meta">${M(`매체 ${o.sources}곳`, `기사 ${o.articles}건`)}</span></span><span class="end"><b class="${lv(o.temp, [80, 60, 40])}">${o.temp}°</b><small>${tempWord(o.temp)}</small></span></a></li>`; }).join("")}</ol></div></section>` : ""}
 
     <section class="sec">
       <details class="box how"><summary>집계 방식·출처 안내</summary><div class="in">
@@ -161,7 +163,7 @@ function render(k) {
       </div></details>
     </section>`;
   $("share").onclick = async () => {
-    const data = {title: `${E.keyword} — 지금 ${E.temp}° | 이슈피클`, url: location.href};
+    const data = {title: `${E.title || E.keyword} — 지금 ${E.temp}° | 이슈피클`, url: location.href};
     try { if (navigator.share) { await navigator.share(data); return; } } catch (e) { return; }
     try { await navigator.clipboard.writeText(location.href); } catch (e) {}
     $("toast").classList.add("on"); setTimeout(() => $("toast").classList.remove("on"), 1600);

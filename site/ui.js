@@ -1,6 +1,31 @@
 /* 이슈피클 공통 화면 기능: 화면 설정, 아래 메뉴, 문의 메일 */
 (function () {
   var doc = document.documentElement;
+
+  // ── 방문자 통계 (구글 애널리틱스) ──
+  // [설정] 구글 애널리틱스 '측정 ID'(G-로 시작)를 따옴표 안에 넣으면 모든 페이지에서 통계가 켜져요
+  var GA_ID = "G-20CQWM806Y";
+  if (/^G-[A-Z0-9]+$/.test(GA_ID)) {
+    var gs = document.createElement("script");
+    gs.async = true; gs.src = "https://www.googletagmanager.com/gtag/js?id=" + GA_ID;
+    document.head.appendChild(gs);
+    window.dataLayer = window.dataLayer || [];
+    window.gtag = function () { window.dataLayer.push(arguments); };
+    window.gtag("js", new Date());
+    window.gtag("config", GA_ID);
+    // 어느 칸(섹션)의 링크를 많이 누르는지 기록해요 (예: 실시간 순위, 브리핑, 커뮤니티 화제)
+    document.addEventListener("click", function (e) {
+      var a = e.target.closest && e.target.closest("a, button");
+      if (!a) return;
+      var sec = a.closest("section[id], nav.bnav, header");
+      var name = sec ? (sec.id || sec.className.split(" ")[0]) : "기타";
+      window.gtag("event", "click_section", {
+        section: name,
+        page: location.pathname.split("/").pop() || "index.html",
+        label: (a.textContent || "").replace(/\s+/g, " ").trim().slice(0, 40)
+      });
+    }, true);
+  }
   function get(k) { try { return localStorage.getItem(k); } catch (e) { return null; } }
   function put(k, v) { try { localStorage.setItem(k, v); } catch (e) {} }
 

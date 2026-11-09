@@ -81,6 +81,14 @@
     <p class="note">호감도와는 상관없이, 기사 제목에 이름이 나온 횟수와 다룬 매체 수만으로 매긴 순서예요. 같은 기사를 옮겨 실은 것과 사진 기사는 세지 않아요.</p>
   </section>
 
+  <!-- ⑦-2 커뮤니티 화제 -->
+  <section class="sec" id="sec-buzz" aria-labelledby="h-buzz">
+    <div class="sec-head"><div><h2 id="h-buzz">커뮤니티 화제</h2><p>언론이 '온라인에서 화제'라고 보도한 이야기 · 여러 매체가 다룬 순</p></div></div>
+    <div class="box"><ol class="rlist" id="buzz"></ol></div>
+    <a class="more" id="buzz-report" hidden target="_blank" rel="noopener">📮 커뮤니티 화제 제보하기</a>
+    <p class="note">커뮤니티 글을 직접 가져오지 않고, 그 이야기를 다룬 기사 제목과 링크만 보여 드려요. 📌는 운영자가 직접 고른 이야기예요.</p>
+  </section>
+
   <!-- ▼ [광고 설정 3] 두 번째 광고 -->
   <div class="ad-slot" id="ad-2"></div>
 
@@ -258,6 +266,29 @@ function renderSearch() {
   }).join("") : stateMsg("검색어");
 }
 
+// ── 커뮤니티 화제 ──
+// [제보 버튼] 구글 설문지 주소를 따옴표 안에 넣으면 '제보하기' 버튼이 나타나요
+const REPORT_URL = "";
+function renderBuzz() {
+  const b = DATA?.buzz || {}, picks = b.picks || [], auto = b.auto || [];
+  const pin = picks.map(it => {
+    const tag = it.link ? "a" : "div";
+    const attr = it.link ? ` href="${esc(url(it.link))}" target="_blank" rel="noopener nofollow"` : "";
+    return `<li><${tag} class="row"${attr}>
+      <span class="rank" aria-label="운영자 추천">📌</span>
+      <span class="mid"><span class="kw">${esc(it.title)}</span>${it.desc ? `<span class="hl" style="-webkit-line-clamp:2">${esc(it.desc)}</span>` : ""}
+        <span class="meta">${M("운영자 추천", it.date ? it.date.slice(5).replace("-", ".") : "")}</span></span>
+      <span class="end"></span></${tag}></li>`;
+  });
+  const rows = auto.map((it, i) => `<li><a class="row" href="${esc(url(it.link))}" target="_blank" rel="noopener nofollow">
+      <span class="rank">${i + 1}</span>
+      <span class="mid"><span class="kw" style="font-size:.9375rem;font-weight:600">${esc(it.title)}</span>
+        <span class="meta">${M(esc(it.source), it.sources > 1 ? `${it.sources}개 매체 보도` : "", it.time ? ago(it.time) : "")}</span></span>
+      <span class="end"></span></a></li>`);
+  $("buzz").innerHTML = pin.concat(rows).join("") || stateMsg("커뮤니티 화제");
+  if (/^https?:\/\//.test(REPORT_URL)) { $("buzz-report").href = REPORT_URL; $("buzz-report").hidden = false; }
+}
+
 function renderWiki() {
   const w = DATA?.wiki?.items || [];
   $("sec-wiki").hidden = !w.length;
@@ -360,7 +391,7 @@ function setPaused(p) {
 }
 
 function render() {
-  renderHero(); renderTop(); renderRising(); renderCats(); renderPeople(); renderSearch(); renderWiki(); renderVideos(); renderMemes();
+  renderHero(); renderTop(); renderRising(); renderCats(); renderPeople(); renderBuzz(); renderSearch(); renderWiki(); renderVideos(); renderMemes();
 }
 
 async function loadExtra() {                       // 썸네일 찾기용 영상 목록 + 밈절임

@@ -110,11 +110,16 @@ STOPWORDS = set("""
 통과 의결 가결 부결 경신 기록 달성 유지 전환 변경 연장 중단 재개 완료 성공 실패 공식
 이유 방법 모습 의미 효과 영향 우려 가운데 사이 직후 직전 당일 연속 이틀 사흘 매년 처음
 청년 시민 주민 학생 아이 부모 노인 어린이 가족 남성 여성 국민들 업계 기업 회사 단체
-씨 등 것 수 때 중 브랜드 공략 진출 내년 대상 글로벌 성료 매장 AI 매출 성장 넘어
-부담 최초 현장 근황 돌아온 데뷔 난리 소감 MC 판매 성장 넘어 무대
-실적 규모 최고 복귀 영입 계약 감독 선수 제외 실적 방문 만든 로봇 
-기술 찾아
+씨 등 것 수 때 중 넘어 최초 현장 근황 돌아온 난리 소감 만든 찾아
  quot amp nbsp apos lt gt QUOT AMP NBSP APOS LT GT""".split())
+# ↑ 여기에는 '등·것·오전'처럼 어느 기사에나 나오는 단어만 넣어요.
+#   '진출·공략·브랜드'처럼 뜻이 넓은 단어는 아래 '한 단어 제목 규칙'이 알아서 순위를 낮춰요.
+
+# 한 단어 제목 규칙: 키워드로 '미국 매장'처럼 2단어 이상 제목을 못 만들면
+# (= 기사들이 서로 다른 이야기라 공통 구절이 없으면) 섞인 이슈로 보고 점수를 깎아요.
+SINGLE_TITLE_FACTOR = 0.3   # 점수에 곱하는 값. 1 = 규칙 끄기, 0 = 아예 순위에서 빼기
+SINGLE_OK = set("""
+""".split())                # 한 단어 제목이어도 깎지 않을 단어 (예: 트럼프). 화제의 인물 이름은 자동으로 안 깎아요.
 
 # 이슈人: 이 단어 바로 앞(또는 뒤)에 붙은 2~4글자를 사람 이름으로 봅니다.
 TITLES_AFTER = set("""
@@ -309,6 +314,21 @@ def score_terms(articles, extract, min_sources=2):
     return out
 
 
+def title_rule(scored, keep=frozenset()):
+    """한 단어 제목밖에 못 만드는 키워드(섞인 이슈)는 점수를 깎고 다시 줄 세워요.
+    돌려주는 값: (새 점수 목록, 깎인 키워드 모음)"""
+    out, single = [], set()
+    for score, kw, n_art, n_src, arts in scored:
+        if kw not in keep and kw not in SINGLE_OK and make_title(kw, arts) == kw:
+            single.add(kw)
+            if SINGLE_TITLE_FACTOR <= 0:
+                continue
+            score = score * SINGLE_TITLE_FACTOR
+        out.append((score, kw, n_art, n_src, arts))
+    out.sort(key=lambda x: (-x[0], x[1]))
+    return out, single
+
+
 def cat_of(arts, link_cat):
     cnt = Counter(link_cat[a["link"]] for a in arts if a["link"] in link_cat)
     return cnt.most_common(1)[0][0] if cnt else DEFAULT_CAT
@@ -375,10 +395,12 @@ def old_rank_map(lst, key="keyword"):
     return {x[key]: x["rank"] for x in lst} if lst is not None else None
 
 
-def rising(scored, now, link_cat=None):
+def rising(scored, now, link_cat=None, single=frozenset()):
     """최근 RISING_HOURS 시간에 기사가 몰린 이슈. 모자라면 최근 기사 증가가 큰 순으로 채움.
-    분야(정치·경제…)마다 먼저 1개씩 고르고, 자리가 남으면 분야당 2개까지 채움"""
+    분야(정치·경제…)마다 먼저 1개씩 고르고, 자리가 남으면 분야당 2개까지 채움.
+    single 에 든 키워드(한 단어 제목)는 여기서도 점수를 깎아요."""
     link_cat = link_cat or {}
+    factor = lambda kw: SINGLE_TITLE_FACTOR if kw in single else 1
     recent_cut = (now - timedelta(hours=RISING_HOURS)).isoformat()
     c3 = (now - timedelta(hours=3)).isoformat()
     c6 = (now - timedelta(hours=6)).isoformat()
@@ -393,9 +415,10 @@ def rising(scored, now, link_cat=None):
         recent = [a for a in arts if a["time"] >= recent_cut]
         last3, prev3 = metrics(arts)
         if len(recent) >= 2 and len(recent) / n_art >= 0.5:
-            strict.append((len(recent) * 3 + n_src, kw, n_art, n_src, arts, len(recent), False))
+            strict.append(((len(recent) * 3 + n_src) * factor(kw), kw, n_art, n_src, arts, len(recent), False))
         elif last3 >= 1:                                   # 채우기 후보: 최근 3시간 증가가 큰 순
-            loose.append(((last3 - prev3) * 3 + last3 * 2 + n_src, kw, n_art, n_src, arts, len(recent), True))
+            loose.append((((last3 - prev3) * 3 + last3 * 2 + n_src) * factor(kw), kw, n_art, n_src, arts,
+                          len(recent), True))
     strict.sort(key=lambda x: (-x[0], x[1]))
     loose.sort(key=lambda x: (-x[0], x[1]))
 
@@ -457,6 +480,7 @@ def find_people(articles):
 
     def extract(title):
         return {strip_josa(w) for w in tokens(title)} & names
+    extract.names = names          # 한 단어 제목 규칙에서 사람 이름은 안 깎으려고 같이 넘겨요
     return extract
 
 
@@ -1361,7 +1385,12 @@ def main():
         print("[오류] 기사를 하나도 못 가져왔어요. 이전 데이터를 그대로 둡니다.", file=sys.stderr)
         sys.exit(1)
 
-    scored = score_terms(articles, keywords)
+    people_extract = find_people(articles)
+    person_names = frozenset(people_extract.names)
+    raw = score_terms(articles, keywords)
+    scored, single = title_rule(raw, person_names)
+    print(f"한 단어 제목이라 점수를 깎은 키워드: {len(single)}개 "
+          f"(위쪽 10개: {', '.join([kw for _, kw, *_ in raw if kw in single][:10])})")
     old_cats = old.get("categories", {})
 
     result = {
@@ -1369,12 +1398,12 @@ def main():
         "total_articles": len(articles),
         "total_sources": len({a["source"] for a in articles}),
         "top": pick(scored, TOP_N, old_rank_map(old.get("top")), link_cat, TOP_CAT_CAP),
-        "rising": rising(scored, now, link_cat),
-        "people": pick(score_terms(articles, find_people(articles)), PEOPLE_N,
+        "rising": rising(scored, now, link_cat, single),
+        "people": pick(score_terms(articles, people_extract), PEOPLE_N,
                        old_rank_map(old.get("people")), link_cat, PEOPLE_CAT_CAP, 5),
         "categories": {
             cid: {"name": cat["name"],
-                  "issues": pick(score_terms(per_cat[cid], keywords), CAT_N,
+                  "issues": pick(title_rule(score_terms(per_cat[cid], keywords), person_names)[0], CAT_N,
                                  old_rank_map(old_cats.get(cid, {}).get("issues")))}
             for cid, cat in CATEGORIES.items()
         },
@@ -1398,7 +1427,7 @@ def main():
     result["_img"] = attach_images(result, old.get("_img"), now, press_arts)
 
     # 이슈 상세 페이지용 데이터 (issues.json) + 온도 기록
-    kw_arts = {kw: arts for _, kw, _, _, arts in scored}
+    kw_arts = {kw: arts for _, kw, _, _, arts in raw}
     details, result["_hist"] = build_details(result, kw_arts, vids, community, now, old.get("_hist"))
     clean(result["top"]); clean(result["people"])
     for c in result["categories"].values():

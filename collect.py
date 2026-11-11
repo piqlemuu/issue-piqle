@@ -30,7 +30,9 @@ from pathlib import Path
 TOP_N = 20            # '지금 뜨는 이슈' 개수
 CAT_N = 20            # 분야별 이슈 개수
 PEOPLE_N = 10         # 이슈人 개수
-RISING_N = 10         # 치고 올라오는 이슈 개수
+RISING_N = 5          # 치고 올라오는 이슈 개수
+RISING_MIN_RATIO = 1.5  # 최근 3시간 기사가 그 전 3시간보다 이만큼 이상 늘어야 '급부상' (새로 등장한 이슈는 통과)
+RISING_SKIP_TOP = 5   # 실시간 순위 이 순위 안에 이미 있는 이슈는 급부상에서 빼요 (0 = 빼지 않음)
 RISING_PER_CAT = 2    # 분야마다 최대 몇 개까지 (먼저 분야마다 1개씩, 남으면 2개째)
 NEWS_PER_ISSUE = 5    # 첫 화면에서 이슈마다 보여줄 관련 기사 수
 MAX_AGE_HOURS = 24    # 이 시간보다 오래된 기사는 버림
@@ -466,7 +468,7 @@ def old_rank_map(lst, key="keyword"):
     return {x[key]: x["rank"] for x in lst} if lst is not None else None
 
 
-def rising(scored, now, link_cat=None, single=frozenset()):
+def rising(scored, now, link_cat=None, single=frozenset(), exclude=()):
     """최근 RISING_HOURS 시간에 기사가 몰린 이슈. 모자라면 최근 기사 증가가 큰 순으로 채움.
     분야(정치·경제…)마다 먼저 1개씩 고르고, 자리가 남으면 분야당 2개까지 채움.
     single 에 든 키워드(한 단어 제목)는 여기서도 점수를 깎아요."""
@@ -493,13 +495,24 @@ def rising(scored, now, link_cat=None, single=frozenset()):
     strict.sort(key=lambda x: (-x[0], x[1]))
     loose.sort(key=lambda x: (-x[0], x[1]))
 
-    cands, used = [], []
+    # 실시간 순위 위쪽에 이미 있는 이슈 (키워드나 제목이 같으면 같은 이슈)
+    skip_kw = {it["keyword"] for it in exclude}
+    skip_title = {it.get("title") or it["keyword"] for it in exclude}
+    cands, used, titles = [], [], set()
     for c in strict + loose:                              # 기사가 70% 넘게 겹치면 같은 이슈로 봄
-        ids = {a["link"] for a in c[4]}
+        kw, arts = c[1], c[4]
+        last3, prev3 = metrics(arts)
+        if prev3 and last3 / prev3 < RISING_MIN_RATIO:    # 별로 안 늘었으면 '급부상'이 아니에요
+            continue
+        title = make_title(kw, arts)
+        if kw in skip_kw or title in skip_title or title in titles:
+            continue                                      # 실시간 순위와 겹치거나, 제목이 같은 이슈가 이미 있음
+        ids = {a["link"] for a in arts}
         if any(len(ids & u) / len(ids) > 0.7 for u in used):
             continue
         used.append(ids)
-        cands.append((len(cands), cat_of(c[4], link_cat), c))
+        titles.add(title)
+        cands.append((len(cands), cat_of(arts, link_cat), c))
 
     picked, per = [], Counter()
     for limit in range(1, RISING_PER_CAT + 1):            # 1바퀴: 분야마다 1개 → 2바퀴: 2개째
@@ -1469,13 +1482,14 @@ def main():
     print(f"한 단어 제목이라 점수를 깎은 키워드: {len(single)}개 "
           f"(위쪽 10개: {', '.join([kw for _, kw, *_ in raw if kw in single][:10])})")
     old_cats = old.get("categories", {})
+    top_list = pick(scored, TOP_N, old_rank_map(old.get("top")), link_cat, TOP_CAT_CAP)
 
     result = {
         "updated": now.isoformat(timespec="minutes"),
         "total_articles": len(articles),
         "total_sources": len({a["source"] for a in articles}),
-        "top": pick(scored, TOP_N, old_rank_map(old.get("top")), link_cat, TOP_CAT_CAP),
-        "rising": rising(scored, now, link_cat, single),
+        "top": top_list,
+        "rising": rising(scored, now, link_cat, single, top_list[:RISING_SKIP_TOP]),
         "people": pick(score_terms(articles, people_extract), PEOPLE_N,
                        old_rank_map(old.get("people")), link_cat, PEOPLE_CAT_CAP, 5),
         "categories": {

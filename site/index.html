@@ -247,11 +247,9 @@ function renderCats() {
     `<button role="tab" id="tab-${id}" aria-selected="${id === curCat}" aria-controls="cat-box" data-id="${id}">${esc(c.name)}</button>`).join("");
   $("cat-box").setAttribute("aria-labelledby", "tab-" + curCat);
   const list = DATA?.categories?.[curCat]?.issues || [];
-  $("cat").innerHTML = list.length ? (catOpen ? list.slice(0, 20) : list.slice(0, 5)).map((it, i) => row(it, i + 1, {noCat: true, thumb: true})).join("") : stateMsg("이슈");
-  $("cat-more").hidden = list.length <= 5;
-  $("cat-more").setAttribute("aria-expanded", catOpen);
-  $("cat-more").textContent = catOpen ? "접기" : `${DATA.categories[curCat].name} 이슈 ${Math.min(list.length, 20)}위까지 더 보기`;
-  if (catOpen) { $("cat-box").style.minHeight = ""; return; }
+  const CAT_SHOW = 5;                                      // 분야별 이슈는 5위까지만 보여 줘요 (더 보기 버튼 없음)
+  $("cat").innerHTML = list.length ? list.slice(0, CAT_SHOW).map((it, i) => row(it, i + 1, {noCat: true, thumb: true})).join("") : stateMsg("이슈");
+  $("cat-more").hidden = true;
   catMinH = Math.max(catMinH, $("cat-box").offsetHeight);       // 분야를 바꿔도 화면이 튀지 않게
   $("cat-box").style.minHeight = catMinH ? catMinH + "px" : "";
 }

@@ -157,6 +157,13 @@ HEAD = """<!DOCTYPE html>
 .ex article h2{{font-size:1.125rem;font-weight:700;margin:1.25rem 0 .375rem}}.ex article h2:first-child{{margin-top:0}}
 .ex article p{{margin:.375rem 0}}
 .ex .by{{color:var(--sub);font-size:.8125rem;margin-top:.5rem}}
+.ex .rel .rs{{display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;font-size:.875rem;line-height:1.5;color:var(--sub);margin-top:.125rem}}
+.ex .sec-more{{font-size:.8125rem;font-weight:600;color:var(--sub);white-space:nowrap;align-self:flex-end}}
+.ex .go-home{{margin-top:.75rem;padding:1rem;display:flex;flex-direction:column;gap:.25rem;background:var(--soft)}}
+.ex .go-home b{{font-size:1rem}}.ex .go-home span{{font-size:.875rem;color:var(--sub)}}
+.ex .go-btn{{margin-top:.5rem;display:flex;align-items:center;justify-content:center;min-height:2.75rem;border-radius:10px;background:var(--text);color:var(--card);font-weight:700}}
+.ex .go-wide{{display:grid;grid-template-columns:auto 1fr auto;gap:.75rem;align-items:center;margin-top:.625rem;padding:.875rem 1rem;border-radius:var(--r-card);background:var(--logo);color:#fff}}
+.ex .go-wide .pk{{font-size:1.5rem}}.ex .go-wide b{{display:block;font-size:1rem}}.ex .go-wide small{{display:block;font-size:.8125rem;opacity:.92}}.ex .go-wide .ar{{font-size:1.5rem;font-weight:300}}
 .ex .live{{display:flex;align-items:center;justify-content:center;min-height:2.75rem;margin-top:.75rem;border:1px solid var(--line);border-radius:10px;background:var(--card);font-weight:600}}
 </style>
 <script type="application/ld+json">{ld}</script>
@@ -178,6 +185,35 @@ FOOT = """
 <script>document.querySelectorAll('.bnav a').forEach(a=>{const h=a.getAttribute('href');if(!/^(https?:|\\.\\.\\/|#)/.test(h))a.setAttribute('href','../'+h)})</script>
 </body></html>
 """
+
+
+RELATED_N = 4   # 해설 페이지 '다른 이슈 해설' 개수
+
+
+def related_html(ex, all_explains):
+    """최신 해설부터, 지금 보는 글과 키워드가 다른 해설을 골라 요약 한 줄과 함께 보여 줘요"""
+    seen, others = {ex["keyword"]}, []
+    for o in sorted(all_explains, key=lambda o: o.get("date", ""), reverse=True):
+        if o["title"] == ex["title"] or o["keyword"] in seen:
+            continue
+        seen.add(o["keyword"])
+        others.append(o)
+        if len(others) >= RELATED_N:
+            break
+    if not others:
+        return ""
+    rows = "".join(
+        f'<li><a href="{e(slug(o["title"]))}.html"><span><span class="tt">{e(o["title"])}</span>'
+        + (f'<span class="rs">{e(plain(o["summary"][0]))}</span>' if o.get("summary") else "")
+        + f'<small>{e(o["date"].replace("-", "."))} 해설</small></span><span class="ext" aria-hidden="true">›</span></a></li>'
+        for o in others)
+    return ('<section class="sec"><div class="sec-head"><div><h2>다른 이슈 해설</h2><p>새콤기자가 정리한 다른 이야기도 읽어 보세요</p></div>'
+            '<a class="sec-more" href="./">전체 보기 ›</a></div>'
+            f'<div class="box"><ul class="nlist rel">{rows}</ul></div>'
+            # 해설을 더 둘러본 뒤 홈으로: 이슈피클 색 넓은 버튼
+            '<a class="go-wide" href="../index.html"><span class="pk" aria-hidden="true">🥒</span>'
+            '<span><b>지금 뜨는 이슈 전체 보기</b><small>이슈피클 홈 · 30분마다 갱신</small></span>'
+            '<span class="ar" aria-hidden="true">›</span></a></section>')
 
 
 def build_page(ex, snap, all_explains):
@@ -217,6 +253,11 @@ def build_page(ex, snap, all_explains):
     if art:
         body.append('<article class="box" style="margin-top:.75rem">' + "".join(art)
                     + '<p class="by"><b>새콤기자</b> · 긴 기사도 새콤하게 세 줄로 🥒<br>아래 근거 기사를 바탕으로 정리했어요.</p></article>')
+    # 다 읽은 뒤 홈으로: 질문형 안내 카드
+    body.append('<aside class="box go-home"><b>이 이슈 말고, 오늘은 뭐가 떴을까?</b>'
+                '<span>실시간 순위 1위부터 30분마다 새로 골라 둬요</span>'
+                '<a class="go-btn" href="../index.html">오늘의 이슈 순위 보러 가기 ›</a></aside>')
+    body.append(related_html(ex, all_explains))           # 근거 기사 위: 다른 이슈 해설로 계속 이어 읽기
     if ex["source"]:
         body.append('<section class="sec"><div class="sec-head"><div><h2>근거 기사</h2><p>누르면 원문이 새 창으로 열려요</p></div></div>'
                     '<div class="box"><ul class="nlist">' + "".join(
@@ -242,11 +283,6 @@ def build_page(ex, snap, all_explains):
                         f'<div class="box"><ul class="nlist">{"".join(rows[:6])}</ul></div></section>')
         if snap.get("live"):
             body.append(f'<a class="live" href="../issue.html?k={urllib.parse.quote(ex["keyword"])}">지금 온도·관련 기사 실시간으로 보기 ›</a>')
-    others = [o for o in all_explains if o["title"] != title][:5]
-    if others:
-        body.append('<section class="sec"><div class="sec-head"><div><h2>다른 이슈 해설</h2></div></div><div class="box"><ul class="nlist">'
-                    + "".join(f'<li><a href="{e(slug(o["title"]))}.html"><span><span class="tt">{e(o["title"])}</span>'
-                              f'<small>{e(o["date"].replace("-", "."))}</small></span></a></li>' for o in others) + "</ul></div></section>")
     return head + "\n".join(body) + FOOT
 
 

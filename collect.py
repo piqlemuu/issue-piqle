@@ -121,6 +121,28 @@ SINGLE_TITLE_FACTOR = 0.3   # 점수에 곱하는 값. 1 = 규칙 끄기, 0 = �
 SINGLE_OK = set("""
 """.split())                # 한 단어 제목이어도 깎지 않을 단어 (예: 트럼프). 화제의 인물 이름은 자동으로 안 깎아요.
 
+# 넓은 단어 규칙: '브랜드·참가·판매'처럼 '뷰티 브랜드', '할인 판매' 같은 두 단어 제목은 만들어지지만
+# 여전히 여러 이야기가 섞인 단어도 한 단어 제목처럼 점수를 깎아요 (SINGLE_TITLE_FACTOR 를 같이 써요).
+#   ① 아래 목록에 적은 단어  ② 기사가 BROAD_SPREAD 개 이상 분야에 고루 퍼진 단어 (자동)
+BROAD_WORDS = set("""
+브랜드 참가 판매 가능성 최우수 매출 매장 성장 공략 진출 출시 할인 혜택 고객 소비자 상품 제품
+신제품 연말 내년 글로벌 시장 투자 전략 협업 인기 화제 눈길 관심 주목 성료 선보여 론칭 체험
+대상 아들 딸 남편 아내 차량 콘서트 직장인 공개된 무대 현장 소식
+""".split())
+BROAD_SPREAD = 5            # 기사가 이만큼 많은 분야(10개 중)에 걸쳐 있으면 넓은 단어로 봐요. 0 = 자동 판단 끄기
+
+# 보도자료로 보이는 기사는 점수를 덜 쳐요 (같은 보도자료를 여러 매체가 받아써서 순위가 부풀지 않게)
+PR_WEIGHT = 0.3             # 1 = 규칙 끄기
+PR_SOURCES = {"뉴스와이어", "보도자료", "PR Newswire", "비즈니스와이어", "Business Wire"}
+PR_TITLE = re.compile(
+    r"\[(보도자료|PR|알림|게시판|신상품|신제품|이벤트|출시)\]|"
+    r"(성료|성황리|선봬|선보여|선보인다|론칭|런칭|기획전|프로모션|이벤트 진행|업무협약|MOU|협약 체결|"
+    r"기념 이벤트|할인 행사|특가|오픈 기념|사회공헌|최우수상 수상|대상 수상|기탁)")
+
+# 구글 검색 급상승(실시간 트렌드)에 같은 단어가 있으면 가산점: 1위 ×(1+TREND_MAX_BONUS) … 10위 ×1.05
+TREND_MAX_BONUS = 0.5       # 0 = 가산점 끄기
+TREND_BOOST = {}            # main() 에서 채워요
+
 # 이슈人: 이 단어 바로 앞(또는 뒤)에 붙은 2~4글자를 사람 이름으로 봅니다.
 TITLES_AFTER = set("""
 대통령 전대통령 총리 장관 차관 의원 대표 위원장 원내대표 시장 지사 도지사 구청장 교육감
@@ -299,8 +321,35 @@ def collect_feeds(urls, cutoff):
     return seen
 
 
+def is_pr(a):
+    return a.get("source") in PR_SOURCES or bool(PR_TITLE.search(a.get("title", "")))
+
+
+def trend_boost_map(trends):
+    """급상승 검색어 → {정규화한 단어: 배율}. 검색어 전체와 그 안의 낱말(2글자 이상)을 모두 등록"""
+    out, n = {}, max(len(trends), 1)
+    for t in trends:
+        mult = 1 + TREND_MAX_BONUS * (n + 1 - t["rank"]) / n
+        for w in {normalize(t["keyword"])} | {normalize(strip_josa(x)) for x in tokens(t["keyword"])}:
+            if len(w) >= 2 and w not in STOPWORDS and w.upper() not in STOPWORDS:
+                out[w] = max(out.get(w, 1), mult)
+    return out
+
+
+def trend_mult(kw):
+    k = normalize(kw)
+    if k in TREND_BOOST:
+        return TREND_BOOST[k]
+    best = 1          # 'KBO' ↔ 'kbo리그' 처럼 이슈 단어가 검색어의 절반 이상이면 같은 것으로 봐요
+    for w, m in TREND_BOOST.items():
+        if len(k) >= 2 and ((k in w and len(k) * 2 >= len(w)) or (w in k and len(w) * 2 >= len(k))):
+            best = max(best, m)
+    return best
+
+
 def score_terms(articles, extract, min_sources=2):
-    """단어별로 (점수, 단어, 기사 수, 매체 수, 기사 목록) 을 계산"""
+    """단어별로 (점수, 단어, 기사 수, 매체 수, 기사 목록) 을 계산.
+    보도자료 기사는 PR_WEIGHT 만큼만 치고, 구글 급상승 검색어와 겹치면 가산점을 줘요."""
     stats = defaultdict(list)
     for a in articles:
         for kw in extract(a["title"]):
@@ -308,18 +357,33 @@ def score_terms(articles, extract, min_sources=2):
     out = []
     for kw, arts in stats.items():
         n_src = len({a["source"] for a in arts})
-        if n_src >= min_sources:
-            out.append((n_src * 3 + len(arts), kw, len(arts), n_src, arts))
+        if n_src < min_sources:
+            continue
+        w_src, w_art = defaultdict(float), 0.0
+        for a in arts:
+            w = PR_WEIGHT if is_pr(a) else 1.0
+            w_art += w
+            w_src[a["source"]] = max(w_src[a["source"]], w)
+        score = (sum(w_src.values()) * 3 + w_art) * trend_mult(kw)
+        out.append((round(score, 1), kw, len(arts), n_src, arts))
     out.sort(key=lambda x: (-x[0], x[1]))
     return out
 
 
-def title_rule(scored, keep=frozenset()):
-    """한 단어 제목밖에 못 만드는 키워드(섞인 이슈)는 점수를 깎고 다시 줄 세워요.
+def is_broad(kw, arts, link_cat=None):
+    if kw in BROAD_WORDS:
+        return True
+    if BROAD_SPREAD and link_cat:
+        return len({link_cat[a["link"]] for a in arts if a["link"] in link_cat}) >= BROAD_SPREAD
+    return False
+
+
+def title_rule(scored, keep=frozenset(), link_cat=None):
+    """한 단어 제목밖에 못 만드는 키워드(섞인 이슈)와 넓은 단어는 점수를 깎고 다시 줄 세워요.
     돌려주는 값: (새 점수 목록, 깎인 키워드 모음)"""
     out, single = [], set()
     for score, kw, n_art, n_src, arts in scored:
-        if kw not in keep and kw not in SINGLE_OK and make_title(kw, arts) == kw:
+        if kw not in keep and kw not in SINGLE_OK and (make_title(kw, arts) == kw or is_broad(kw, arts, link_cat)):
             single.add(kw)
             if SINGLE_TITLE_FACTOR <= 0:
                 continue
@@ -345,6 +409,10 @@ def pick(scored, n, old_ranks, link_cat=None, cap=None, per=10):
         if any((kw in it["keyword"] or it["keyword"] in kw)
                and len(ids & {a["link"] for a in it["_arts"]}) / len(ids) > 0.3 for it in issues):
             continue                       # '의장' 과 '국회의장' 처럼 겹치는 단어 → 하나만
+        words = set(make_title(kw, arts).split())
+        if any((it["keyword"] in words or kw in it["title"].split())
+               and len(ids & {a["link"] for a in it["_arts"]}) / len(ids) > 0.15 for it in issues):
+            continue                       # '서울카페쇼 참가' 처럼 이미 뽑힌 이슈 이름이 제목에 들어 있음 → 같은 이슈
         cid = cat_of(arts, link_cat) if link_cat is not None else None
         if cap and cid not in CAP_FREE and cnt[cid] >= cap * (1 + len(issues) // per):
             skipped.append((score, kw, n_art, n_src, arts, cid))
@@ -1387,8 +1455,12 @@ def main():
 
     people_extract = find_people(articles)
     person_names = frozenset(people_extract.names)
+    trends = collect_trends()
+    TREND_BOOST.clear()
+    TREND_BOOST.update(trend_boost_map(trends))
+    print(f"보도자료로 본 기사: {sum(1 for a in articles if is_pr(a))}건 / 급상승 가산 단어: {len(TREND_BOOST)}개")
     raw = score_terms(articles, keywords)
-    scored, single = title_rule(raw, person_names)
+    scored, single = title_rule(raw, person_names, link_cat)
     print(f"한 단어 제목이라 점수를 깎은 키워드: {len(single)}개 "
           f"(위쪽 10개: {', '.join([kw for _, kw, *_ in raw if kw in single][:10])})")
     old_cats = old.get("categories", {})
@@ -1407,7 +1479,7 @@ def main():
                                  old_rank_map(old_cats.get(cid, {}).get("issues")))}
             for cid, cat in CATEGORIES.items()
         },
-        "search": collect_trends(),
+        "search": trends,
     }
     result["wiki"] = collect_wiki(old.get("wiki"), now)
     vids, result["_yt"] = collect_youtube(old.get("_yt"), now)

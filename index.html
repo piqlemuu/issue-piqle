@@ -2,25 +2,437 @@
 <html lang="ko">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>이슈피클 - 뜨는 이슈만 골라 새콤하게 | 실시간 이슈 순위</title>
-<meta name="description" content="언론 보도·검색·커뮤니티 반응을 모아 30분마다 갱신하는 실시간 이슈 순위, 이슈피클로 이동해요.">
+<meta property="og:site_name" content="이슈피클">
+<meta property="og:image" content="https://piqlemuu.github.io/issue-piqle/og.jpg">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta name="twitter:card" content="summary_large_image">
+
+<meta name="description" content="뉴스·검색·영상 데이터를 모아 지금 한국에서 화제인 이슈를 30분마다 온도 순위로 보여드립니다. 실시간 이슈, 이슈 인물, 분야별 이슈, 검색 급상승, 뜨는 영상.">
+<meta name="keywords" content="실시간 이슈, 이슈 순위, 검색어 순위, 실검, 오늘 뉴스, 연예 이슈, 경제 이슈, 인기 영상">
+<meta property="og:title" content="이슈피클 - 뜨는 이슈만 골라 새콤하게">
+<meta property="og:description" content="언론 보도·검색·커뮤니티 반응을 모아 30분마다 갱신하는 실시간 이슈 순위">
+<meta property="og:type" content="website">
 <!-- 검색엔진 주인 확인 (지우지 마세요) -->
-<meta name="naver-site-verification" content="a15c8a5a111fb8f7b309197c41bd7be8d970866b" />
-<link rel="canonical" href="https://piqlemuu.github.io/issue-piqle/">
-<style>
-body{margin:0;min-height:100vh;display:flex;align-items:center;justify-content:center;background:#f2f3f6;color:#111;font-family:-apple-system,BlinkMacSystemFont,"Apple SD Gothic Neo","Noto Sans KR",sans-serif;text-align:center}
-h1{font-size:1.75rem;margin:0 0 .5rem}h1 span{color:#2a72a3}
-p{color:#626873;margin:0 0 1.25rem}
-a{display:inline-block;padding:.75rem 1.5rem;border-radius:10px;background:#2a72a3;color:#fff;text-decoration:none;font-weight:700}
-</style>
+<meta name="google-site-verification" content="fFa15tCNDL9lGcycd2geDuBrjmq7XVXEo61L4eQZm0Y" />
+<!-- 네이버 서치어드바이저 인증 태그를 받으면 여기에 붙여넣으세요 -->
+
+<!-- ▼ [광고 설정 1] 애드센스 승인 후: 아래 주석 기호를 지우고 ca-pub-0000000000000000 을 내 번호로 바꾸세요
+<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-0000000000000000" crossorigin="anonymous"></script>
+-->
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.min.css">
+<link rel="stylesheet" href="style.css">
+<link rel="alternate" type="application/rss+xml" title="이슈피클" href="rss.xml">
+<script>try{var d=document.documentElement,t=localStorage.getItem("theme"),f=localStorage.getItem("fsize");d.setAttribute("data-theme",t||(matchMedia("(prefers-color-scheme: dark)").matches?"dark":"light"));d.setAttribute("data-fs",{l:"l",xl:"xl"}[f]||"m")}catch(e){}</script>
 </head>
 <body>
-<main>
-  <h1>이슈<span>피클</span></h1>
-  <p>뜨는 이슈만 골라 새콤하게</p>
-  <a href="https://piqlemuu.github.io/issue-piqle/">이슈피클로 가기 ›</a>
+<header class="top">
+  <div class="wrap top-in">
+    <h1 class="logo"><a href="index.html">이슈<span>피클</span></a></h1>
+    <button class="icon-btn" id="settings-btn" aria-label="화면 설정" aria-haspopup="dialog" aria-controls="settings">
+      <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.8-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1.1-1.5 1.7 1.7 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.8 1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.5-1.1 1.7 1.7 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.8.3H9a1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.8V9a1.7 1.7 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1z"/></svg>
+    </button>
+  </div>
+</header>
+
+<main class="wrap">
+  <!-- ② 업데이트 시각 · 집계 범위 -->
+  <p class="intro">언론 보도·검색·커뮤니티 반응을 모아 <b>30분마다</b> 갱신하는 실시간 이슈 순위</p>
+  <p class="status" id="status"><i class="dot" aria-hidden="true"></i><span id="updated">불러오는 중…</span></p>
+  <div class="alert" id="alert" role="alert" hidden><span>데이터를 불러오지 못했어요. 인터넷 연결을 확인해 주세요.</span><button id="retry">다시 시도</button></div>
+
+  <!-- ②-2 브리핑: 3시간마다 바뀐 점만 3줄로 -->
+  <section class="brief" id="brief" aria-labelledby="h-brief" hidden>
+    <div class="bhead"><h2 id="h-brief">브리핑</h2><span id="brief-sub">3시간마다 바뀐 점만 정리해요</span></div>
+    <ul class="blist" id="blist"></ul>
+    <a class="bday" id="bday" hidden>📅 오늘 하루 이슈 정리 보기 ›</a>
+    <details class="bprev" id="bprev" hidden><summary>지난 브리핑 보기</summary><div id="bprev-list"></div></details>
+  </section>
+
+  <!-- ③ 실시간 이슈 순위 -->
+  <section class="sec" id="sec-top" aria-labelledby="h-top">
+    <div class="sec-head"><div><h2 id="h-top">실시간 이슈 순위</h2><p>여러 언론사가 함께 다룬 이슈 순서예요</p></div></div>
+    <div class="box"><ol class="rlist" id="top"></ol></div>
+    <button class="more" id="top-more" hidden aria-expanded="false" aria-controls="top"></button>
+  </section>
+
+  <!-- ④ 분야별 이슈 -->
+  <section class="sec" id="sec-cat" aria-labelledby="h-cat">
+    <div class="sec-head"><div><h2 id="h-cat">분야별 이슈</h2><p>관심 있는 분야를 골라 보세요</p></div></div>
+    <div class="tabs" id="chips" role="tablist" aria-label="분야"></div>
+    <div class="box" id="cat-box" role="tabpanel"><ol class="rlist" id="cat"></ol></div>
+    <button class="more" id="cat-more" hidden aria-expanded="false" aria-controls="cat"></button>
+  </section>
+
+  <!-- ⑤ 급부상 이슈 -->
+  <section class="sec" id="sec-rising" aria-labelledby="h-rising">
+    <div class="sec-head"><div><h2 id="h-rising">급부상 이슈</h2><p>최근 몇 시간 사이 기사가 빠르게 늘어난 이슈예요</p></div></div>
+    <div class="cards" id="rising"></div>
+  </section>
+
+  <!-- ⑤-2 이번 달 달라지는 것 (calendar.md) -->
+  <section class="sec" id="sec-cal" aria-labelledby="h-cal" hidden>
+    <div class="sec-head"><div><h2 id="h-cal">📅 다가오는 생활 일정</h2><p>이번 달 시행되거나 바뀌는 제도와 일정이에요</p></div></div>
+    <div class="box"><ol class="rlist" id="cal"></ol></div>
+    <a class="more" id="cal-more" href="m/">월별 달라지는 것 전체 보기 ›</a>
+  </section>
+
+  <!-- ▼ [광고 설정 2] 첫 번째 광고: 애드센스 광고 단위 코드를 이 div 안에 붙여넣으세요 -->
+  <div class="ad-slot" id="ad-1"></div>
+
+  <!-- ⑦ 화제의 인물 -->
+  <section class="sec" id="sec-people" aria-labelledby="h-people">
+    <div class="sec-head"><div><h2 id="h-people">화제의 인물</h2><p>최근 24시간 기사 제목에 이름이 나온 횟수(언급량) 순위예요</p></div></div>
+    <div class="box"><ol class="rlist" id="people"></ol></div>
+    <p class="note">호감도와는 상관없이, 기사 제목에 이름이 나온 횟수와 다룬 매체 수만으로 매긴 순서예요. 같은 기사를 옮겨 실은 것과 사진 기사는 세지 않아요.</p>
+  </section>
+
+  <!-- ▼ [광고 설정 3] 두 번째 광고 -->
+  <div class="ad-slot" id="ad-2"></div>
+
+  <!-- ⑧ 검색 급상승 -->
+  <section class="sec" id="sec-search" aria-labelledby="h-search">
+    <div class="sec-head"><div><h2 id="h-search">검색 급상승</h2><p>구글에서 갑자기 검색이 몰린 키워드 · 출처 구글 트렌드</p></div></div>
+    <div class="box slist"><ol class="rlist" id="search"></ol></div>
+  </section>
+
+  <!-- ⑧-2 커뮤니티 화제 -->
+  <section class="sec" id="sec-buzz" aria-labelledby="h-buzz">
+    <div class="sec-head"><div><h2 id="h-buzz">커뮤니티 화제</h2><p>언론이 '온라인에서 화제'라고 보도한 이야기 · 여러 매체가 다룬 순</p></div></div>
+    <div class="box"><ol class="rlist" id="buzz"></ol></div>
+    <a class="more" id="buzz-report" hidden target="_blank" rel="noopener">📮 커뮤니티 화제 제보하기</a>
+    <p class="note">커뮤니티 글을 직접 가져오지 않고, 그 이야기를 다룬 기사 제목과 링크만 보여 드려요. 📌는 운영자가 직접 고른 이야기예요.</p>
+  </section>
+
+  <!-- ⑨ 밈절임 -->
+  <section class="sec" id="sec-memes" aria-labelledby="h-memes">
+    <div class="sec-head"><div><h2 id="h-memes">밈절임</h2><p>요즘 뜨는 밈을 절임장이 풀어 드려요</p></div></div>
+    <div class="mgrid" id="memes"></div>
+    <a class="more" href="memes.html">밈절임 전체 보기 ›</a>
+  </section>
+
+  <!-- ⑩ 급상승 영상 -->
+  <section class="sec" id="sec-videos" aria-labelledby="h-videos">
+    <div class="sec-head"><div><h2 id="h-videos">급상승 영상</h2><p id="vid-desc">조회수가 빠르게 오르고 있는 유튜브 영상이에요</p></div>
+      <div class="tools"><button class="round-btn" data-rail="videos" data-d="-1" aria-label="이전 영상">‹</button><button class="round-btn" data-rail="videos" data-d="1" aria-label="다음 영상">›</button></div></div>
+    <div class="rail" id="videos"></div>
+    <a class="more" href="content.html">콘텐츠 랭킹 더 보기 ›</a>
+  </section>
+
+  <!-- ⑩-2 위키백과 많이 본 문서 -->
+  <section class="sec" id="sec-wiki" aria-labelledby="h-wiki" hidden>
+    <div class="sec-head"><div><h2 id="h-wiki">어제 많이 찾아본 것</h2><p id="wiki-desc">한국어 위키백과에서 많이 읽힌 문서 · 출처 위키미디어</p></div></div>
+    <div class="box slist"><ol class="rlist" id="wiki"></ol></div>
+  </section>
+
+  <!-- ▼ [광고 설정 4] 세 번째 광고 -->
+  <div class="ad-slot" id="ad-3"></div>
+
+  <!-- ⑪ 사이트 안내 · 정책 -->
+  <footer class="foot">
+    <p><b>이슈피클</b> — 언론사 기사, 구글 검색어, 유튜브 영상을 30분 간격으로 다시 모아 순위를 새로 매겨요. 기사 제목과 링크만 보여드리며, 기사 저작권은 각 언론사에 있습니다.</p>
+    <nav aria-label="사이트 안내"><a href="about.html">이슈피클이란?</a><a href="copyright.html">저작권 정책</a><a href="privacy.html">개인정보처리방침</a><a href="terms.html">이용약관</a><a href="#" class="mail" data-u="etis+uumelqip" data-d="moc.liamg">문의</a></nav>
+    <p>© 2026 이슈피클</p>
+  </footer>
 </main>
-<script>location.replace("https://piqlemuu.github.io/issue-piqle/" + location.search + location.hash);</script>
+
+<nav class="bnav" data-here="home"></nav>
+
+<script src="ui.js"></script>
+<script>
+let DATA = null, FAILED = false, curCat = null, topOpen = false, catOpen = false;
+let EXTRA = {videos: [], memes: []};
+const $ = id => document.getElementById(id);
+const esc = s => String(s ?? "").replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+const url = u => /^https?:\/\//.test(u || "") ? u : "#";
+const issueLink = k => "issue.html?k=" + encodeURIComponent(k);
+const tempWord = t => t >= 80 ? "뜨거움" : t >= 60 ? "들썩임" : t >= 40 ? "따끈함" : "잔잔함";
+const PLAY = '<svg class="play" viewBox="0 0 48 48" aria-hidden="true"><circle cx="24" cy="24" r="22" fill="rgba(0,0,0,.55)"/><path d="M19 15l14 9-14 9z" fill="#fff"/></svg>';
+const ICONS = {
+  news: '<svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="16" rx="2"/><path d="M7 8h10M7 12h10M7 16h6"/></svg>',
+  person: '<svg viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M4 21c1-4 4-6 8-6s7 2 8 6"/></svg>',
+  rise: '<svg viewBox="0 0 24 24"><path d="M3 17l6-6 4 4 8-8"/><path d="M15 7h6v6"/></svg>',
+  meme: '<svg viewBox="0 0 24 24"><path d="M4 5h16v11H9l-5 4z"/></svg>'
+};
+// 숫자 구간 색 (높을수록 빨강 → 주황 → 황토 → 초록)
+const lv = (n, [a, b, c]) => n >= a ? "lv4" : n >= b ? "lv3" : n >= c ? "lv2" : "lv1";
+const tempLv = t => lv(t, [80, 60, 40]);
+const parseTraffic = s => { const m = String(s || "").replace(/,/g, "").match(/([\d.]+)\s*(만|천)?/); return m ? parseFloat(m[1]) * (m[2] === "만" ? 1e4 : m[2] === "천" ? 1e3 : 1) : 0; };
+const CATS = {"연예": "ent", "스포츠": "spo", "생활·경제": "life", "음식·카페": "food", "뷰티·패션": "beauty", "쇼핑·혜택": "shop", "여행·공간": "trip", "문화·여가": "cul", "IT·테크": "it", "시사": "sisa"};
+const catCls = name => CATS[name] ? "c-" + CATS[name] : "";
+const catLbl = name => name ? `<span class="lbl cat ${catCls(name)}">${esc(name)}</span>` : "";
+const M = (...a) => a.filter(Boolean).map(x => `<span class="nw">${x}</span>`).join(" · ");
+function ago(iso) {
+  if (!iso) return "";
+  const m = Math.round((Date.now() - new Date(iso)) / 60000);
+  if (m < 1) return "방금"; if (m < 60) return m + "분 전";
+  const h = Math.floor(m / 60); return h < 24 ? h + "시간 전" : Math.floor(h / 24) + "일 전";
+}
+function korNum(n) {
+  if (n == null) return "";
+  if (n >= 1e8) return (n / 1e8).toFixed(1).replace(/\.0$/, "") + "억";
+  if (n >= 1e4) return Math.round(n / 1e4) + "만";
+  return Number(n).toLocaleString("ko-KR");
+}
+function chg(c) {                                   // 순위 변동: 화살표 + 숫자
+  if (c === "new") return '<span class="lbl new">NEW</span>';
+  if (c > 0) return `<span class="chg up"><span class="sr">순위 </span>▲${c}<span class="sr">계단 상승</span></span>`;
+  if (c < 0) return `<span class="chg down"><span class="sr">순위 </span>▼${-c}<span class="sr">계단 하락</span></span>`;
+  return "";
+}
+function findThumb(word) {                          // 관련 유튜브 썸네일 (뉴스 사진은 저작권 때문에 안 써요)
+  const w = String(word || "").toLowerCase();
+  if (w.length < 2) return "";
+  const v = EXTRA.videos.find(x => x.title && x.title.toLowerCase().includes(w));
+  return v ? v.thumb : "";
+}
+const skRows = n => Array.from({length: n}, () => '<li class="sk-row" aria-hidden="true"><div class="sk sk-l" style="width:45%"></div><div class="sk sk-l" style="width:90%"></div><div class="sk sk-l" style="width:35%"></div></li>').join("");
+function stateMsg(kind, colspan) {                  // 데이터 없음과 불러오기 실패를 구분
+  return FAILED
+    ? `<li class="state">불러오지 못했어요.<button class="more" data-retry>다시 시도</button></li>`
+    : `<li class="state">아직 모인 ${kind}가 없어요. 30분마다 새로 모아요.</li>`;
+}
+
+// ── 순위 한 줄 ──
+function row(it, i, opt = {}) {
+  const latest = it.news?.[0]?.time;
+  const meta = opt.meta ?? ((!opt.noCat && it.cat ? `<span class="mc">${esc(it.cat)} · </span>` : "") + M(`매체 ${it.sources}곳`, latest ? ago(latest) : ""));
+  const th = opt.thumb ? (it.img || findThumb(it.keyword)) : "";
+  return `<li><a class="row ${th ? "has-img" : ""}" href="${issueLink(it.keyword)}">
+    <span class="rank">${i}</span>
+    ${th ? `<img class="th" src="${esc(th)}" alt="" loading="lazy" referrerpolicy="no-referrer" decoding="async" width="74" height="51" onerror="this.parentNode.classList.remove('has-img');this.remove()">` : ""}
+    <span class="mid"><span class="l1">${!opt.noCat ? catLbl(it.cat) : ""}<span class="kw">${esc(opt.useKw ? it.keyword : (it.title || it.keyword))}</span>${opt.noChg ? "" : chg(it.change)}${it.explain ? '<span class="lbl ex">해설</span>' : ""}</span>
+      ${it.headline ? `<span class="hl">${esc(it.headline)}</span>` : ""}
+      <span class="meta">${meta}</span></span>
+    <span class="end">${opt.end ?? `<b class="${tempLv(it.temp)}">${it.temp}°</b><small>${tempWord(it.temp)}</small>`}</span>
+  </a></li>`;
+}
+
+function renderTop() {
+  const list = DATA?.top || [];
+  $("top").innerHTML = list.length ? (topOpen ? list : list.slice(0, 5)).map((it, i) => row(it, i + 1, {thumb: true})).join("") : stateMsg("이슈");
+  $("top-more").hidden = list.length <= 5;
+  $("top-more").setAttribute("aria-expanded", topOpen);
+  $("top-more").textContent = topOpen ? "접기" : `실시간 이슈 ${list.length}위까지 더 보기`;
+}
+
+function risingSide(it) {                            // 오른쪽: 상승 수치 + 비교 기준
+  if (it.ratio != null) return `<b>▲${it.ratio}배</b><small>3시간 전보다</small>`;
+  if (it.is_new) return `<b>▲${it.last3 ?? it.recent}건</b><small>3시간 전엔 0건</small>`;
+  return `<b>▲${it.last3 ?? it.recent}건</b><small>최근 3시간 기사</small>`;
+}
+function renderRising() {
+  const r = DATA?.rising || [];
+  const shown = r;
+  $("rising").innerHTML = r.length ? shown.map(it => {
+    const th = it.img || findThumb(it.keyword);
+    return `<a class="box rcard ${th ? "has-img" : ""}" href="${issueLink(it.keyword)}">
+      ${th ? `<img class="th" src="${esc(th)}" alt="" loading="lazy" referrerpolicy="no-referrer" decoding="async" width="74" height="51" onerror="this.parentNode.classList.remove('has-img');this.remove()">` : ""}
+      <span class="mid"><span class="kw">${it.is_new ? '<span class="lbl new" style="margin-right:.375rem">NEW</span>' : ""}${catLbl(it.cat)}${esc(it.title || it.keyword)}${it.explain ? '<span class="lbl ex">해설</span>' : ""}</span>
+        <span class="hl">${esc(it.headline)}</span>
+        <span class="meta">${M(`<b class="${tempLv(it.temp)}">${it.temp}°</b> ${tempWord(it.temp)}`, it.latest ? ago(it.latest) : "", `매체 ${it.sources}곳`)}</span></span>
+      <span class="end">${risingSide(it)}</span></a>`;
+  }).join("") : `<div class="box"><ul class="rlist">${stateMsg("급부상 이슈")}</ul></div>`;
+}
+
+let catMinH = 0;
+function renderCats() {
+  const cats = Object.entries(DATA?.categories || {});
+  if (!curCat || !DATA?.categories?.[curCat]) curCat = cats[0]?.[0];
+  $("chips").innerHTML = cats.map(([id, c]) =>
+    `<button role="tab" id="tab-${id}" aria-selected="${id === curCat}" aria-controls="cat-box" data-id="${id}">${esc(c.name)}</button>`).join("");
+  $("cat-box").setAttribute("aria-labelledby", "tab-" + curCat);
+  const list = DATA?.categories?.[curCat]?.issues || [];
+  $("cat").innerHTML = list.length ? (catOpen ? list.slice(0, 20) : list.slice(0, 5)).map((it, i) => row(it, i + 1, {noCat: true})).join("") : stateMsg("이슈");
+  $("cat-more").hidden = list.length <= 5;
+  $("cat-more").setAttribute("aria-expanded", catOpen);
+  $("cat-more").textContent = catOpen ? "접기" : `${DATA.categories[curCat].name} 이슈 ${Math.min(list.length, 20)}위까지 더 보기`;
+  if (catOpen) { $("cat-box").style.minHeight = ""; return; }
+  catMinH = Math.max(catMinH, $("cat-box").offsetHeight);       // 분야를 바꿔도 화면이 튀지 않게
+  $("cat-box").style.minHeight = catMinH ? catMinH + "px" : "";
+}
+
+function renderPeople() {
+  const p = DATA?.people || [];
+  $("people").innerHTML = p.length ? p.slice(0, 5).map((it, i) => row(it, i + 1, {
+    noChg: false, useKw: true,
+    meta: M(`매체 ${it.sources}곳`, it.news?.[0]?.time ? ago(it.news[0].time) : ""),
+    end: `<b class="${lv(it.articles, [50, 20, 10])}">${it.articles}건</b><small>언급</small>`
+  })).join("") : stateMsg("인물");
+}
+
+function renderSearch() {
+  const s = DATA?.search || [];
+  $("search").innerHTML = s.length ? s.slice(0, 5).map((it, i) => {
+    const link = it.news?.[0]?.link || "https://www.google.com/search?q=" + encodeURIComponent(it.keyword);
+    return `<li><a class="row" href="${esc(url(link))}" target="_blank" rel="noopener nofollow">
+      <span class="rank">${i + 1}</span>
+      <span class="mid"><span class="kw">${esc(it.keyword)}</span>${it.news?.[0]?.title ? `<span class="meta">${esc(it.news[0].title)}</span>` : ""}</span>
+      <span class="end"><b class="${lv(parseTraffic(it.traffic), [5e4, 2e4, 5e3])}">${esc(it.traffic || "")}</b><small>검색량</small></span></a></li>`;
+  }).join("") : stateMsg("검색어");
+}
+
+// ── 브리핑 ──
+const HIDE_BRIEF = ["관심이 식은 이슈"];                       // 첫 화면 브리핑에서 숨길 줄
+const shownLines = lines => (lines || []).filter(l => !HIDE_BRIEF.includes(l.label));
+function briefLines(lines, small) {
+  return shownLines(lines).map(l => {
+    const SHORT = {"지금 1위": "지금 1위", "새로 10위 안에": "새로 진입", "순위 급상승": "순위 상승", "가장 빨리 뜨는 중": "급부상",
+                   "관심이 식은 이슈": "관심 하락", "검색 1위": "검색 1위", "커뮤니티 화제": "커뮤니티"};
+    const body = `<span class="bl">${esc(SHORT[l.label] || l.label)}</span><b>${esc(l.text)}</b>${!small && l.sub ? `<small>${esc(l.sub)}</small>` : ""}`;
+    if (l.k) return `<li><a href="${issueLink(l.k)}">${body}</a></li>`;
+    if (l.link) return `<li><a href="${esc(url(l.link))}" target="_blank" rel="noopener nofollow">${body}</a></li>`;
+    return `<li><div>${body}</div></li>`;
+  }).join("");
+}
+const hourLabel = iso => { const d = new Date(iso); return `${d.getHours()}시 ${String(d.getMinutes()).padStart(2, "0")}분`; };
+function renderBrief() {
+  const b = DATA?.brief;
+  if (!b || !b.lines?.length) { $("brief").hidden = true; return; }
+  $("brief").hidden = false;
+  const H = [0, 9, 12, 15, 18, 21], h = new Date(b.slot || b.time).getHours();
+  const nx = H.find(x => x > h);
+  $("h-brief").textContent = `⏱ ${h === 0 ? "자정" : h + "시"} 브리핑`;
+  $("brief-sub").textContent = `직전 브리핑과 비교해 바뀐 점 · 다음 브리핑 ${nx == null ? "자정" : nx + "시"}`;
+  $("blist").innerHTML = briefLines(shownLines(b.lines).filter(l => l.label !== "지금 1위").slice(0, 3), true);
+  const day = (DATA.updated || "").slice(0, 10);
+  if (/^\d{4}-\d{2}-\d{2}$/.test(day)) { $("bday").href = `b/${day}.html`; $("bday").hidden = false; }
+  const prev = (DATA.brief_hist || []).filter(x => x.time !== b.time);
+  $("bprev").hidden = !prev.length;
+  $("bprev-list").innerHTML = prev.map(x => `<p class="bt">${new Date(x.slot || x.time).getHours()}시 브리핑</p><ul class="blist sm">${briefLines(x.lines, true)}</ul>`).join("");
+}
+
+// ── 다가오는 생활 일정 ──
+function renderCal() {
+  const c = DATA?.calendar || [];
+  $("sec-cal").hidden = !c.length;
+  if (!c.length) return;
+  $("cal").innerHTML = c.map(it => `<li><a class="row" href="m/${esc(it.month)}.html#${encodeURIComponent(it.anchor || "")}">
+      <span class="rank" style="font-size:.8125rem;line-height:1.4;font-weight:700">${/중$/.test(it.when) ? "이달" : esc(it.when.replace(/ \(.\)$/, "").replace("월 ", "/").replace("일", ""))}</span>
+      <span class="mid"><span class="l1"><span class="kw">${esc(it.title)}</span></span>
+        <span class="meta">${M(esc(it.when), esc(it.cat || ""))}</span></span>
+      <span class="end"><b class="${/^D-[0-7]$|오늘/.test(it.dday) ? "lv4" : ""}">${esc(it.dday)}</b></span></a></li>`).join("");
+}
+
+// ── 커뮤니티 화제 ──
+// [제보 버튼] 구글 설문지 주소를 따옴표 안에 넣으면 '제보하기' 버튼이 나타나요
+const REPORT_URL = "";
+function renderBuzz() {
+  const b = DATA?.buzz || {}, picks = b.picks || [], auto = b.auto || [];
+  const pin = picks.map(it => {
+    const tag = it.link ? "a" : "div";
+    const attr = it.link ? ` href="${esc(url(it.link))}" target="_blank" rel="noopener nofollow"` : "";
+    return `<li><${tag} class="row"${attr}>
+      <span class="rank" aria-label="운영자 추천">📌</span>
+      <span class="mid"><span class="kw">${esc(it.title)}</span>${it.desc ? `<span class="hl" style="-webkit-line-clamp:2">${esc(it.desc)}</span>` : ""}
+        <span class="meta">${M("운영자 추천", it.date ? it.date.slice(5).replace("-", ".") : "")}</span></span>
+      <span class="end"></span></${tag}></li>`;
+  });
+  const rows = auto.map((it, i) => `<li><a class="row" href="${esc(url(it.link))}" target="_blank" rel="noopener nofollow">
+      <span class="rank">${i + 1}</span>
+      <span class="mid"><span class="kw" style="font-size:.9375rem;font-weight:600">${esc(it.title)}</span>
+        <span class="meta">${M(esc(it.source), it.sources > 1 ? `${it.sources}개 매체 보도` : "", it.time ? ago(it.time) : "")}</span></span>
+      <span class="end"></span></a></li>`);
+  $("buzz").innerHTML = pin.concat(rows).join("") || stateMsg("커뮤니티 화제");
+  if (/^https?:\/\//.test(REPORT_URL)) { $("buzz-report").href = REPORT_URL; $("buzz-report").hidden = false; }
+}
+
+function renderWiki() {
+  const w = DATA?.wiki?.items || [];
+  $("sec-wiki").hidden = !w.length;
+  if (!w.length) return;
+  const d = DATA.wiki.date.split("-");
+  $("wiki-desc").textContent = `${+d[1]}월 ${+d[2]}일 한국어 위키백과에서 많이 읽힌 문서 · 출처 위키미디어`;
+  $("wiki").innerHTML = w.slice(0, 5).map((it, i) => `<li><a class="row" href="${esc(url(it.link))}" target="_blank" rel="noopener nofollow">
+      <span class="rank">${i + 1}</span>
+      <span class="mid"><span class="kw">${esc(it.title)}</span>${chg(it.change)}</span>
+      <span class="end"><b class="${lv(it.views, [5e4, 2e4, 1e4])}">${korNum(it.views)}</b><small>조회</small></span></a></li>`).join("");
+}
+
+function renderVideos() {
+  const v = DATA?.videos || [];
+  const hasGain = v.some(x => x.gain != null);
+  $("vid-desc").textContent = hasGain ? "조회수가 빠르게 오르고 있는 유튜브 영상이에요" : "지금 한국 유튜브 인기 영상이에요";
+  $("videos").innerHTML = v.length ? v.slice(0, 8).map(x => `
+    <a class="box vc" href="${esc(url(x.link))}" target="_blank" rel="noopener" aria-label="${esc(x.title)} (유튜브에서 보기)">
+      <span class="vt">${x.thumb ? `<img src="${esc(url(x.thumb))}" alt="" loading="lazy">` : ""}${PLAY}</span>
+      <span class="vb"><span class="t">${esc(x.title)}</span>
+        <span class="m">${M(esc(x.channel), `조회수 <b class="${lv(x.views, [1e6, 1e5, 1e4])}">${korNum(x.views)}회</b>`)}</span>
+        ${x.gain != null ? `<span class="g ${lv(x.gain, [5e5, 1e5, 2e4])}">▲${korNum(x.gain)}회 · 최근 ${x.hrs}시간</span>` : ""}</span>
+    </a>`).join("") : `<div class="box" style="flex:1"><ul class="rlist">${stateMsg("영상")}</ul></div>`;
+}
+
+function memeImg(m) {
+  if (m.img && (/^https?:\/\//.test(m.img) || /^[\w.-]+\.(svg|png|jpe?g|webp|gif)$/i.test(m.img))) return m.img;
+  if (m.page && /^[\w.-]+\.html$/.test(m.page)) return m.page.replace(/\.html$/, ".svg");
+  return findThumb(m.word);
+}
+function renderMemes() {
+  const ms = EXTRA.memes.slice(0, 2);
+  $("memes").innerHTML = ms.length ? ms.map(m => {
+    const img = memeImg(m);
+    const href = m.page && /^[\w.-]+\.html$/.test(m.page) ? m.page : "memes.html#" + encodeURIComponent(m.word);
+    return `<a class="box mcard ${img ? "" : "noimg"}" href="${esc(href)}">
+      ${img ? `<span class="mi"><img src="${esc(img)}" alt="${esc(m.word)} 대표 이미지" loading="lazy" onerror="this.parentNode.remove()"></span>` : ""}
+      <span><h3>${esc(m.word)}</h3><p>${esc(m.meaning)}</p>${m.date ? `<time datetime="${esc(m.date)}">${esc(m.date.replace(/-/g, "."))}</time>` : ""}</span></a>`;
+  }).join("") : `<div class="box"><ul class="rlist"><li class="state">아직 정리된 밈이 없어요.</li></ul></div>`;
+}
+
+function render() {
+  renderBrief(); renderTop(); renderRising(); renderCal(); renderCats(); renderPeople(); renderBuzz(); renderSearch(); renderWiki(); renderVideos(); renderMemes();
+}
+
+async function loadExtra() {                       // 썸네일 찾기용 영상 목록 + 밈절임
+  try { const c = await (await fetch("content.json?t=" + Date.now())).json(); EXTRA.videos = c.youtube || []; } catch (e) {}
+  try { const m = await (await fetch("memes.json?t=" + Date.now())).json(); EXTRA.memes = m.dictionary || []; } catch (e) {}
+  if (window.__EXTRA__) Object.assign(EXTRA, window.__EXTRA__);
+  if (DATA) { renderTop(); renderRising(); }
+  renderMemes();
+}
+
+async function load() {
+  try {
+    const d = window.__DATA__ || await (await fetch("data.json?t=" + Date.now())).json();
+    if (!d || !d.updated) throw new Error("bad data");
+    DATA = d; FAILED = false;
+    const t = new Date(DATA.updated);
+    $("updated").textContent = t.toLocaleString("ko-KR", {month: "numeric", day: "numeric", hour: "2-digit", minute: "2-digit"})
+      + " 업데이트" + (DATA.total_sources ? ` · 언론사 ${DATA.total_sources}곳 기사 ${DATA.total_articles}건 집계` : "");
+    $("alert").hidden = true;
+  } catch (e) {
+    if (!DATA) { FAILED = true; $("updated").textContent = "업데이트 정보를 불러오지 못했어요"; }
+    $("alert").hidden = false;
+  }
+  render();
+}
+
+// ── 버튼 ──
+$("top-more").onclick = () => { topOpen = !topOpen; renderTop(); };
+$("cat-more").onclick = () => { catOpen = !catOpen; renderCats(); };
+$("chips").onclick = e => { const b = e.target.closest("button"); if (b) { curCat = b.dataset.id; catOpen = false; renderCats(); b.focus(); } };
+$("chips").onkeydown = e => {                       // 탭은 좌우 화살표로도 이동
+  if (!["ArrowLeft", "ArrowRight"].includes(e.key)) return;
+  const bs = [...$("chips").querySelectorAll("button")], i = bs.findIndex(b => b.dataset.id === curCat);
+  const n = bs[(i + (e.key === "ArrowRight" ? 1 : -1) + bs.length) % bs.length];
+  if (n) { curCat = n.dataset.id; catOpen = false; renderCats(); $("tab-" + curCat).focus(); }
+};
+document.querySelectorAll("[data-rail]").forEach(b => b.onclick = () => {
+  const rail = $(b.dataset.rail); rail.scrollBy({left: b.dataset.d * rail.clientWidth * .8});
+});
+$("retry").onclick = () => load();
+document.addEventListener("click", e => { if (e.target.closest("[data-retry]")) load(); });
+
+// 처음 불러오는 동안 자리 잡아 두기 (화면이 덜 튀어요)
+["top", "cat", "people", "search"].forEach(id => $(id).innerHTML = skRows(id === "search" ? 3 : 5));
+$("rising").innerHTML = '<div class="box"><ul class="rlist">' + skRows(5) + "</ul></div>";
+$("videos").innerHTML = '<div class="box vc" aria-hidden="true"><span class="vt sk"></span><span class="vb"><span class="sk sk-l" style="display:block;width:90%"></span></span></div>'.repeat(2);
+
+load();
+loadExtra();
+setInterval(load, 10 * 60 * 1000);   // 화면을 켜 두면 10분마다 새로고침
+</script>
 </body>
 </html>

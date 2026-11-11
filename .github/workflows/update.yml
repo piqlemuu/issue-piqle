@@ -36,6 +36,7 @@ jobs:
           KOBIS_API_KEY: ${{ secrets.KOBIS_API_KEY }}
           NAVER_CLIENT_ID: ${{ secrets.NAVER_CLIENT_ID }}
           NAVER_CLIENT_SECRET: ${{ secrets.NAVER_CLIENT_SECRET }}
+          KAKAO_REST_KEY: ${{ secrets.KAKAO_REST_KEY }}
 
       - name: 결과 저장
         run: |

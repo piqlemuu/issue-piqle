@@ -276,8 +276,10 @@ function renderSearch() {
 }
 
 // ── 브리핑 ──
+const HIDE_BRIEF = ["관심이 식은 이슈"];                       // 첫 화면 브리핑에서 숨길 줄
+const shownLines = lines => (lines || []).filter(l => !HIDE_BRIEF.includes(l.label));
 function briefLines(lines, small) {
-  return lines.map(l => {
+  return shownLines(lines).map(l => {
     const SHORT = {"지금 1위": "지금 1위", "새로 10위 안에": "새로 진입", "순위 급상승": "순위 상승", "가장 빨리 뜨는 중": "급부상",
                    "관심이 식은 이슈": "관심 하락", "검색 1위": "검색 1위", "커뮤니티 화제": "커뮤니티"};
     const body = `<span class="bl">${esc(SHORT[l.label] || l.label)}</span><b>${esc(l.text)}</b>${!small && l.sub ? `<small>${esc(l.sub)}</small>` : ""}`;
@@ -295,7 +297,7 @@ function renderBrief() {
   const nx = H.find(x => x > h);
   $("h-brief").textContent = `⏱ ${h === 0 ? "자정" : h + "시"} 브리핑`;
   $("brief-sub").textContent = `직전 브리핑과 비교해 바뀐 점 · 다음 브리핑 ${nx == null ? "자정" : nx + "시"}`;
-  $("blist").innerHTML = briefLines(b.lines.filter(l => l.label !== "지금 1위").slice(0, 3), true);
+  $("blist").innerHTML = briefLines(shownLines(b.lines).filter(l => l.label !== "지금 1위").slice(0, 3), true);
   const day = (DATA.updated || "").slice(0, 10);
   if (/^\d{4}-\d{2}-\d{2}$/.test(day)) { $("bday").href = `b/${day}.html`; $("bday").hidden = false; }
   const prev = (DATA.brief_hist || []).filter(x => x.time !== b.time);

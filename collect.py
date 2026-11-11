@@ -570,6 +570,9 @@ def find_people(articles):
 
 
 # ───────────── 검색 급상승 ─────────────
+HANGUL = re.compile("[가-힣]")
+
+
 def collect_trends():
     try:
         root = ET.fromstring(fetch(TRENDS_URL))
@@ -585,9 +588,13 @@ def collect_trends():
                 if url.startswith("http"):
                     news.append({"title": text(c, "news_item_title"),
                                  "source": text(c, "news_item_source"), "link": url})
-        out.append({"rank": i, "keyword": text(it, "title"),
+        kw = text(it, "title")
+        # 한글도 없고 한국어 기사도 없는 검색어(예: xsmb 같은 외국 복권·사이트 이름)는 뺌
+        if not HANGUL.search(kw) and not any(HANGUL.search(n["title"]) for n in news):
+            continue
+        out.append({"rank": len(out) + 1, "keyword": kw,
                     "traffic": text(it, "approx_traffic"), "news": news[:3]})
-        if i >= 10:
+        if len(out) >= 10:
             break
     return out
 

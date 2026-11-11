@@ -1174,9 +1174,11 @@ def attach_images(result, cache, now, press_arts):
     if not ARTICLE_IMAGES:
         return cache
     press = {press_key(a["title"]): (a["link"], a.get("img", "")) for a in press_arts}
-    groups = [result["rising"], result["top"], result["people"]] + [c["issues"] for c in result["categories"].values()]
-    groups.append(result.get("search") or [])                          # 검색 급상승: 관련 기사 사진
-    groups.append([{"_arts": [b]} for b in (result.get("buzz") or {}).get("auto") or []])   # 커뮤니티 화제: 기사 자체에 사진을 붙여요
+    # 커뮤니티 화제·검색 급상승을 맨 앞에: 개수가 적어서 먼저 찾아도 부담이 작고,
+    # 뒤에 두면 한 번에 찾는 한도(IMG_NEW_PER_RUN)를 앞 순위들이 다 써 버려서 사진이 영영 안 붙어요
+    groups = [[{"_arts": [b]} for b in (result.get("buzz") or {}).get("auto") or []],   # 커뮤니티 화제: 기사 자체에 사진
+              result.get("search") or []]                                             # 검색 급상승: 관련 기사 사진
+    groups += [result["rising"], result["top"], result["people"]] + [c["issues"] for c in result["categories"].values()]
     tried = found = 0
     for g in groups:
         for it in g:

@@ -1,0 +1,48 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1050 600" width="1050" height="600">
+  <defs>
+    <pattern id="stripe" width="64" height="64" patternUnits="userSpaceOnUse" patternTransform="rotate(135)">
+      <rect width="64" height="64" fill="#FFF1E6"/>
+      <rect width="16" height="64" fill="#F9D9DF"/>
+    </pattern>
+  </defs>
+  <g font-family="'Pretendard Variable',Pretendard,'Apple SD Gothic Neo','Noto Sans KR','Malgun Gothic',sans-serif">
+  <rect width="1050" height="600" fill="url(#stripe)"/>
+
+  <!-- 지원금 신청서 카드 -->
+  <g transform="rotate(-3 330 300)">
+    <rect x="70" y="92" width="540" height="420" rx="26" fill="#ffffff" stroke="#1F2A37" stroke-width="6"/>
+    <rect x="70" y="92" width="540" height="78" rx="26" fill="#7A4A36"/>
+    <rect x="70" y="140" width="540" height="30" fill="#7A4A36"/>
+    <text x="108" y="144" font-size="32" font-weight="900" fill="#ffffff">빼난지원금 지급 안내</text>
+    <text x="108" y="232" font-size="26" font-weight="700" fill="#3a4654">대상</text>
+    <text x="196" y="232" font-size="26" font-weight="800" fill="#1F2A37">11월 11일 빼빼로 0개 수령자</text>
+    <line x1="108" y1="254" x2="572" y2="254" stroke="#E8E2D8" stroke-width="3"/>
+    <text x="108" y="300" font-size="26" font-weight="700" fill="#3a4654">지급</text>
+    <text x="196" y="300" font-size="26" font-weight="800" fill="#1F2A37">막대 과자 1통 (위로 포함)</text>
+    <line x1="108" y1="322" x2="572" y2="322" stroke="#E8E2D8" stroke-width="3"/>
+    <text x="108" y="368" font-size="26" font-weight="700" fill="#3a4654">신청</text>
+    <text x="196" y="368" font-size="26" font-weight="800" fill="#1F2A37">친구 단톡방에서 수시 접수</text>
+    <!-- 도장 -->
+    <g transform="rotate(-14 470 446)">
+      <circle cx="470" cy="446" r="58" fill="none" stroke="#E5483A" stroke-width="7"/>
+      <text x="470" y="440" text-anchor="middle" font-size="26" font-weight="900" fill="#E5483A">지급</text>
+      <text x="470" y="472" text-anchor="middle" font-size="26" font-weight="900" fill="#E5483A">완료</text>
+    </g>
+  </g>
+
+  <!-- 막대 과자 -->
+  <g stroke="#1F2A37" stroke-width="6">
+    <g transform="translate(700 150) rotate(-16)"><rect width="30" height="300" rx="15" fill="#F2C27B"/><path d="M0 110V15a15 15 0 0 1 30 0v95z" fill="#6B3A2A"/></g>
+    <g transform="translate(780 132) rotate(4)"><rect width="30" height="300" rx="15" fill="#F2C27B"/><path d="M0 110V15a15 15 0 0 1 30 0v95z" fill="#F59BB3"/></g>
+    <g transform="translate(860 148) rotate(20)"><rect width="30" height="300" rx="15" fill="#F2C27B"/><path d="M0 110V15a15 15 0 0 1 30 0v95z" fill="#6B3A2A"/></g>
+  </g>
+
+  <!-- 제목 스티커 -->
+  <g transform="rotate(3 800 520)">
+    <rect x="640" y="478" width="350" height="78" rx="16" fill="#FFD84A" stroke="#1F2A37" stroke-width="6"/>
+    <text x="815" y="530" text-anchor="middle" font-size="36" font-weight="900" fill="#1F2A37">빼난지원금 뜻?</text>
+  </g>
+  <rect x="40" y="36" width="150" height="44" rx="22" fill="#1F2A37"/>
+  <text x="115" y="66" text-anchor="middle" font-size="22" font-weight="800" fill="#ffffff">밈절임 🫙</text>
+  </g>
+</svg>

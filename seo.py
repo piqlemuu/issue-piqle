@@ -395,7 +395,7 @@ def build_day(day, rec, day_explains, prev_day, next_day, now_iso, summaries=Non
         bl = ""
         for b in rec["briefs"]:
             h = int(b["slot"][11:13])
-            lines = "".join(f'<li>{e(l["icon"])} {e(l["label"])}: <b>{e(l["text"])}</b></li>' for l in b["lines"])
+            lines = "".join(f'<li>{e(l["icon"])} {e(l["label"])}: <b>{e(l["text"])}</b></li>' for l in b["lines"] if l.get("label") != "관심이 식은 이슈")
             bl += f'<h3 style="font-size:.9375rem;margin:.875rem 0 .25rem">{"자정" if h == 0 else str(h) + "시"} 브리핑</h3><div class="box"><ul class="tl">{lines}</ul></div>'
         body.append(f'<section class="sec"><div class="sec-head"><div><h2>시간대별 브리핑</h2><p>3시간마다 순위가 어떻게 바뀌었는지예요</p></div></div>{bl}</section>')
     nav = '<nav class="dnav" aria-label="다른 날">'

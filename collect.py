@@ -143,6 +143,9 @@ PR_TITLE = re.compile(
 TREND_MAX_BONUS = 0.5       # 0 = 가산점 끄기
 TREND_BOOST = {}            # main() 에서 채워요
 
+# 브리핑에 '관심이 식은 이슈'(💤) 줄을 넣을지. False = 넣지 않아요 (홈·날짜별 페이지 모두)
+SHOW_GONE = False
+
 # 이슈人: 이 단어 바로 앞(또는 뒤)에 붙은 2~4글자를 사람 이름으로 봅니다.
 TITLES_AFTER = set("""
 대통령 전대통령 총리 장관 차관 의원 대표 위원장 원내대표 시장 지사 도지사 구청장 교육감
@@ -1347,7 +1350,7 @@ def make_brief(result, old, now):
         lines.append({"icon": "📈", "label": "가장 빨리 뜨는 중", "text": f"{name(r)} ({how})", "k": r["keyword"]})
     now_kw = {x["keyword"] for x in top[:10]}
     gone = [it for it in (old.get("top") or [])[:5] if it["keyword"] not in now_kw]
-    if gone:
+    if gone and SHOW_GONE:                 # '관심이 식은 이슈' 줄은 기본으로 꺼 둬요 (위쪽 SHOW_GONE)
         lines.append({"icon": "💤", "label": "관심이 식은 이슈", "text": ", ".join(name(it) for it in gone[:2])})
     if result.get("search"):
         lines.append({"icon": "🔎", "label": "검색 1위", "text": result["search"][0]["keyword"]})

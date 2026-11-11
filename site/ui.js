@@ -77,7 +77,7 @@
     var items = [
       ["home", "index.html", "홈", '<path d="M3 10.5 12 3l9 7.5V20a1 1 0 0 1-1 1h-5v-6H9v6H4a1 1 0 0 1-1-1z"/>'],
       ["rank", pre + "#sec-top", "이슈 랭킹", '<path d="M6 20V11M12 20V4M18 20v-6"/>'],
-      ["people", pre + "#sec-people", "인물", '<circle cx="12" cy="8" r="4"/><path d="M4 21c1-4 4-6 8-6s7 2 8 6"/>'],
+      ["cal", pre + "#sec-cal", "일정", '<rect x="3" y="5" width="18" height="16" rx="2"/><path d="M3 10h18M8 3v4M16 3v4"/>'],
       ["content", "content.html", "콘텐츠", '<rect x="3" y="5" width="18" height="14" rx="2"/><path d="m10 9 5 3-5 3z"/>'],
       ["memes", "memes.html", "밈절임", '<path d="M4 5h16v11H9l-5 4z"/><path d="M8.5 10.5h.01M12 10.5h.01M15.5 10.5h.01"/>']
     ];

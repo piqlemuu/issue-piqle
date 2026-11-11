@@ -1197,13 +1197,24 @@ def attach_images(result, cache, now, press_arts):
                     hit = (a["link"], a.get("img", ""))       # 주 매체 기사: 원문 주소를 이미 알아요
                 else:
                     hit = press.get(press_key(a["title"]))
+                c = cache.get(a["link"])
+                # 예전에 사진을 못 찾아 '없음'으로 기억해 둔 기사도, 카카오로는 아직 안 찾아봤으면 한 번 더 찾아봐요
+                retry = bool(c) and not c[0] and KAKAO_KEY and (len(c) < 3 or c[2] != "k")
+                if c and not retry:
+                    continue
+                used_kakao = False
                 if not hit and KAKAO_KEY and tried < IMG_NEW_PER_RUN and a is arts[0]:
+                    used_kakao = True
+                    tried += 1
                     try:
                         u = kakao_url(a["title"], a["source"])
                         hit = (u, "") if u else None
-                    except Exception:
+                    except Exception as e:
+                        print(f"[경고] 카카오 검색 실패 ({e})", file=sys.stderr)
                         hit = None
-                if not hit or a["link"] in cache:
+                if not hit:
+                    if used_kakao:                          # 카카오로도 못 찾음 → 다시 찾지 않게 기억
+                        cache[a["link"]] = ["", now.isoformat(timespec="minutes"), "k"]
                     continue
                 url, img = hit
                 if not img and tried < IMG_NEW_PER_RUN:
@@ -1212,7 +1223,7 @@ def attach_images(result, cache, now, press_arts):
                         img = og_image(url)
                     except Exception:
                         img = ""
-                cache[a["link"]] = [img, now.isoformat(timespec="minutes")]
+                cache[a["link"]] = [img, now.isoformat(timespec="minutes")] + (["k"] if used_kakao else [])
                 if img:
                     found += 1
                     a["img"] = img

@@ -87,7 +87,7 @@ KAKAO_KEY = os.environ.get("KAKAO_REST_KEY", "").strip()   # 있으면 기사 �
 
 # 기사 사진 썸네일: 기사 원문의 대표 사진(og:image)을 작게 보여줘요. 끄려면 False 로.
 ARTICLE_IMAGES = True
-IMG_NEW_PER_RUN = 40   # 한 번 실행할 때 새로 찾아볼 기사 수 (사이트에 부담 안 주게)
+IMG_NEW_PER_RUN = 60   # 한 번 실행할 때 새로 찾아볼 기사 수 (사이트에 부담 안 주게)
 IMG_KEEP_H = 48        # 찾아 둔 사진 주소를 기억하는 시간
 NAVER_ID = os.environ.get("NAVER_CLIENT_ID", "").strip()          # 네이버 데이터랩 (선택)
 NAVER_SECRET = os.environ.get("NAVER_CLIENT_SECRET", "").strip()
@@ -1161,10 +1161,12 @@ def attach_images(result, cache, now, press_arts):
         return cache
     press = {press_key(a["title"]): (a["link"], a.get("img", "")) for a in press_arts}
     groups = [result["rising"], result["top"], result["people"]] + [c["issues"] for c in result["categories"].values()]
+    groups.append(result.get("search") or [])                          # 검색 급상승: 관련 기사 사진
+    groups.append([{"_arts": [b]} for b in (result.get("buzz") or {}).get("auto") or []])   # 커뮤니티 화제: 기사 자체에 사진을 붙여요
     tried = found = 0
     for g in groups:
         for it in g:
-            arts = sorted(it.get("_arts") or it.get("news") or [], key=lambda a: a["time"], reverse=True)
+            arts = sorted(it.get("_arts") or it.get("news") or [], key=lambda a: a.get("time", ""), reverse=True)
             for a in arts:
                 if a["link"] in cache and cache[a["link"]][0]:
                     a["img"] = cache[a["link"]][0]; break

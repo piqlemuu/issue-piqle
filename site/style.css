@@ -8,7 +8,7 @@
   --down:#45677d;                          /* 하락 */
   --live:#e5483c;
   --logo:#2a72a3;
-  --lv4:#b2565c; --lv3:#a8643c; --lv2:#85703a; --lv1:#58794a;   /* 숫자 구간 색: 높음→낮음 */
+  --lv4:#DC2F3A; --lv3:#C9480B; --lv2:#9A6A00; --lv1:#13863A;   /* 숫자 구간 색: 높음→낮음 */
   --shadow:0 1px 2px rgba(17,17,17,.04),0 1px 4px rgba(17,17,17,.04);
   --r-card:12px; --r-thumb:8px;
   --pad:16px;
@@ -19,7 +19,7 @@
 html[data-theme=soft]{
   --bg:#f4f1e8; --card:#fbf9f3; --text:#1a1a17; --sub:#5c584e;
   --line:#e3ddcf; --soft:#ece7da; --red:#b0232a; --down:#3f5f72;
-  --lv4:#a8525a; --lv3:#9f5f38; --lv2:#7d6a36; --lv1:#537346;
+  --lv4:#D42B36; --lv3:#C2440A; --lv2:#946500; --lv1:#11813A;
 }
 html[data-theme=dark]{
   --bg:#111214; --card:#1a1c20; --text:#eceef1; --sub:#a8aeb8;
@@ -27,7 +27,7 @@ html[data-theme=dark]{
   --navy:#dfe5f0; --on-navy:#1a1c20;
   --red:#ff7a7f; --down:#9cbfd4; --live:#ff6a5f;
   --shadow:none; --on-hot:#111214;
-  --lv4:#e3a7aa; --lv3:#e0b896; --lv2:#d4c595; --lv1:#aac79c;
+  --lv4:#FF8A8F; --lv3:#FFA94D; --lv2:#FFD43B; --lv1:#7EDC8E;
   --logo:#6fb3e0;
   color-scheme:dark;
 }

@@ -73,6 +73,14 @@
     <div class="cards" id="rising"></div>
   </section>
 
+  <!-- ⑧-2 커뮤니티 화제 -->
+  <section class="sec" id="sec-buzz" aria-labelledby="h-buzz">
+    <div class="sec-head"><div><h2 id="h-buzz">커뮤니티 화제</h2><p>언론이 '온라인에서 화제'라고 보도한 이야기 · 여러 매체가 다룬 순</p></div></div>
+    <div class="box"><ol class="rlist" id="buzz"></ol></div>
+    <a class="more" id="buzz-report" hidden target="_blank" rel="noopener">📮 커뮤니티 화제 제보하기</a>
+    <p class="note">커뮤니티 글을 직접 가져오지 않고, 그 이야기를 다룬 기사의 제목·대표 사진·링크를 보여 드려요. 📌는 운영자가 직접 고른 이야기예요.</p>
+  </section>
+
   <!-- ⑤-2 이번 달 달라지는 것 (calendar.md) -->
   <section class="sec" id="sec-cal" aria-labelledby="h-cal" hidden>
     <div class="sec-head"><div><h2 id="h-cal">📅 다가오는 생활 일정</h2><p>이번 달 시행되거나 바뀌는 제도와 일정이에요</p></div></div>
@@ -97,14 +105,6 @@
   <section class="sec" id="sec-search" aria-labelledby="h-search">
     <div class="sec-head"><div><h2 id="h-search">검색 급상승</h2><p>구글에서 갑자기 검색이 몰린 키워드 · 출처 구글 트렌드</p></div></div>
     <div class="box slist"><ol class="rlist" id="search"></ol></div>
-  </section>
-
-  <!-- ⑧-2 커뮤니티 화제 -->
-  <section class="sec" id="sec-buzz" aria-labelledby="h-buzz">
-    <div class="sec-head"><div><h2 id="h-buzz">커뮤니티 화제</h2><p>언론이 '온라인에서 화제'라고 보도한 이야기 · 여러 매체가 다룬 순</p></div></div>
-    <div class="box"><ol class="rlist" id="buzz"></ol></div>
-    <a class="more" id="buzz-report" hidden target="_blank" rel="noopener">📮 커뮤니티 화제 제보하기</a>
-    <p class="note">커뮤니티 글을 직접 가져오지 않고, 그 이야기를 다룬 기사 제목과 링크만 보여 드려요. 📌는 운영자가 직접 고른 이야기예요.</p>
   </section>
 
   <!-- ⑨ 밈절임 -->
@@ -189,6 +189,7 @@ function findThumb(word) {                          // 관련 유튜브 썸네�
   const v = EXTRA.videos.find(x => x.title && x.title.toLowerCase().includes(w));
   return v ? v.thumb : "";
 }
+const thumbImg = th => th ? `<img class="th" src="${esc(th)}" alt="" loading="lazy" referrerpolicy="no-referrer" decoding="async" width="74" height="51" onerror="this.parentNode.classList.remove('has-img');this.remove()">` : "";
 const skRows = n => Array.from({length: n}, () => '<li class="sk-row" aria-hidden="true"><div class="sk sk-l" style="width:45%"></div><div class="sk sk-l" style="width:90%"></div><div class="sk sk-l" style="width:35%"></div></li>').join("");
 function stateMsg(kind, colspan) {                  // 데이터 없음과 불러오기 실패를 구분
   return FAILED
@@ -246,7 +247,7 @@ function renderCats() {
     `<button role="tab" id="tab-${id}" aria-selected="${id === curCat}" aria-controls="cat-box" data-id="${id}">${esc(c.name)}</button>`).join("");
   $("cat-box").setAttribute("aria-labelledby", "tab-" + curCat);
   const list = DATA?.categories?.[curCat]?.issues || [];
-  $("cat").innerHTML = list.length ? (catOpen ? list.slice(0, 20) : list.slice(0, 5)).map((it, i) => row(it, i + 1, {noCat: true})).join("") : stateMsg("이슈");
+  $("cat").innerHTML = list.length ? (catOpen ? list.slice(0, 20) : list.slice(0, 5)).map((it, i) => row(it, i + 1, {noCat: true, thumb: true})).join("") : stateMsg("이슈");
   $("cat-more").hidden = list.length <= 5;
   $("cat-more").setAttribute("aria-expanded", catOpen);
   $("cat-more").textContent = catOpen ? "접기" : `${DATA.categories[curCat].name} 이슈 ${Math.min(list.length, 20)}위까지 더 보기`;
@@ -268,8 +269,9 @@ function renderSearch() {
   const s = DATA?.search || [];
   $("search").innerHTML = s.length ? s.slice(0, 5).map((it, i) => {
     const link = it.news?.[0]?.link || "https://www.google.com/search?q=" + encodeURIComponent(it.keyword);
-    return `<li><a class="row" href="${esc(url(link))}" target="_blank" rel="noopener nofollow">
-      <span class="rank">${i + 1}</span>
+    const th = it.img || it.news?.find(n => n.img)?.img || findThumb(it.keyword);
+    return `<li><a class="row ${th ? "has-img" : ""}" href="${esc(url(link))}" target="_blank" rel="noopener nofollow">
+      <span class="rank">${i + 1}</span>${thumbImg(th)}
       <span class="mid"><span class="kw">${esc(it.keyword)}</span>${it.news?.[0]?.title ? `<span class="meta">${esc(it.news[0].title)}</span>` : ""}</span>
       <span class="end"><b class="${lv(parseTraffic(it.traffic), [5e4, 2e4, 5e3])}">${esc(it.traffic || "")}</b><small>검색량</small></span></a></li>`;
   }).join("") : stateMsg("검색어");
@@ -331,8 +333,8 @@ function renderBuzz() {
         <span class="meta">${M("운영자 추천", it.date ? it.date.slice(5).replace("-", ".") : "")}</span></span>
       <span class="end"></span></${tag}></li>`;
   });
-  const rows = auto.map((it, i) => `<li><a class="row" href="${esc(url(it.link))}" target="_blank" rel="noopener nofollow">
-      <span class="rank">${i + 1}</span>
+  const rows = auto.map((it, i) => `<li><a class="row ${it.img ? "has-img" : ""}" href="${esc(url(it.link))}" target="_blank" rel="noopener nofollow">
+      <span class="rank">${i + 1}</span>${thumbImg(it.img)}
       <span class="mid"><span class="kw" style="font-size:.9375rem;font-weight:600">${esc(it.title)}</span>
         <span class="meta">${M(esc(it.source), it.sources > 1 ? `${it.sources}개 매체 보도` : "", it.time ? ago(it.time) : "")}</span></span>
       <span class="end"></span></a></li>`);

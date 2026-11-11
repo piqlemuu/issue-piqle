@@ -293,11 +293,19 @@ function renderSearch() {                           // 검색 급상승: 옆으�
 // ── 브리핑 ──
 const HIDE_BRIEF = ["관심이 식은 이슈"];                       // 첫 화면 브리핑에서 숨길 줄
 const shownLines = lines => (lines || []).filter(l => !HIDE_BRIEF.includes(l.label));
+// "GS건설 아파트 (3시간 전보다 2.3배)" → "GS건설 아파트" + 작은 색 글씨 "기사 2.3배" (가격으로 오해하지 않게 '기사'를 붙임)
+function briefText(t) {
+  let tag = "";
+  const m = String(t || "")
+    .replace(/\s*\(3시간 전보다 ([\d.]+)배\)/, (_, r) => { tag = `기사 ${r}배`; return ""; })
+    .replace(/\s*\(새로 등장\)/, () => { tag = "새로 등장"; return ""; });
+  return esc(m) + (tag ? ` <em class="bx">${esc(tag)}</em>` : "");
+}
 function briefLines(lines, small) {
   return shownLines(lines).map(l => {
     const SHORT = {"지금 1위": "지금 1위", "새로 10위 안에": "새로 진입", "순위 급상승": "순위 상승", "가장 빨리 뜨는 중": "급부상",
                    "관심이 식은 이슈": "관심 하락", "검색 1위": "검색 1위", "커뮤니티 화제": "커뮤니티"};
-    const body = `<span class="bl">${esc(SHORT[l.label] || l.label)}</span><b>${esc(l.text)}</b>${!small && l.sub ? `<small>${esc(l.sub)}</small>` : ""}`;
+    const body = `<span class="bl">${esc(SHORT[l.label] || l.label)}</span><b>${briefText(l.text)}</b>${!small && l.sub ? `<small>${esc(l.sub)}</small>` : ""}`;
     if (l.k) return `<li><a href="${issueLink(l.k)}">${body}</a></li>`;
     if (l.link) return `<li><a href="${esc(url(l.link))}" target="_blank" rel="noopener nofollow">${body}</a></li>`;
     return `<li><div>${body}</div></li>`;
@@ -317,7 +325,7 @@ function renderBrief() {
   const lead = ORDER.map(k => lines.find(l => l.label === k)).find(Boolean) || lines[0];
   const LEAD = {"가장 빨리 뜨는 중": "급부상", "새로 10위 안에": "새로 진입", "순위 급상승": "순위 상승", "커뮤니티 화제": "커뮤니티", "검색 1위": "검색 1위"};
   if (!lead) { $("brief").hidden = true; return; }
-  $("bhead-txt").innerHTML = `<i>${esc(LEAD[lead.label] || lead.label)}</i> ${esc(lead.text)}`;
+  $("bhead-txt").innerHTML = `<i>${esc(LEAD[lead.label] || lead.label)}</i> ${briefText(lead.text)}`;
   $("blist").innerHTML = briefLines(lines, true);
   const day = (DATA.updated || "").slice(0, 10);
   if (/^\d{4}-\d{2}-\d{2}$/.test(day)) { $("bday").href = `b/${day}.html`; $("bday").hidden = false; }

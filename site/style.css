@@ -321,6 +321,7 @@ html[data-theme=dark] .doc a{color:#9fc0ff}
 .bopen::after{content:" ▾"}
 .bline[open] .bopen::after{content:" ▴"}
 .bline[open] .bopen{font-size:0}.bline[open] .bopen::after{font-size:.8125rem}
+.bx{font-style:normal;font-size:.75rem;font-weight:600;color:var(--lv3);margin-left:.125rem;white-space:nowrap}
 .bbody{padding:0 1rem .875rem;border-top:1px solid var(--line)}
 .bsub{margin:.5rem 0 .25rem;color:var(--sub);font-size:.8125rem}
 .blist{list-style:none;margin:0;padding:0}

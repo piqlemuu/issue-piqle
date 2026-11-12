@@ -1080,16 +1080,48 @@ def google_to_url(link):
     return u.group(0).decode("ascii", "ignore") if u else ""
 
 
+GNEWS_UA = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0 Safari/537.36"
+
+
+def gnews_url(link):
+    """구글 뉴스 주소(news.google.com/rss/articles/…)를 언론사 원문 주소로 풀어요 (키 필요 없음)"""
+    aid = urllib.parse.urlparse(link).path.rstrip("/").split("/")[-1]
+    if not aid:
+        return ""
+    req = urllib.request.Request("https://news.google.com/rss/articles/" + aid + "?hl=ko&gl=KR&ceid=KR:ko",
+                                 headers={"User-Agent": GNEWS_UA})
+    with urllib.request.urlopen(req, timeout=10) as r:
+        page = r.read(600_000).decode("utf-8", "ignore")
+    sg = re.search(r'data-n-a-sg="([^"]+)"', page)
+    ts = re.search(r'data-n-a-ts="([^"]+)"', page)
+    if not (sg and ts):
+        return ""
+    inner = ('["garturlreq",[["X","X",["X","X"],null,null,1,1,"KR:ko",null,1,null,null,null,null,null,0,1],'
+             '"X","X",1,[1,1,1],1,1,null,0,0,null,0],"%s",%s,"%s"]') % (aid, ts.group(1), sg.group(1))
+    body = "f.req=" + urllib.parse.quote(json.dumps([[["Fbv4je", inner]]]))
+    req = urllib.request.Request("https://news.google.com/_/DotsSplashUi/data/batchexecute",
+                                 data=body.encode(), method="POST",
+                                 headers={"User-Agent": GNEWS_UA,
+                                          "Content-Type": "application/x-www-form-urlencoded;charset=UTF-8"})
+    with urllib.request.urlopen(req, timeout=10) as r:
+        txt = r.read().decode("utf-8", "ignore")
+    part = txt.split("\n\n", 1)[1] if "\n\n" in txt else txt
+    data = json.loads(part)
+    u = json.loads(data[0][2])[1]
+    return u if isinstance(u, str) and u.startswith("http") and "news.google.com" not in u else ""
+
+
 def kakao_url(title, source):
     """카카오 검색 API로 같은 제목의 원문 주소 찾기 (KAKAO_REST_KEY 가 있을 때만)"""
     if not KAKAO_KEY:
         return ""
-    q = urllib.parse.urlencode({"query": title, "size": 3})
+    clean = re.sub(r"[\"'“”‘’`…\[\]<>《》「」]", " ", title)        # 따옴표·말줄임표가 있으면 검색이 잘 안 돼요
+    q = urllib.parse.urlencode({"query": re.sub(r"\s+", " ", clean).strip(), "size": 10})
     req = urllib.request.Request("https://dapi.kakao.com/v2/search/web?" + q,
                                  headers={"Authorization": "KakaoAK " + KAKAO_KEY})
     with urllib.request.urlopen(req, timeout=10) as r:
         docs = json.loads(r.read()).get("documents", [])
-    key = normalize(title)[:20]
+    key = normalize(title)[:12]
     for d in docs:
         if key and key in normalize(re.sub(r"<[^>]+>", "", d.get("title", ""))):
             return d.get("url", "")
@@ -1199,10 +1231,19 @@ def attach_images(result, cache, now, press_arts):
                     hit = press.get(press_key(a["title"]))
                 c = cache.get(a["link"])
                 # 예전에 사진을 못 찾아 '없음'으로 기억해 둔 기사도, 카카오로는 아직 안 찾아봤으면 한 번 더 찾아봐요
-                retry = bool(c) and not c[0] and KAKAO_KEY and (len(c) < 3 or c[2] != "k")
+                retry = bool(c) and not c[0] and (len(c) < 3 or c[2] != "g")   # 원문 주소 찾기를 아직 안 해 본 '사진 없음'은 한 번 더
                 if c and not retry:
                     continue
                 used_kakao = False
+                if not hit and "news.google.com" in a["link"] and tried < IMG_NEW_PER_RUN and a is arts[0]:
+                    used_kakao = True                   # 'k' 표시: 원문 주소 찾기를 이미 해 봤다는 뜻
+                    tried += 1
+                    try:
+                        u = gnews_url(a["link"])
+                        hit = (u, "") if u else None
+                    except Exception as e:
+                        print(f"[경고] 구글 뉴스 주소 풀기 실패 ({type(e).__name__})", file=sys.stderr)
+                        hit = None
                 if not hit and KAKAO_KEY and tried < IMG_NEW_PER_RUN and a is arts[0]:
                     used_kakao = True
                     tried += 1
@@ -1214,7 +1255,7 @@ def attach_images(result, cache, now, press_arts):
                         hit = None
                 if not hit:
                     if used_kakao:                          # 카카오로도 못 찾음 → 다시 찾지 않게 기억
-                        cache[a["link"]] = ["", now.isoformat(timespec="minutes"), "k"]
+                        cache[a["link"]] = ["", now.isoformat(timespec="minutes"), "g"]
                     continue
                 url, img = hit
                 if not img and tried < IMG_NEW_PER_RUN:
@@ -1223,7 +1264,7 @@ def attach_images(result, cache, now, press_arts):
                         img = og_image(url)
                     except Exception:
                         img = ""
-                cache[a["link"]] = [img, now.isoformat(timespec="minutes")] + (["k"] if used_kakao else [])
+                cache[a["link"]] = [img, now.isoformat(timespec="minutes"), "g"]   # 'g': 이 방식으로 찾아봤음
                 if img:
                     found += 1
                     a["img"] = img

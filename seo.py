@@ -105,7 +105,7 @@ def hl(escaped):
     return re.sub(r"!!(.+?)!!", r'<mark class="warn">\1</mark>', escaped)          # 주의 문구 (과태료·마감일 등)
 
 
-HL_STYLE = "background:linear-gradient(transparent 58%,rgba(255,214,0,.55) 58%);color:inherit;font-weight:700;padding:0 2px"
+HL_STYLE = "background:none;color:inherit;font-weight:700"
 WARN_STYLE = "background:none;color:inherit;text-decoration:underline wavy #e5484d;text-underline-offset:4px"
 H3_STYLE = "font-size:1.05rem;font-weight:800;margin:1.4rem 0 .4rem;padding-left:.6rem;border-left:4px solid #14a38b;line-height:1.5"
 FIG_STYLE = "margin:1rem 0"

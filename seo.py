@@ -105,8 +105,62 @@ def hl(escaped):
     return re.sub(r"!!(.+?)!!", r'<mark class="warn">\1</mark>', escaped)          # 주의 문구 (과태료·마감일 등)
 
 
+HL_STYLE = "background:linear-gradient(transparent 58%,rgba(255,214,0,.55) 58%);color:inherit;font-weight:700;padding:0 2px"
+WARN_STYLE = "background:none;color:inherit;text-decoration:underline wavy #e5484d;text-underline-offset:4px"
+H3_STYLE = "font-size:1.05rem;font-weight:800;margin:1.4rem 0 .4rem;padding-left:.6rem;border-left:4px solid #14a38b;line-height:1.5"
+FIG_STYLE = "margin:1rem 0"
+IMG_STYLE = "display:block;width:100%;height:auto;border-radius:12px"
+CAP_STYLE = "font-size:.8rem;color:#888;margin-top:.35rem;line-height:1.5"
+
+
+def rich(escaped):
+    """==형광펜==, !!주의!!, **굵게** 를 꾸며요. 이미 e()로 감싼 글자에 써요."""
+    s = hl(escaped)
+    s = s.replace('<mark class="hl">', f'<mark class="hl" style="{HL_STYLE}">')
+    s = s.replace('<mark class="warn">', f'<mark class="warn" style="{WARN_STYLE}">')
+    return re.sub(r"\*\*(.+?)\*\*", r"<strong>\1</strong>", s)
+
+
 def paras(text):
-    return "".join(f"<p>{hl(e(p.strip()))}</p>" for p in re.split(r"\n\s*\n", text) if p.strip())
+    """문단을 HTML로 바꿔요.
+    ▶ 소제목          → 작은 제목
+    사진: 주소 | 설명 | 출처  → 사진과 설명
+    **굵게**, ==형광펜==, !!주의!!  → 강조
+    """
+    out = []
+    for p in re.split(r"\n\s*\n", text):
+        lines = [ln.strip() for ln in p.strip().split("\n") if ln.strip()]
+        buf = []
+
+        def flush():
+            if buf:
+                out.append(f"<p>{rich(e(' '.join(buf)))}</p>")
+                buf.clear()
+
+        for ln in lines:
+            if ln.startswith("▶"):
+                flush()
+                out.append(f'<h3 style="{H3_STYLE}">{rich(e(ln[1:].strip()))}</h3>')
+            elif re.match(r"^사진\s*[:：]", ln):
+                flush()
+                parts = [x.strip() for x in re.sub(r"^사진\s*[:：]\s*", "", ln).split("|")]
+                src = parts[0]
+                if not re.match(r"^(https?://|\.\./|/)", src):
+                    continue
+                cap = parts[1] if len(parts) > 1 else ""
+                credit = parts[2] if len(parts) > 2 else ""
+                caption = e(cap) + (f" · 출처 {e(credit)}" if credit else "")
+                out.append(
+                    f'<figure style="{FIG_STYLE}"><img src="{e(src)}" alt="{e(cap)}" loading="lazy" style="{IMG_STYLE}">'
+                    + (f'<figcaption style="{CAP_STYLE}">{caption}</figcaption>' if caption else "")
+                    + "</figure>"
+                )
+            else:
+                buf.append(ln)
+        flush()
+    return "".join(out)
+
+
 
 
 def chart_svg(hist, temp):

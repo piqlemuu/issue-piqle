@@ -97,6 +97,7 @@ DATALAB_EVERY_H = 3   # 네이버 데이터랩 확인 간격(시간)
 
 # 순위에서 뺄 흔한 단어 (이상한 키워드가 순위에 뜨면 여기에 추가하세요)
 STOPWORDS = set("""
+AI ai
 최대 최소 가을 겨울 여름 봄 사과 오전 오후 이날 당시 직접 최근 결국 다시 계속
 기자 뉴스 속보 단독 종합 오늘 내일 어제 올해 지난 이번 관련 대한 위해 통해 위한
 있는 없는 한다 했다 하는 하고 것으로 대해 이후 가능 사진 영상 포토 공개 발표 진행
@@ -1622,6 +1623,28 @@ def main():
           f"박스오피스 {len(bo['items']) if bo else 0} · 넷플릭스 {len(nf['tv']) + len(nf['films']) if nf else 0} · "
           f"밈 후보 {len(memes)}")
 
+
+# ── AI 뒤에 붙은 단어를 묶어 한 키워드로 만들어요 (예: "AI 반도체" → AI반도체) ──
+# AI_SKIP: AI 뒤에 와도 너무 넓어서 묶지 않을 단어 (띄어쓰기로 더 넣을 수 있어요)
+AI_SKIP = set("""
+글로벌 시대 기반 활용 기술 서비스 산업 시장 기업 도입 전환 경쟁 개발 플랫폼
+솔루션 전략 혁신 생태계 역량 분야 관련 시스템 모델 투자 확대 강화 협력
+""".split())
+
+_keywords_original = keywords
+
+
+def keywords(title):
+    found = _keywords_original(title)
+    toks = tokens(title)
+    for i, w in enumerate(toks[:-1]):
+        if w.upper() != "AI":
+            continue
+        nxt = strip_josa(toks[i + 1])
+        if not re.fullmatch(r"[가-힣]{2,}", nxt) or nxt in STOPWORDS or nxt in QUERY_WORDS or nxt in AI_SKIP:
+            continue
+        found.add("AI" + nxt)
+    return found
 
 if __name__ == "__main__":
     main()

@@ -79,6 +79,7 @@
       ["rank", pre + "#sec-top", "이슈 랭킹", '<path d="M6 20V11M12 20V4M18 20v-6"/>'],
       ["cal", pre + "#sec-cal", "일정", '<rect x="3" y="5" width="18" height="16" rx="2"/><path d="M3 10h18M8 3v4M16 3v4"/>'],
       ["content", "content.html", "콘텐츠", '<rect x="3" y="5" width="18" height="14" rx="2"/><path d="m10 9 5 3-5 3z"/>'],
+      ["explain", "i/index.html", "새콤 해설", '<path d="M6 3h9l4 4v14H6z"/><path d="M14 3v5h5M9 13h6M9 17h4"/>'],
       ["memes", "memes.html", "밈절임", '<path d="M4 5h16v11H9l-5 4z"/><path d="M8.5 10.5h.01M12 10.5h.01M15.5 10.5h.01"/>']
     ];
     nav.setAttribute("aria-label", "주요 메뉴");

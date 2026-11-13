@@ -719,3 +719,218 @@ def build_all(details, old_snaps, now_iso, memes_dict, daily=None):
     (SITE / "rss.xml").write_text(rss, encoding="utf-8")
     print(f"검색용 페이지: 해설 {len(explains)}개 · 날짜별 {len(daily or {})}일(검색 노출 {len(good_days)}일) · 사이트맵 {len(urls)}개 주소")
     return link_map, snaps
+
+# ==================================================================
+# 새콤 해설 블로그 꾸미기 (seo.py 맨 아래에 붙여 넣는 부분)
+# - 해설 모음(i/index.html): 소개 + 분야 탭 + 대표 그림 카드
+# - 해설 글(i/*.html): 위쪽 '새콤 해설' 링크, 아래쪽 작성자 상자·이전/다음 글·함께 읽을 해설
+# - 문제가 생기면 원래 모양으로 그대로 만들어져요(사이트가 멈추지 않아요).
+# ==================================================================
+import html as _sk_html
+import re as _sk_re
+
+HL_STYLE = "background:none;color:inherit;font-weight:700"  # 형광펜은 사이트 기본 민트색만
+
+SK_NAME = "새콤 해설"
+SK_INTRO = "새콤기자가 오늘 화제인 이슈를 무슨 일인지, 왜 화제인지 쉽게 풀어 드려요"
+SK_AUTHOR = "새콤기자"
+SK_AUTHOR_LINE = "복잡한 이슈를 새콤하게, 핵심만 쉽게 풀어 드려요."
+SK_TABS = ["생활·경제", "연예", "커뮤니티", "스포츠"]
+SK_COLORS = ["#e6f4ff", "#d9f3ec", "#fff1e0", "#efedff", "#fde3dd"]
+
+SK_CSS = """<style>
+.sk{max-width:720px;margin:0 auto;padding:0 0 1rem;word-break:keep-all}
+.sk *{box-sizing:border-box}
+.sk-intro{margin:.5rem 0 1rem}
+.sk-intro h1{font-size:1.5rem;font-weight:900;margin:0}
+.sk-intro p{color:var(--sub);font-size:.875rem;margin:.25rem 0 0;line-height:1.6}
+.sk-tabs{display:flex;gap:.5rem;overflow-x:auto;padding-bottom:.25rem;margin-bottom:.75rem}
+.sk-tab{flex:none;font:inherit;font-size:.8125rem;font-weight:700;padding:.4rem .8rem;border-radius:999px;
+ background:var(--card);border:1px solid var(--line);color:var(--sub);cursor:pointer}
+.sk-tab.on{background:var(--text);color:var(--bg);border-color:var(--text)}
+.sk a{color:inherit;text-decoration:none}
+.sk-card{display:block;background:var(--card);border:1px solid var(--line);border-radius:16px;overflow:hidden;margin-top:.75rem}
+.sk-feat img{display:block;width:100%;height:auto}
+.sk-feat .sk-t{padding:.9rem 1rem 1rem}
+.sk-feat h2{font-size:1.2rem;line-height:1.4;margin:.4rem 0 0;font-weight:900}
+.sk-row{display:flex;gap:.75rem;padding:.75rem}
+.sk-th{flex:none;width:112px;height:76px;border-radius:10px;background-size:cover;background-position:center;
+ display:flex;align-items:center;justify-content:center;text-align:center;font-size:.8125rem;font-weight:900;
+ line-height:1.35;padding:.4rem;color:#1d1d1f}
+.sk-row h3{font-size:.95rem;line-height:1.4;margin:.3rem 0 0;font-weight:800}
+.sk-sum{font-size:.85rem;color:var(--sub);line-height:1.55;margin:.35rem 0 0}
+.sk-meta{font-size:.75rem;color:var(--sub);margin-top:.4rem;opacity:.85}
+.sk-chip{display:inline-block;font-size:.72rem;font-weight:700;padding:.15rem .5rem;border-radius:6px;background:#e9f7f3;color:#0f8a75}
+.sk-new{display:inline-block;margin-left:.35rem;font-size:.7rem;font-weight:800;color:#fff;background:#e5484d;padding:.1rem .4rem;border-radius:5px}
+.sk-sec{font-size:1rem;font-weight:900;margin:1.4rem 0 .25rem}
+.sk-author{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:1rem;margin-top:1rem}
+.sk-author b{font-size:1rem}.sk-author p{margin:.2rem 0 0;font-size:.85rem;color:var(--sub);line-height:1.6}
+.sk-author a{color:#14a38b;font-weight:700}
+.sk-pn{display:flex;gap:.6rem;margin-top:.75rem}
+.sk-pn a,.sk-pn span.sk-empty{flex:1;background:var(--card);border:1px solid var(--line);border-radius:14px;padding:.75rem;
+ font-size:.85rem;font-weight:700;line-height:1.4}
+.sk-pn small{display:block;font-size:.72rem;color:var(--sub);font-weight:500;margin-bottom:.25rem}
+.sk-pn span.sk-empty{visibility:hidden}
+.sk-grid{display:grid;grid-template-columns:1fr 1fr;gap:.6rem}
+.sk-grid .sk-card{margin-top:.5rem}
+.sk-grid .sk-th{width:100%;height:86px;border-radius:0}
+.sk-grid .sk-tx{padding:.55rem .65rem .7rem;font-size:.82rem;font-weight:800;line-height:1.4}
+.sk-hide{display:none!important}
+</style>"""
+
+
+def _sk_e(s):
+    return _sk_html.escape(str(s or ""))
+
+
+def _sk_slug(title):
+    return _sk_re.sub(r"[^0-9A-Za-z가-힣]+", "-", title).strip("-")[:60]
+
+
+def _sk_extra():
+    """explain.md 에서 제목별 '분야:'와 첫 번째 '사진:' 주소를 읽어요."""
+    out = {}
+    try:
+        text = EXPLAIN_FILE.read_text(encoding="utf-8")
+    except Exception:
+        return out
+    for block in _sk_re.split(r"^##\s+", text, flags=_sk_re.M)[1:]:
+        lines = block.split("\n")
+        title = lines[0].strip()
+        cat, img = "", ""
+        for ln in lines[1:]:
+            s = ln.strip()
+            m = _sk_re.match(r"^분야\s*[:：]\s*(.+)$", s)
+            if m and not cat:
+                cat = m.group(1).strip()
+            m = _sk_re.match(r"^사진\s*[:：]\s*([^|]+)", s)
+            if m and not img:
+                u = m.group(1).strip()
+                if _sk_re.match(r"^(https?://|\.\./|/)", u):
+                    img = u
+        out[title] = {"cat": cat, "img": img}
+    return out
+
+
+def _sk_items(explains):
+    extra = _sk_extra()
+    items = []
+    for ex in explains or []:
+        try:
+            title = (ex.get("title") or "").strip()
+            if not title:
+                continue
+            x = extra.get(title, {})
+            body = " ".join(str(ex.get(k) or "") for k in ("what", "why", "next"))
+            body = _sk_re.sub(r"^\s*(사진\s*[:：].*|▶.*)$", "", body, flags=_sk_re.M)
+            mins = max(1, round(len(_sk_re.sub(r"\s+", "", body)) / 500))
+            summ = ex.get("summary") or []
+            if isinstance(summ, str):
+                summ = [summ]
+            items.append({
+                "title": title,
+                "url": _sk_slug(title) + ".html",
+                "date": str(ex.get("date") or ""),
+                "sum": _sk_re.sub(r"==|!!|\*\*", "", summ[0]) if summ else "",
+                "cat": x.get("cat") or "이슈",
+                "img": x.get("img", ""),
+                "mins": mins,
+            })
+        except Exception:
+            continue
+    items.sort(key=lambda it: it["date"], reverse=True)
+    return items
+
+
+def _sk_thumb(it, i, cls="sk-th"):
+    if it["img"]:
+        return f'<div class="{cls}" style="background-image:url(\'{_sk_e(it["img"])}\')"></div>'
+    word = it["title"][:14]
+    return f'<div class="{cls}" style="background:{SK_COLORS[i % len(SK_COLORS)]}">{_sk_e(word)}</div>'
+
+
+def _sk_date(d):
+    return d.replace("-", ".")
+
+
+_sk_old_build_index = build_index
+
+
+def build_index(explains):
+    page = _sk_old_build_index(explains)
+    try:
+        items = _sk_items(explains)
+        if not items or "<h1>이슈 해설</h1>" not in page:
+            raise ValueError("skip")
+        used = [t for t in SK_TABS if any(it["cat"] == t for it in items)]
+        tabs = ('<button class="sk-tab on" data-c="전체">전체</button>' + "".join(
+            f'<button class="sk-tab" data-c="{_sk_e(t)}">{_sk_e(t)}</button>' for t in used)) if used else ""
+        cards = []
+        for i, it in enumerate(items):
+            chip = f'<span class="sk-chip">{_sk_e(it["cat"])}</span>'
+            meta = f'<div class="sk-meta">{_sk_e(_sk_date(it["date"]))} · {SK_AUTHOR} · {it["mins"]}분 읽기</div>'
+            if i == 0:
+                img = (f'<img src="{_sk_e(it["img"])}" alt="" loading="lazy">' if it["img"]
+                       else f'<div class="sk-th" style="width:100%;height:160px;border-radius:0;font-size:1.1rem;'
+                            f'background:{SK_COLORS[0]}">{_sk_e(it["title"][:20])}</div>')
+                cards.append(f'<a class="sk-card sk-feat" data-c="{_sk_e(it["cat"])}" href="{_sk_e(it["url"])}">{img}'
+                             f'<div class="sk-t">{chip}<span class="sk-new">NEW</span><h2>{_sk_e(it["title"])}</h2>'
+                             f'<p class="sk-sum">{_sk_e(it["sum"])}</p>{meta}</div></a>')
+                cards.append('<div class="sk-sec">최신 해설</div>')
+            else:
+                cards.append(f'<a class="sk-card sk-row" data-c="{_sk_e(it["cat"])}" href="{_sk_e(it["url"])}">'
+                             f'{_sk_thumb(it, i)}<div>{chip}<h3>{_sk_e(it["title"])}</h3>{meta}</div></a>')
+        js = """<script>(function(){var b=document.querySelectorAll('.sk-tab');b.forEach(function(t){t.onclick=function(){
+b.forEach(function(x){x.classList.remove('on')});t.classList.add('on');var c=t.getAttribute('data-c');
+document.querySelectorAll('.sk-card').forEach(function(a){a.style.display=(c==='전체'||a.getAttribute('data-c')===c)?'':'none'});
+document.querySelectorAll('.sk-sec').forEach(function(s){s.style.display=c==='전체'?'':'none'})}})})();</script>"""
+        block = (SK_CSS + '<div class="sk" id="sk-list"><div class="sk-intro"><h1>' + SK_NAME + '</h1><p>'
+                 + SK_INTRO + '</p></div><div class="sk-tabs">' + tabs + '</div>' + "".join(cards) + '</div>' + js
+                 + '<style>#sk-list ~ :not(nav):not(script):not(footer):not(style){display:none!important}</style>')
+        page = page.replace("<h1>이슈 해설</h1>", block, 1)
+        page = page.replace("이슈 해설 모아 보기", SK_NAME + " 모아 보기").replace("이슈피클 이슈 해설", "이슈피클 " + SK_NAME)
+        return page
+    except Exception:
+        return page
+
+
+_sk_old_build_page = build_page
+
+
+def build_page(ex, snap, all_explains):
+    page = _sk_old_build_page(ex, snap, all_explains)
+    try:
+        page = page.replace('<p class="crumb">이슈 해설', f'<p class="crumb"><a href="index.html">{SK_NAME}</a>', 1)
+        page = page.replace('"name": "이슈 해설"', f'"name": "{SK_NAME}"')
+        items = _sk_items(all_explains)
+        me = (ex.get("title") or "").strip()
+        idx = next((i for i, it in enumerate(items) if it["title"] == me), None)
+        if idx is None:
+            return page
+        cur = items[idx]
+        older = items[idx + 1] if idx + 1 < len(items) else None
+        newer = items[idx - 1] if idx > 0 else None
+        def pn(it, label, right=False):
+            if not it:
+                return '<span class="sk-empty"></span>'
+            st = ' style="text-align:right"' if right else ""
+            return f'<a href="{_sk_e(it["url"])}"{st}><small>{label}</small>{_sk_e(it["title"])}</a>'
+        others = [it for it in items if it["title"] != me]
+        same = [it for it in others if it["cat"] == cur["cat"]]
+        rel = (same + [it for it in others if it not in same])[:2]
+        rel_html = "".join(
+            f'<a class="sk-card" href="{_sk_e(it["url"])}">{_sk_thumb(it, i)}'
+            f'<div class="sk-tx"><span class="sk-chip">{_sk_e(it["cat"])}</span><br>{_sk_e(it["title"])}</div></a>'
+            for i, it in enumerate(rel))
+        block = (SK_CSS + '<div class="sk">'
+                 + f'<div class="sk-author"><b>{SK_AUTHOR}</b><p>{SK_AUTHOR_LINE}<br>'
+                 + f'<a href="index.html">{SK_NAME} 전체 보기 ›</a></p></div>'
+                 + '<div class="sk-pn">' + pn(older, "‹ 이전 글") + pn(newer, "다음 글 ›", True) + '</div>'
+                 + (f'<div class="sk-sec">함께 읽으면 좋은 해설</div><div class="sk-grid">{rel_html}</div>' if rel else "")
+                 + '</div>')
+        for mark in ('<nav class="bnav"', "</main>", "</body>"):
+            if mark in page:
+                return page.replace(mark, block + mark, 1)
+        return page + block
+    except Exception:
+        return page

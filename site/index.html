@@ -81,9 +81,9 @@
   <!-- ⑧-2 커뮤니티 화제 -->
   <section class="sec" id="sec-buzz" aria-labelledby="h-buzz">
     <div class="sec-head"><div><h2 id="h-buzz">커뮤니티 화제</h2><p>언론이 '온라인에서 화제'라고 보도한 이야기 · 여러 매체가 다룬 순</p></div></div>
-    <div class="bgrid" id="buzz"></div>
+    <div id="buzz"></div>
     <a class="more" id="buzz-report" hidden target="_blank" rel="noopener">📮 커뮤니티 화제 제보하기</a>
-    <p class="note">커뮤니티 글을 직접 가져오지 않고, 그 이야기를 다룬 기사의 제목·대표 사진·링크를 보여 드려요. 📌는 운영자가 직접 고른 이야기예요.</p>
+    <p class="note">커뮤니티 글을 직접 가져오지 않고, 그 이야기를 다룬 기사의 제목·대표 사진·링크를 보여 드려요.</p>
   </section>
 
   <!-- ⑤-2 이번 달 달라지는 것 (calendar.md) -->
@@ -348,20 +348,16 @@ function renderCal() {
 // ── 커뮤니티 화제 ──
 // [제보 버튼] 구글 설문지 주소를 따옴표 안에 넣으면 '제보하기' 버튼이 나타나요
 const REPORT_URL = "";
-function renderBuzz() {                             // 커뮤니티 화제: 2열 사진 카드 (📌 추천은 넓게)
-  const b = DATA?.buzz || {}, picks = b.picks || [], auto = b.auto || [];
-  const pin = picks.map(it => {
-    const tag = it.link ? "a" : "div";
-    const attr = it.link ? ` href="${esc(url(it.link))}" target="_blank" rel="noopener nofollow"` : "";
-    return `<${tag} class="box bcard wide"${attr}>
-      <span class="bb"><span class="pin">📌 운영자 추천</span><span class="kw">${esc(it.title)}</span>${it.desc ? `<span class="hl">${esc(it.desc)}</span>` : ""}
-        <span class="meta">${M(it.date ? it.date.slice(5).replace("-", ".") : "")}</span></span></${tag}>`;
+function renderBuzz() {                             // 커뮤니티 화제: 가로 목록 (왼쪽 작은 사진 + 제목)
+  const auto = DATA?.buzz?.auto || [];
+  const rows = auto.slice(0, 8).map((it, i) => {
+    const img = it.img ? `<img class="nth" src="${esc(it.img)}" alt="" loading="lazy" referrerpolicy="no-referrer" decoding="async" onerror="this.remove()">` : "";
+    return `<li><a href="${esc(url(it.link))}" target="_blank" rel="noopener nofollow"><b class="bn2">${i + 1}</b>${img}
+      <span class="bt"><span class="tt">${esc(it.title)}</span>
+        <small>${M(esc(it.source), it.sources > 1 ? `${it.sources}개 매체` : "", it.time ? ago(it.time) : "")}</small></span>
+      <span class="go" aria-hidden="true">›</span></a></li>`;
   });
-  const cards = auto.slice(0, 6).map((it, i) => `<a class="box bcard" href="${esc(url(it.link))}" target="_blank" rel="noopener nofollow">
-      <span class="bp ${it.img ? "" : "noimg"}">${it.img ? `<img src="${esc(it.img)}" alt="" loading="lazy" referrerpolicy="no-referrer" decoding="async" onerror="this.parentNode.classList.add('noimg');this.remove()">` : ""}<span class="bn">${i + 1}</span></span>
-      <span class="bb"><span class="kw">${esc(it.title)}</span>
-        <span class="meta">${M(esc(it.source), it.sources > 1 ? `${it.sources}개 매체` : "", it.time ? ago(it.time) : "")}</span></span></a>`);
-  $("buzz").innerHTML = pin.concat(cards).join("") || emptyBox("커뮤니티 화제");
+  $("buzz").innerHTML = rows.length ? `<div class="box"><ul class="nlist blist">${rows.join("")}</ul></div>` : emptyBox("커뮤니티 화제");
   if (/^https?:\/\//.test(REPORT_URL)) { $("buzz-report").href = REPORT_URL; $("buzz-report").hidden = false; }
 }
 

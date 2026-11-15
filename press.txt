@@ -13,6 +13,17 @@
 # 주소 출처: 한국경제·경향신문·전자신문·ZDNet Korea는 직접 열어 확인했어요(2026-11-08).
 #           나머지는 newswatcher 공개 목록(github.com/seokhoonj/newswatcher)에서 확인된 주소예요(2026-08-20 기준).
 
+# ── 음식·카페 / 뷰티·패션 / 여행·공간 / 문화·여가 (2026-11-15 추가, 직접 열어 확인) ──
+# 국내 언론사 RSS 중에는 날짜가 '2026-11-15 10:50:40' 모양인 곳이 많아요. collect.py 가 이 모양도 읽어요.
+식품외식경제 | 음식·카페 | https://www.foodbank.co.kr/rss/allArticle.xml
+식품음료신문 | 음식·카페 | https://www.thinkfood.co.kr/rss/allArticle.xml
+장업신문 | 뷰티·패션 | https://www.jangup.com/rss/allArticle.xml
+한국섬유신문 | 뷰티·패션 | https://www.ktnews.com/rss/allArticle.xml
+여행신문 | 여행·공간 | https://www.traveltimes.co.kr/rss/allArticle.xml
+트래블데일리 | 여행·공간 | https://www.traveldaily.co.kr/rss/allArticle.xml
+뉴스컬처 | 문화·여가 | http://www.nc.press/rss/allArticle.xml
+인벤 | 문화·여가 | https://webzine.inven.co.kr/news/rss.php
+
 # ── 연예 ──
 한국경제 | 연예 | https://www.hankyung.com/feed/entertainment
 OSEN | 연예 | https://rss.mt.co.kr/osen_news.xml

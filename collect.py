@@ -188,8 +188,17 @@ ISSUES_OUT = ROOT / "site" / "issues.json"
 
 def fetch(url):
     req = urllib.request.Request(url, headers={"User-Agent": "Mozilla/5.0 (issue-radar bot)"})
-    with urllib.request.urlopen(req, timeout=20) as r:
-        return r.read()
+    # 구글 뉴스는 가끔 잠깐 막혀요(429·503) → 몇 초 쉬었다가 두 번까지 다시 시도
+    tries = 3 if "news.google.com" in url else 1
+    for n in range(tries):
+        try:
+            with urllib.request.urlopen(req, timeout=20) as r:
+                return r.read()
+        except Exception:
+            if n + 1 == tries:
+                raise
+            import time
+            time.sleep(4 * (n + 1))
 
 
 def local(tag):
@@ -214,6 +223,20 @@ def text(el, name):
     return re.sub(r"\s+", " ", t.replace("\xa0", " ")).strip()
 
 
+def pub_time(raw):
+    """RSS 날짜 읽기. 표준 형식(Sun, 15 Nov 2026 10:00:00 +0900)과
+    국내 언론사 RSS에 흔한 '2026-11-15 10:50:40'(한국 시간) 형식을 모두 읽어요"""
+    raw = (raw or "").strip()
+    try:
+        return parsedate_to_datetime(raw).astimezone(KST)
+    except Exception:
+        m = re.match(r"^(\d{4})-(\d{2})-(\d{2})[ T](\d{2}):(\d{2})(?::(\d{2}))?", raw)
+        if not m:
+            raise ValueError("날짜 형식을 모르겠어요: " + raw[:30])
+        y, mo, d, h, mi, sec = (int(x or 0) for x in m.groups())
+        return datetime(y, mo, d, h, mi, sec, tzinfo=KST)
+
+
 # ───────────── 뉴스 ─────────────
 def parse_news(xml_bytes):
     items = []
@@ -226,7 +249,7 @@ def parse_news(xml_bytes):
         elif " - " in title and not source:
             title, source = title.rsplit(" - ", 1)
         try:
-            pub = parsedate_to_datetime(text(it, "pubDate")).astimezone(KST)
+            pub = pub_time(text(it, "pubDate"))
         except Exception:
             pub = datetime.now(KST)
         if title and link.startswith("http"):
@@ -1182,7 +1205,7 @@ def collect_press(cutoff):
                 if not title or not link.startswith("http"):
                     continue
                 try:
-                    pub = parsedate_to_datetime(text(it, "pubDate")).astimezone(KST).isoformat(timespec="minutes")
+                    pub = pub_time(text(it, "pubDate")).isoformat(timespec="minutes")
                 except Exception:
                     continue                                   # 날짜 없는 기사는 최신인지 몰라서 뺌
                 if pub < cutoff or "포토" in title[:6]:
@@ -1512,8 +1535,11 @@ def main():
     per_cat = {cid: [] for cid in CATEGORIES}
     for k, a in collect_feeds(GENERAL_FEEDS, cutoff).items():
         all_seen.setdefault(k, by_title.get(k, a))
+    feed_empty = set()                                     # 분야 RSS를 하나도 못 받은 분야 → 이전 결과를 그대로 보여 줘요
     for cid, cat in CATEGORIES.items():
         seen = collect_feeds(cat["feeds"], cutoff)
+        if not seen:
+            feed_empty.add(cid)
         for k, a in seen.items():
             seen[k] = by_title.get(k, a)
         for k, a in by_title.items():
@@ -1561,8 +1587,17 @@ def main():
                                  old_rank_map(old_cats.get(cid, {}).get("issues")))}
             for cid, cat in CATEGORIES.items()
         },
-        "search": trends,
     }
+    # 분야 RSS가 잠깐 막혀 이슈가 비면, 빈 칸 대신 지난번 결과를 그대로 둬요
+    for cid in CATEGORIES:
+        prev = old_cats.get(cid, {}).get("issues") or []
+        now_list = result["categories"][cid]["issues"]
+        if prev and cid in feed_empty and not now_list:
+            print(f"[경고] {CATEGORIES[cid]['name']}: 분야 기사를 못 받아서 지난번 이슈 {len(prev)}개를 그대로 둡니다.", file=sys.stderr)
+            result["categories"][cid]["issues"] = prev
+    result.update({
+        "search": trends,
+    })
     result["wiki"] = collect_wiki(old.get("wiki"), now)
     vids, result["_yt"] = collect_youtube(old.get("_yt"), now)
     result["videos"] = vids[:10]

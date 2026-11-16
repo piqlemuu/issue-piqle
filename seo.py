@@ -10,7 +10,7 @@ import html
 import json
 import re
 import urllib.parse
-from datetime import datetime
+from datetime import datetime, timedelta
 from email.utils import format_datetime
 from pathlib import Path
 
@@ -141,10 +141,16 @@ def paras(text):
             if ln.startswith("▶"):
                 flush()
                 out.append(f'<h3 style="{H3_STYLE}">{rich(e(ln[1:].strip()))}</h3>')
-            elif re.match(r"^사진\s*[:：]", ln):
+            elif re.match(r"^사진\s*[:：]", ln) or re.match(r"^!\[[^\]]*\]\([^)]+\)\s*$", ln):
                 flush()
-                parts = [x.strip() for x in re.sub(r"^사진\s*[:：]\s*", "", ln).split("|")]
+                md = re.match(r"^!\[([^\]]*)\]\(([^)\s]+)[^)]*\)", ln)
+                if md:                                         # ![설명](coinone-lead.png) 모양도 사진으로 읽어요
+                    parts = [md.group(2), md.group(1)]
+                else:
+                    parts = [x.strip() for x in re.sub(r"^사진\s*[:：]\s*", "", ln).split("|")]
                 src = parts[0]
+                if re.match(r"^[\w.-]+\.(png|jpe?g|gif|webp|svg)$", src, re.I):
+                    src = "../" + src                          # site 폴더에 올린 그림 이름만 적어도 돼요
                 if not re.match(r"^(https?://|\.\./|/)", src):
                     continue
                 cap = parts[1] if len(parts) > 1 else ""
@@ -491,6 +497,8 @@ def build_day(day, rec, day_explains, prev_day, next_day, now_iso, summaries=Non
     nav = '<nav class="dnav" aria-label="다른 날">'
     nav += f'<a href="{prev_day}.html">‹ {e(day_label(prev_day))}</a>' if prev_day else "<span></span>"
     nav += '<a href="index.html">날짜별 모아 보기</a>'
+    if day in WEEK_OF:
+        nav += f'<a href="../w/{WEEK_OF[day]}.html">이번 주 정리</a>'
     nav += f'<a href="{next_day}.html">{e(day_label(next_day))} ›</a>' if next_day else "<span></span>"
     body.append(nav + "</nav>")
     return head + "\n".join(body) + FOOT, indexable
@@ -636,6 +644,10 @@ def build_months(today):
                 f'<p class="note" style="margin-top:.5rem;font-size:.9375rem;line-height:1.7">{e(lead)}</p>',
                 f'<div class="box" style="margin-top:.875rem"><ul class="cal">{"".join(rows)}</ul></div>',
                 '<p class="note" style="margin-top:.75rem">공식 발표와 언론 보도를 2곳 이상 확인해 새콤기자가 정리했어요. 세부 조건은 출처와 담당 기관 안내를 꼭 확인하세요.</p>']
+        wks = sorted({wk for d, wk in WEEK_OF.items() if d[:7] == mon and week_range(wk)[3][:7] == mon})
+        if wks:
+            wl = "".join(f'<li><a href="../w/{wk}.html">{e(week_label(wk)[0])} 이슈 정리 ›</a></li>' for wk in wks)
+            body.append(f'<div class="box" style="margin-top:.875rem"><ul class="cal">{wl}</ul></div>')
         prev_m, next_m = (months[i - 1] if i else None), (months[i + 1] if i + 1 < len(months) else None)
         nav = '<nav class="dnav" aria-label="다른 달">'
         nav += f'<a href="{prev_m}.html">‹ {int(prev_m[5:])}월</a>' if prev_m else "<span></span>"
@@ -653,6 +665,148 @@ def build_months(today):
         f'<div class="box" style="margin-top:.75rem"><ul class="nlist">{lis or "<li class=state>아직 정리한 달이 없어요.</li>"}</ul></div>' + FOOT,
         encoding="utf-8")
     return [mm for mm in months if sum(1 for x in items if x["date"][:7] == mm) >= CAL_MIN_INDEX]
+
+
+# ───────────── 이번 주 이슈 정리 (weekly.md → w/2026-W46.html) ─────────────
+WEEK_FILE = ROOT / "weekly.md"
+WEEK_DIR = SITE / "w"
+WEEK_MIN_ISSUES = 3   # 사람이 쓴 '이번 주 한 줄'과 이슈 정리가 이 개수 이상 있는 주만 검색에 내보내요
+WEEK_OF = {}          # 날짜(2026-11-12) → 주 이름(2026-W46). 날짜별 페이지에서 주간 정리로 이어 줘요
+
+
+def week_range(wk):
+    y, w = int(wk[:4]), int(wk[6:])
+    mon = datetime.fromisocalendar(y, w, 1).date()
+    return [(mon + timedelta(days=i)).isoformat() for i in range(7)]
+
+
+def week_label(wk):
+    days = week_range(wk)
+    a, b = datetime.strptime(days[0], "%Y-%m-%d"), datetime.strptime(days[-1], "%Y-%m-%d")
+    # 그 주 목요일이 속한 달의 몇째 주인지
+    thu = datetime.strptime(days[3], "%Y-%m-%d")
+    nth = (thu.day - 1) // 7 + 1
+    return f"{thu.year}년 {thu.month}월 {['첫', '둘', '셋', '넷', '다섯'][nth - 1]}째 주", f"{a.month}월 {a.day}일 ~ {b.month}월 {b.day}일"
+
+
+def read_weekly():
+    """weekly.md: '## 2026-W46' 아래에 이번 주 한 줄 / 이슈 / 다음 주 / 출처"""
+    if not WEEK_FILE.exists():
+        return []
+    out = []
+    for block in re.split(r"^##\s+", WEEK_FILE.read_text(encoding="utf-8"), flags=re.M)[1:]:
+        lines = block.splitlines()
+        wk = lines[0].strip()[:8]
+        if not re.fullmatch(r"\d{4}-W\d{2}", wk):
+            continue
+        it = {"week": wk, "one": "", "issues": [], "next": [], "source": []}
+        cur = None
+        for ln in lines[1:]:
+            m = re.match(r"^\s*(이번 주 한 줄|이슈|다음 주|출처|기간)\s*[:：]\s*(.*)$", ln)
+            if m:
+                cur, val = m.group(1), m.group(2).strip()
+                if cur == "이번 주 한 줄":
+                    it["one"] = val
+                elif cur == "출처":
+                    name, _, link = val.partition("|")
+                    if link.strip().startswith("http"):
+                        it["source"].append({"name": name.strip(), "link": link.strip()})
+                continue
+            sub = re.match(r"^\s+해설\s*[:：]\s*(.+)$", ln)
+            if sub and cur == "이슈" and it["issues"]:
+                it["issues"][-1]["ex"] = sub.group(1).strip()
+                continue
+            m = re.match(r"^\s*[-•]\s*([^:：]+?)\s*[:：]\s*(.+)$", ln)
+            if m and cur in ("이슈", "다음 주"):
+                if "[확인 필요" in m.group(2):
+                    print(f"[주간] {wk} '{m.group(1)}' 에 [확인 필요] 가 남아 있어서 올리지 않았어요.")
+                    continue
+                (it["issues"] if cur == "이슈" else it["next"]).append({"title": m.group(1).strip(), "body": m.group(2).strip(), "ex": ""})
+        if "[확인 필요" in it["one"]:
+            it["one"] = ""
+        if it["issues"]:
+            out.append(it)
+    return sorted(out, key=lambda x: x["week"])
+
+
+def build_weeks(weeks, explains, day_pages, today):
+    """주간 정리 페이지를 만들고, 검색에 내보낼 주 목록을 돌려줘요"""
+    WEEK_DIR.mkdir(parents=True, exist_ok=True)
+    ex_by_title = {x["title"]: x for x in explains}
+    good = []
+    names = [w["week"] for w in weeks]
+    for i, w in enumerate(weeks):
+        wk = w["week"]
+        days = week_range(wk)
+        for d in days:
+            WEEK_OF[d] = wk
+        title_l, span = week_label(wk)
+        indexable = bool(w["one"]) and len(w["issues"]) >= WEEK_MIN_ISSUES
+        url = SITE_URL + f"w/{wk}.html"
+        title = f"{title_l} 이슈 정리"
+        lead = plain(w["one"]) or f"{span} 화제가 된 이슈를 정리했어요."
+        ld = {"@context": "https://schema.org", "@graph": [
+            {"@type": "Article", "headline": title, "description": lead[:150], "inLanguage": "ko",
+             "datePublished": days[-1] if days[-1] <= today else today, "dateModified": today, "image": OG_IMG, "mainEntityOfPage": url,
+             "author": {"@type": "Person", "name": "새콤기자", "url": SITE_URL + "about.html"},
+             "publisher": {"@type": "Organization", "name": SITE_NAME, "url": SITE_URL}},
+            {"@type": "ItemList", "itemListElement": [
+                {"@type": "ListItem", "position": k + 1, "name": x["title"]} for k, x in enumerate(w["issues"])]}]}
+        head = HEAD.format(title=e(f"{title} — {span} 무슨 일이 있었나 | 이슈피클"), desc=e(lead[:150]), url=e(url),
+                           ogtitle=e(f"{title} — 이슈피클"), ogimg=e(OG_IMG),
+                           ld=json.dumps(ld, ensure_ascii=False).replace("</", "<\\/"))
+        if not indexable:
+            head = head.replace("<title>", '<meta name="robots" content="noindex,follow">\n<title>', 1)
+        head = head.replace("</style>",
+            ".ex .wk{list-style:none;margin:0;padding:0;counter-reset:w}.ex .wk>li{padding:1rem;border-top:1px solid var(--line)}.ex .wk>li:first-child{border-top:0}"
+            ".ex .wk h2{font-size:1.0625rem;font-weight:700;margin:0 0 .25rem;line-height:1.45}.ex .wk h2:before{counter-increment:w;content:counter(w) '. ';color:var(--logo)}"
+            ".ex .wk p{margin:.25rem 0;line-height:1.7;font-size:.9375rem}.ex .wk .exl{display:inline-block;margin-top:.375rem;font-size:.875rem;font-weight:700}"
+            ".ex .one{font-size:1.0625rem;font-weight:700;line-height:1.6;padding:1rem;border-radius:12px;background:var(--soft);margin:.75rem 0 0}"
+            ".ex .tl{list-style:none;margin:0;padding:0}.ex .tl li{padding:.5rem 1rem;border-top:1px solid var(--line);font-size:.9375rem;line-height:1.55}.ex .tl li:first-child{border-top:0}"
+            ".ex .src{margin:.375rem 0 0;padding-left:1.1rem;font-size:.8125rem}.ex .src a{color:var(--sub);text-decoration:underline}"
+            ".ex .dnav{display:flex;justify-content:space-between;gap:.5rem;margin-top:1rem;flex-wrap:wrap}.ex .dnav a{color:var(--sub);font-size:.875rem;font-weight:600}</style>", 1)
+        rows = []
+        for x in w["issues"]:
+            ex = ex_by_title.get(x["ex"]) if x["ex"] else None
+            link = f'<a class="exl" href="../i/{e(slug(ex["title"]))}.html">📝 새콤기자 해설 읽기 ›</a>' if ex else ""
+            rows.append(f'<li><h2>{e(x["title"])}</h2><p>{hl(e(x["body"]))}</p>{link}</li>')
+        body = ['<a class="back" href="../index.html">‹ 홈으로</a>',
+                f'<p class="crumb">이번 주 이슈 정리 · {e(span)}</p>',
+                f"<h1>{e(title)}</h1>"]
+        if w["one"]:
+            body.append(f'<p class="one">🫙 {hl(e(w["one"]))}</p>')
+        body.append(f'<section class="sec"><div class="sec-head"><div><h2>이번 주 주요 이슈</h2><p>새콤기자가 고른 {len(w["issues"])}가지예요</p></div></div>'
+                    f'<div class="box"><ol class="wk">{"".join(rows)}</ol></div></section>')
+        if w["next"]:
+            nx = "".join(f'<li><b>{e(x["title"])}</b> · {hl(e(x["body"]))}</li>' for x in w["next"])
+            body.append(f'<section class="sec"><div class="sec-head"><div><h2>다음 주에 볼 일정</h2></div></div><div class="box"><ul class="tl">{nx}</ul></div></section>')
+        dl = "".join(f'<li><a href="../b/{d}.html">{e(day_label(d))} 이슈 정리 ›</a></li>' for d in days if d in day_pages)
+        if dl:
+            body.append(f'<section class="sec"><div class="sec-head"><div><h2>날짜별로 더 보기</h2></div></div><div class="box"><ul class="tl">{dl}</ul></div></section>')
+        if w["source"]:
+            src = "".join(f'<li><a href="{e(s["link"])}" target="_blank" rel="noopener nofollow">{e(s["name"] or s["link"])}</a></li>' for s in w["source"])
+            body.append(f'<details style="margin-top:1rem"><summary style="font-weight:700;cursor:pointer">📚 참고한 자료 {len(w["source"])}건</summary><ol class="src">{src}</ol></details>')
+        body.append('<p class="note" style="margin-top:.75rem">공식 발표와 언론 보도를 2곳 이상 확인해 새콤기자가 정리했어요.</p>')
+        prev_w, next_w = (names[i - 1] if i else None), (names[i + 1] if i + 1 < len(names) else None)
+        mon = days[3][:7]
+        nav = '<nav class="dnav" aria-label="다른 주">'
+        nav += f'<a href="{prev_w}.html">‹ 지난주</a>' if prev_w else "<span></span>"
+        nav += f'<a href="index.html">주별 모아 보기</a><a href="../m/{mon}.html">{int(mon[5:])}월 달라지는 것</a>'
+        nav += f'<a href="{next_w}.html">다음 주 ›</a>' if next_w else "<span></span>"
+        body.append(nav + "</nav>")
+        (WEEK_DIR / f"{wk}.html").write_text(head + "\n".join(body) + FOOT, encoding="utf-8")
+        if indexable:
+            good.append(wk)
+    url = SITE_URL + "w/"
+    ld = {"@context": "https://schema.org", "@type": "CollectionPage", "name": "주별 이슈 정리", "url": url}
+    head = HEAD.format(title="주별 이슈 정리 모아 보기 | 이슈피클", desc="한 주 동안 화제가 된 이슈를 새콤기자가 골라 정리했어요.",
+                       url=url, ogtitle="주별 이슈 정리 — 이슈피클", ogimg=e(OG_IMG), ld=json.dumps(ld, ensure_ascii=False))
+    lis = "".join(f'<li><a href="{w["week"]}.html"><span><span class="tt">{e(week_label(w["week"])[0])} 이슈 정리</span>'
+                  f'<small>{e(week_label(w["week"])[1])} · {len(w["issues"])}가지</small></span></a></li>' for w in reversed(weeks))
+    (WEEK_DIR / "index.html").write_text(head + '<a class="back" href="../index.html">‹ 홈으로</a><h1>주별 이슈 정리</h1>'
+        f'<div class="box" style="margin-top:.75rem"><ul class="nlist">{lis or "<li class=state>아직 정리한 주가 없어요.</li>"}</ul></div>' + FOOT,
+        encoding="utf-8")
+    return good
 
 
 def build_all(details, old_snaps, now_iso, memes_dict, daily=None):
@@ -676,6 +830,8 @@ def build_all(details, old_snaps, now_iso, memes_dict, daily=None):
             snap["live"] = bool(cur)
         (OUT_DIR / f"{s}.html").write_text(build_page(ex, snap or None, explains), encoding="utf-8")
     (OUT_DIR / "index.html").write_text(build_index(explains), encoding="utf-8")
+    weeks = read_weekly()
+    good_weeks = build_weeks(weeks, explains, set(daily or {}), now_iso[:10])
     good_days = build_days(daily, explains, now_iso)
     months = build_months(now_iso[:10])
     keep = {slug(x["title"]) for x in explains}
@@ -695,6 +851,9 @@ def build_all(details, old_snaps, now_iso, memes_dict, daily=None):
         urls.append((SITE_URL + "m/", now_iso[:10], "weekly", "0.8"))
         urls += [(SITE_URL + f"m/{mm}.html", now_iso[:10], "weekly", "0.8") for mm in months]
     urls += [(SITE_URL + f"b/{d}.html", d, "monthly", "0.6") for d in good_days]
+    if good_weeks:
+        urls.append((SITE_URL + "w/", today, "weekly", "0.8"))
+        urls += [(SITE_URL + f"w/{wk}.html", min(week_range(wk)[-1], today), "weekly", "0.8") for wk in good_weeks]
     sm = ['<?xml version="1.0" encoding="UTF-8"?>', '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">']
     for loc, lm, fq, pr in urls:
         sm.append(f"  <url><loc>{e(loc)}</loc>{f'<lastmod>{lm}</lastmod>' if lm else ''}<changefreq>{fq}</changefreq><priority>{pr}</priority></url>")
@@ -704,6 +863,9 @@ def build_all(details, old_snaps, now_iso, memes_dict, daily=None):
     # rss: 해설 + 밈절임 글
     feed = [(x["date"], x["title"] + " — 이슈피클 해설", page_url(x["title"]), plain(" ".join(x["summary"]) or x["what"][:200])) for x in explains]
     feed += [(m.get("date", ""), m["word"] + " — 밈절임", SITE_URL + m["page"], m.get("meaning", "")) for m in memes_pages]
+    wk_map = {w["week"]: w for w in weeks}
+    feed += [(min(week_range(wk)[-1], today), week_label(wk)[0] + " 이슈 정리 — 이슈피클", SITE_URL + f"w/{wk}.html",
+              plain(wk_map[wk]["one"])) for wk in good_weeks]
     feed = sorted([f for f in feed if f[0]], reverse=True)[:30]
     items = []
     for d, t, link, desc in feed:
@@ -717,7 +879,7 @@ def build_all(details, old_snaps, now_iso, memes_dict, daily=None):
            f"<title>이슈피클</title><link>{SITE_URL}</link><description>요즘 뜨는 이슈와 밈을 짧게 정리해요</description>"
            f"<language>ko</language>{''.join(items)}</channel></rss>\n")
     (SITE / "rss.xml").write_text(rss, encoding="utf-8")
-    print(f"검색용 페이지: 해설 {len(explains)}개 · 날짜별 {len(daily or {})}일(검색 노출 {len(good_days)}일) · 사이트맵 {len(urls)}개 주소")
+    print(f"검색용 페이지: 해설 {len(explains)}개 · 날짜별 {len(daily or {})}일(검색 노출 {len(good_days)}일) · 주간 {len(weeks)}주(검색 노출 {len(good_weeks)}주) · 사이트맵 {len(urls)}개 주소")
     return link_map, snaps
 
 # ==================================================================
@@ -803,9 +965,11 @@ def _sk_extra():
             m = _sk_re.match(r"^분야\s*[:：]\s*(.+)$", s)
             if m and not cat:
                 cat = m.group(1).strip()
-            m = _sk_re.match(r"^사진\s*[:：]\s*([^|]+)", s)
+            m = _sk_re.match(r"^사진\s*[:：]\s*([^|]+)", s) or _sk_re.match(r"^!\[[^\]]*\]\(([^)\s]+)", s)
             if m and not img:
                 u = m.group(1).strip()
+                if _sk_re.match(r"^[\w.-]+\.(png|jpe?g|gif|webp|svg)$", u, _sk_re.I):
+                    u = SITE_URL + u
                 if _sk_re.match(r"^(https?://|\.\./|/)", u):
                     img = u
         out[title] = {"cat": cat, "img": img}
@@ -822,7 +986,7 @@ def _sk_items(explains):
                 continue
             x = extra.get(title, {})
             body = " ".join(str(ex.get(k) or "") for k in ("what", "why", "next"))
-            body = _sk_re.sub(r"^\s*(사진\s*[:：].*|▶.*)$", "", body, flags=_sk_re.M)
+            body = _sk_re.sub(r"^\s*(사진\s*[:：].*|!\[.*|▶.*)$", "", body, flags=_sk_re.M)
             mins = max(1, round(len(_sk_re.sub(r"\s+", "", body)) / 500))
             summ = ex.get("summary") or []
             if isinstance(summ, str):

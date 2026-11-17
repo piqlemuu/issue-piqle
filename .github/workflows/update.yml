@@ -7,8 +7,10 @@ on:
   push:
     branches: [main]
 
+# 수집 결과(data.json)는 저장소에 저장하지 않고 사이트에만 바로 올려요.
+# 그래서 저장소에 쓰기 권한이 필요 없어요.
 permissions:
-  contents: write
+  contents: read
   pages: write
   id-token: write
 
@@ -29,6 +31,18 @@ jobs:
         with:
           python-version: "3.12"
 
+      # 지난번 결과를 지금 떠 있는 사이트에서 받아 와요(순위 변화·분야별 이전 결과 계산용).
+      # 못 받으면 저장소에 있는 예전 파일로 그냥 진행해요.
+      - name: 지난번 결과 가져오기
+        run: |
+          curl -fsSL --retry 3 --max-time 30 \
+            "https://${GITHUB_REPOSITORY_OWNER,,}.github.io/${GITHUB_REPOSITORY#*/}/data.json?t=$(date +%s)" \
+            -o /tmp/prev.json \
+          && python -c "import json;json.load(open('/tmp/prev.json'))" \
+          && cp /tmp/prev.json site/data.json \
+          && echo "지난번 결과를 사이트에서 받았어요" \
+          || echo "지난번 결과를 못 받아서 저장소에 있는 예전 파일로 진행해요"
+
       - name: 뉴스·검색어·영상 수집
         run: python collect.py
         env:
@@ -37,15 +51,6 @@ jobs:
           NAVER_CLIENT_ID: ${{ secrets.NAVER_CLIENT_ID }}
           NAVER_CLIENT_SECRET: ${{ secrets.NAVER_CLIENT_SECRET }}
           KAKAO_REST_KEY: ${{ secrets.KAKAO_REST_KEY }}
-
-      - name: 결과 저장
-        run: |
-          git config user.name "issue-bot"
-          git config user.email "issue-bot@users.noreply.github.com"
-          git add site/data.json
-          git diff --staged --quiet || git commit -m "이슈 갱신 [skip ci]"
-          git pull --rebase -X theirs origin main || git rebase --abort || true
-          git push || echo "저장은 다음 실행 때 다시 시도해요"
 
       - uses: actions/configure-pages@v5
       - uses: actions/upload-pages-artifact@v4

@@ -56,6 +56,24 @@ jobs:
       - name: 일정·새콤해설 검색용 HTML 보강
         run: python section_seo.py
 
+      - name: 배포 전 SEO 자동 점검 (경고·보고)
+        run: |
+          python seo_audit.py \
+            --site site \
+            --output seo-audit-report.json \
+            --summary seo-audit-report.md
+
+      - name: SEO 점검 결과 다운로드 파일 저장
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: seo-audit-${{ github.run_id }}-${{ github.run_attempt }}
+          path: |
+            seo-audit-report.json
+            seo-audit-report.md
+          if-no-files-found: ignore
+          retention-days: 1
+
       - uses: actions/configure-pages@v5
       - uses: actions/upload-pages-artifact@v4
         with:

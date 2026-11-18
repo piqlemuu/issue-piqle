@@ -53,6 +53,9 @@ jobs:
       - name: 유튜브 순위 검색용 HTML 자동 생성
         run: python youtube_seo.py
 
+      - name: 일정·새콤해설 검색용 HTML 보강
+        run: python section_seo.py
+
       - uses: actions/configure-pages@v5
       - uses: actions/upload-pages-artifact@v4
         with:

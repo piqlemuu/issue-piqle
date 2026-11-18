@@ -7,8 +7,6 @@ on:
   push:
     branches: [main]
 
-# 수집 결과(data.json)는 저장소에 저장하지 않고 사이트에만 바로 올려요.
-# 그래서 저장소에 쓰기 권한이 필요 없어요.
 permissions:
   contents: read
   pages: write
@@ -26,13 +24,10 @@ jobs:
       url: ${{ steps.deployment.outputs.page_url }}
     steps:
       - uses: actions/checkout@v5
-
       - uses: actions/setup-python@v6
         with:
           python-version: "3.12"
 
-      # 지난번 결과를 지금 떠 있는 사이트에서 받아 와요(순위 변화·분야별 이전 결과 계산용).
-      # 못 받으면 저장소에 있는 예전 파일로 그냥 진행해요.
       - name: 지난번 결과 가져오기
         run: |
           curl -fsSL --retry 3 --max-time 30 \
@@ -43,7 +38,7 @@ jobs:
           && echo "지난번 결과를 사이트에서 받았어요" \
           || echo "지난번 결과를 못 받아서 저장소에 있는 예전 파일로 진행해요"
 
-      - name: 뉴스·검색어·영상 수집
+      - name: 뉴스·검색어·영상 수집 + 검색용 정적 페이지
         run: python collect.py
         env:
           YOUTUBE_API_KEY: ${{ secrets.YOUTUBE_API_KEY }}
@@ -51,6 +46,9 @@ jobs:
           NAVER_CLIENT_ID: ${{ secrets.NAVER_CLIENT_ID }}
           NAVER_CLIENT_SECRET: ${{ secrets.NAVER_CLIENT_SECRET }}
           KAKAO_REST_KEY: ${{ secrets.KAKAO_REST_KEY }}
+
+      - name: 홈페이지에 오리지널 해설 링크 자동 반영
+        run: python home_editorial.py
 
       - uses: actions/configure-pages@v5
       - uses: actions/upload-pages-artifact@v4

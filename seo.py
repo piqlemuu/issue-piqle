@@ -1098,3 +1098,22 @@ def build_page(ex, snap, all_explains):
         return page + block
     except Exception:
         return page
+
+
+# PIQLE 직접 작성 원고: 자동 수집으로 목록을 다시 만들어도 카드를 유지합니다.
+# 원본 홈과 기존 해설 카드, 이미지는 변경하지 않습니다.
+_piqle_generated_build_index = build_index
+_PIQLE_EDITORIAL_CARD = '<a id="piqle-csat-editorial" class="sk-card sk-row" data-c="생활·경제" href="csat-ai-20261117.html"><div class="sk-th" style="background-image:url(\'assets/csat-ai-20261117-v1/image-02.jpg\')"></div><div><span class="sk-chip">생활·경제</span><span class="sk-new">NEW</span><h3>수능 D-2, 안경 전수점검·단추 스티커…정부 추가 대책 정리</h3><div class="sk-meta">2026.11.17 · PIQLE 에디터</div></div></a>'
+
+
+def _piqle_add_editorial_card(page):
+    if 'id="piqle-csat-editorial"' in page:
+        return page
+    marker = '<div class="sk-sec">최신 해설</div>'
+    if marker not in page:
+        raise ValueError("PIQLE 글 목록의 최신 해설 구역을 찾지 못했습니다")
+    return page.replace(marker, marker + _PIQLE_EDITORIAL_CARD, 1)
+
+
+def build_index(explains):
+    return _piqle_add_editorial_card(_piqle_generated_build_index(explains))

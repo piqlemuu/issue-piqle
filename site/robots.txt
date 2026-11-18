@@ -1,0 +1,3 @@
+User-agent: *
+Allow: /
+Sitemap: https://piqlemuu.github.io/issue-piqle/sitemap.xml

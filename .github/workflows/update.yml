@@ -50,6 +50,9 @@ jobs:
       - name: 홈페이지에 오리지널 해설 링크 자동 반영
         run: python home_editorial.py
 
+      - name: 메인 로고 아래 쿠팡파트너스 광고 배치
+        run: python inject_coupang_banner.py
+
       - name: 유튜브 순위 검색용 HTML 자동 생성
         run: python youtube_seo.py
 

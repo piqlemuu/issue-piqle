@@ -912,7 +912,7 @@ SK_CSS = """<style>
 .sk-tab.on{background:var(--text);color:var(--bg);border-color:var(--text)}
 .sk a{color:inherit;text-decoration:none}
 .sk-card{display:block;background:var(--card);border:1px solid var(--line);border-radius:16px;overflow:hidden;margin-top:.75rem}
-.sk-feat img{display:block;width:100%;height:auto}
+.sk-feat img{display:block;width:100%;height:clamp(160px,30vw,240px);object-fit:cover;object-position:center 18%}
 .sk-feat .sk-t{padding:.9rem 1rem 1rem}
 .sk-feat h2{font-size:1.2rem;line-height:1.4;margin:.4rem 0 0;font-weight:900}
 .sk-row{display:flex;gap:.75rem;padding:.75rem}
@@ -1032,7 +1032,7 @@ def build_index(explains):
         cards = []
         for i, it in enumerate(items):
             chip = f'<span class="sk-chip">{_sk_e(it["cat"])}</span>'
-            meta = f'<div class="sk-meta">{_sk_e(_sk_date(it["date"]))} · {SK_AUTHOR} · {it["mins"]}분 읽기</div>'
+            meta = f'<div class="sk-meta">{_sk_e(_sk_date(it["date"]))} · {_sk_e(it.get("author") or SK_AUTHOR)} · {it["mins"]}분 읽기</div>'
             if i == 0:
                 img = (f'<img src="{_sk_e(it["img"])}" alt="" loading="lazy">' if it["img"]
                        else f'<div class="sk-th" style="width:100%;height:160px;border-radius:0;font-size:1.1rem;'
@@ -1099,21 +1099,37 @@ def build_page(ex, snap, all_explains):
     except Exception:
         return page
 
-
-# PIQLE 직접 작성 원고: 자동 수집으로 목록을 다시 만들어도 카드를 유지합니다.
-# 원본 홈과 기존 해설 카드, 이미지는 변경하지 않습니다.
-_piqle_generated_build_index = build_index
-_PIQLE_EDITORIAL_CARD = '<a id="piqle-csat-editorial" class="sk-card sk-row" data-c="생활·경제" href="csat-ai-20261117.html"><div class="sk-th" style="background-image:url(\'assets/csat-ai-20261117-v1/image-02.jpg\')"></div><div><span class="sk-chip">생활·경제</span><span class="sk-new">NEW</span><h3>수능 D-2, 안경 전수점검·단추 스티커…정부 추가 대책 정리</h3><div class="sk-meta">2026.11.17 · PIQLE 에디터</div></div></a>'
+# PIQLE 직접 작성 글 목록. HTML 원고와 등록 정보를 분리해 자동 수집 시에도 보존합니다.
+_sk_automatic_items = _sk_items
 
 
-def _piqle_add_editorial_card(page):
-    if 'id="piqle-csat-editorial"' in page:
-        return page
-    marker = '<div class="sk-sec">최신 해설</div>'
-    if marker not in page:
-        raise ValueError("PIQLE 글 목록의 최신 해설 구역을 찾지 못했습니다")
-    return page.replace(marker, marker + _PIQLE_EDITORIAL_CARD, 1)
+def _piqle_editorial_items():
+    path = ROOT / "editorial-articles.json"
+    if not path.is_file():
+        return []
+    records = json.loads(path.read_text(encoding="utf-8"))
+    if not isinstance(records, list):
+        raise ValueError("editorial-articles.json은 글 목록 배열이어야 합니다")
+    result = []
+    for record in records:
+        if not isinstance(record, dict):
+            raise ValueError("글 목록 항목이 올바르지 않습니다")
+        item = dict(record)
+        if not re.fullmatch(r"[A-Za-z0-9][A-Za-z0-9_.-]*\.html", str(item.get("url", ""))):
+            raise ValueError("직접 작성 글 경로는 i 폴더 안의 HTML 파일명이어야 합니다")
+        datetime.strptime(item["date"], "%Y-%m-%d")
+        if not item.get("title"):
+            raise ValueError("글 제목이 필요합니다")
+        item.setdefault("sum", "")
+        item.setdefault("cat", "생활·경제")
+        item.setdefault("img", "")
+        item.setdefault("mins", 3)
+        result.append(item)
+    return result
 
 
-def build_index(explains):
-    return _piqle_add_editorial_card(_piqle_generated_build_index(explains))
+def _sk_items(explains):
+    merged = {item["url"]: item for item in _sk_automatic_items(explains)}
+    for item in _piqle_editorial_items():
+        merged[item["url"]] = item
+    return sorted(merged.values(), key=lambda item: item["date"], reverse=True)

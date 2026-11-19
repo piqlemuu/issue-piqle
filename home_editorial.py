@@ -1,6 +1,7 @@
 """Post-build editorial enhancer. Run AFTER collect.py (already done in update.yml)."""
 from __future__ import annotations
 import html
+import json
 import re
 from pathlib import Path
 from urllib.parse import unquote
@@ -110,8 +111,7 @@ def change_home(doc, items):
     for c in items[:6]:
         esc=lambda s:html.escape(s,quote=True)
         cards.append(f'<li><a href="i/{esc(c["href"])}"><strong>{esc(c["title"])}</strong>'
-                     +f'<time datetime="{esc(c["date"])}">{esc(c["date"])}</time>'
-                     +(f'<span>{esc(c["summary"])}</span>' if c['summary'] else '')+'</a></li>')
+                     +f'<time datetime="{esc(c["date"])}">{esc(c["date"])}</time></a></li>')
     section=(START+'\n<section class="sec ip-original" aria-labelledby="ip-original-heading">'
        +'<div class="sec-head"><div><h2 id="ip-original-heading">이슈피클이 직접 정리한 이야기</h2>'
        +'<p>실시간 순위와 별개로 출처와 맥락을 확인해 정리한 새콤해설입니다.</p></div></div>'
@@ -123,10 +123,29 @@ def change_home(doc, items):
     return doc
 
 
+
+def registered_home_items(items):
+    """새콤해설 직접 작성 글과 홈 제목 목록이 같은 등록 파일을 사용합니다."""
+    path = ROOT / 'editorial-articles.json'
+    merged = {item['href']: dict(item) for item in items}
+    if path.is_file():
+        records = json.loads(path.read_text(encoding='utf-8'))
+        if not isinstance(records, list):
+            raise ValueError('editorial-articles.json must contain a list')
+        for record in records:
+            item = dict(href=record.get('url', ''), title=record.get('title', ''),
+                        date=record.get('date', ''), summary=record.get('sum', ''),
+                        category=record.get('cat', '생활·경제'), image=record.get('img', ''))
+            if is_published(item):
+                merged[item['href']] = item
+    return sorted(merged.values(), key=lambda item: item['date'], reverse=True)
+
+
 def main():
     if not (INDEX.is_file() and HOME.is_file()):
         raise FileNotFoundError('Run collect.py first; site/i/index.html and site/index.html required.')
     new_index,items=change_index(INDEX.read_text(encoding='utf-8'))
+    items=registered_home_items(items)
     new_home=change_home(HOME.read_text(encoding='utf-8'),items)
     INDEX.write_text(new_index,encoding='utf-8')
     HOME.write_text(new_home,encoding='utf-8')

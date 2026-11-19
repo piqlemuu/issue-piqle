@@ -59,6 +59,9 @@ jobs:
       - name: 일정·새콤해설 검색용 HTML 보강
         run: python section_seo.py
 
+      - name: 블랙프라이데이 새콤해설 발행 및 본문 중간 광고 배치
+        run: python publish_blackfriday.py
+
       - name: 배포 전 SEO 자동 점검 (경고·보고)
         run: |
           python seo_audit.py \

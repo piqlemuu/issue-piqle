@@ -12,6 +12,14 @@ INDEX = ROOT / 'site/i/index.html'
 START = '<!-- ISSUEPIQLE_ORIGINAL_START -->'
 END = '<!-- ISSUEPIQLE_ORIGINAL_END -->'
 STYLE = '<!-- ISSUEPIQLE_ORIGINAL_STYLE -->'
+SIGNGATE_BANNER = '''<aside aria-label="제휴 광고" style="margin:20px auto 28px;padding:0 12px;text-align:center;max-width:516px">
+  <p style="margin:0 auto 6px;font-size:12px;color:var(--sub,#53606a);text-align:left;max-width:468px">AD</p>
+  <a href="https://click.linkprice.com/click.php?m=signgate&amp;a=A100710283&amp;l=0008&amp;u_id=" target="_blank" rel="sponsored noopener" style="display:block;color:inherit">
+    <img src="https://img.linkprice.com/files/stlink/signgate/0007" alt="한국정보인증 SignGate 배너" width="468" height="60" loading="lazy" decoding="async" style="display:block;width:100%;max-width:468px;height:auto;margin:auto" onerror="this.hidden=true;this.style.display='none';this.nextElementSibling.hidden=false">
+    <span hidden style="padding:10px 12px;border:1px solid var(--line,#ddd);border-radius:8px;background:var(--card,#fff)">한국정보인증 SignGate 바로가기 ↗</span>
+  </a>
+  <img src="https://track.linkprice.com/lpshow.php?m_id=signgate&amp;a_id=A100710283&amp;p_id=0000&amp;l_id=0008&amp;l_cd1=2&amp;l_cd2=0" width="1" height="1" alt="" style="display:none">
+</aside>'''
 CARD = re.compile(r'<a\b(?=[^>]*class="[^"]*\bsk-(?:feat|row)\b)[^>]*>.*?</a>', re.S)
 DATE = re.compile(r'20\d{2}[.-]\d{2}[.-]\d{2}')
 
@@ -116,7 +124,8 @@ def change_home(doc, items):
        +'<div class="sec-head"><div><h2 id="ip-original-heading">이슈피클이 직접 정리한 이야기</h2>'
        +'<p>실시간 순위와 별개로 출처와 맥락을 확인해 정리한 새콤해설입니다.</p></div></div>'
        +'<ul class="ip-original-list">'+''.join(cards)+'</ul>'
-       +'<a class="more" href="i/">새콤해설 전체 보기 ›</a></section>\n'+END)
+       +'<a class="more" href="i/">새콤해설 전체 보기 ›</a></section>\n'
+       +SIGNGATE_BANNER+'\n'+END)
     doc=doc.replace('<footer class="foot">',section+'\n<footer class="foot">',1)
     if 'rel="canonical"' not in doc:
         doc=doc.replace('</head>','<link rel="canonical" href="https://piqlemuu.github.io/issue-piqle/">\n</head>',1)
@@ -152,3 +161,4 @@ def main():
     print('Featured:',items[0]['title'] if items else 'No eligible article', '| cards:',len(items))
 
 if __name__=='__main__': main()
+

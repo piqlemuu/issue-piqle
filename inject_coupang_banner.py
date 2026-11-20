@@ -1,10 +1,8 @@
 #!/usr/bin/env python3
-"""ISSUE PIQLE homepage: native Coupang carousel between briefing and issue ranking.
+"""ISSUE PIQLE: one 200x150 Coupang carousel AFTER the top-5/expand rankings.
 
-No decorative '파트너스 추천' heading or '(광고)' above the banner.
-Keeps a one-line transparent PNG affiliate disclosure directly below it.
-Patches only the generated site/index.html; leaves GitHub source homepage unchanged.
-Run by existing .github/workflows/update.yml after home_editorial.py.
+Generated homepage only: this is run from .github/workflows/update.yml.
+Does not change source homepage or other editorial pages.
 """
 from pathlib import Path
 import re
@@ -18,79 +16,76 @@ START = '<!-- ISSUEPIQLE_COUPANG_TOP_START -->'
 END = '<!-- ISSUEPIQLE_COUPANG_TOP_END -->'
 STYLE_START = '<!-- ISSUEPIQLE_COUPANG_TOP_STYLE_START -->'
 STYLE_END = '<!-- ISSUEPIQLE_COUPANG_TOP_STYLE_END -->'
-OLD_STYLE_START = '<!-- ISSUEPIQLE_COUPANG_TOP_STYLE -->'
+LEGACY_STYLE = '<!-- ISSUEPIQLE_COUPANG_TOP_STYLE -->'
 DISCLOSURE = '이 포스팅은 쿠팡 파트너스 활동의 일환으로, 이에 따른 일정액의 수수료를 제공받습니다.'
 
 STYLE = f'''{STYLE_START}
 <style>
-/* Quiet editorial placement: after the live briefing, just before issue ranking */
-.ip-coupang{{width:100%;max-width:none;box-sizing:border-box;margin:18px 0 26px;padding:0;background:transparent}}
-.ip-coupang-inner{{width:100%;border:1px solid var(--line,#e2e5e9);border-radius:var(--r-card,12px);box-shadow:var(--shadow,none);background:var(--card,#fff);overflow:hidden;padding:8px 0 7px}}
-.ip-coupang-scroll{{max-width:100%;width:100%;overflow-x:auto;overflow-y:hidden;-webkit-overflow-scrolling:touch;overscroll-behavior-x:contain;scrollbar-width:none;margin:0;padding:0}}
-.ip-coupang-scroll::-webkit-scrollbar{{display:none}}
-.ip-coupang-slot{{min-width:600px;width:600px;min-height:100px;height:100px;line-height:0}}
-.ip-coupang-disclosure{{overflow:hidden;text-align:left;padding:1px 8px 0;margin:0;line-height:0}}
-.ip-coupang-disclosure img{{display:block;width:371px;max-width:100%;height:auto;border:0;background:transparent;margin:0}}
-@media (min-width:720px){{.ip-coupang-scroll{{display:flex;justify-content:center}}}}
-@media (max-width:719px){{.ip-coupang{{margin:14px 0 23px;padding:0}}.ip-coupang-inner{{padding-top:5px}}}}
+/* Ad has the exact content-column width of the existing ranking cards. */
+.ip-coupang{{width:100%;max-width:none;margin:22px 0 27px;padding:0;box-sizing:border-box}}
+.ip-coupang-inner{{width:100%;min-width:0;box-sizing:border-box;overflow:hidden;border:1px solid var(--line,#e2e5e9);border-radius:var(--r-card,12px);box-shadow:var(--shadow,none);background:var(--card,#fff);padding:14px 10px 10px}}
+.ip-coupang-slot{{width:200px;max-width:100%;height:150px;min-height:150px;line-height:0;margin:0 auto;overflow:hidden}}
+.ip-coupang-slot iframe{{max-width:100%;border:0}}
+.ip-coupang-disclosure{{margin:8px 0 0;padding:0;text-align:left;line-height:0;overflow:hidden}}
+.ip-coupang-disclosure img{{display:block;width:371px;max-width:100%;height:auto;margin:0;border:0;background:transparent}}
+@media (max-width:380px){{.ip-coupang-inner{{padding:10px 7px 8px}}.ip-coupang{{margin:18px 0 24px}}}}
 </style>
 {STYLE_END}'''
 
 BANNER = f'''{START}
 <section class="ip-coupang" aria-label="쿠팡 파트너스 광고">
   <div class="ip-coupang-inner">
-    <div class="ip-coupang-scroll" role="region" aria-label="상품 광고 배너, 좌우 스크롤 가능" tabindex="0">
-      <div class="ip-coupang-slot">
-        <script src="https://ads-partners.coupang.com/g.js"></script>
-        <script>new PartnersCoupang.G({{"id":1051992,"template":"carousel","trackingCode":"AF1144527","width":"600","height":"100","tsource":""}});</script>
-      </div>
+    <div class="ip-coupang-slot">
+      <script src="https://ads-partners.coupang.com/g.js"></script>
+      <script>new PartnersCoupang.G({{"id":1052403,"template":"carousel","trackingCode":"AF1144527","width":"200","height":"150","tsource":""}});</script>
     </div>
     <div class="ip-coupang-disclosure" role="note">
-      <img src="assets/system/coupang-fee-disclosure.png" width="1484" height="88" alt="{DISCLOSURE}" loading="eager">
+      <img src="assets/system/coupang-fee-disclosure.png" width="1484" height="88" alt="{DISCLOSURE}" loading="lazy">
     </div>
   </div>
 </section>
 {END}'''
 
 
-def drop_marked(doc, start, end):
-    pattern = re.compile(r'\s*' + re.escape(start) + r'.*?' + re.escape(end) + r'\s*', re.S)
-    return pattern.sub('\n', doc)
+def remove_section(doc, start, end):
+    marker = re.compile(r'\s*' + re.escape(start) + r'.*?' + re.escape(end) + r'\s*', re.S)
+    if (start in doc) != (end in doc):
+        raise ValueError('Partially injected ad marker found: refusing to publish')
+    return marker.sub('\n', doc)
 
 
 def main():
-    if not HOME.is_file() or not SOURCE_PNG.is_file():
-        raise SystemExit('Missing site/index.html or assets/coupang-fee-disclosure.png')
+    if not HOME.is_file():
+        raise FileNotFoundError('Missing site/index.html; run collect.py before this script.')
+    if not SOURCE_PNG.is_file():
+        raise FileNotFoundError('Missing assets/coupang-fee-disclosure.png; keep existing repo image.')
     doc = HOME.read_text(encoding='utf-8')
-    if doc.count('</head>') != 1 or doc.count('</header>') != 1:
-        raise SystemExit('Unexpected homepage structure; safe abort')
-    if 'id="sec-top"' not in doc or '<main class="wrap">' not in doc:
-        raise SystemExit('Cannot locate live issue ranking; safe abort')
-
-    # Existing source / previously generated page may already contain the old banner.
-    doc = drop_marked(doc, START, END)
-    doc = drop_marked(doc, STYLE_START, STYLE_END)
-    doc = re.sub(r'\s*' + re.escape(OLD_STYLE_START) + r'\s*<style>.*?</style>\s*', '\n', doc, flags=re.S)
-
+    if doc.count('</head>') != 1 or doc.count('<section class="sec" id="sec-top"') != 1:
+        raise ValueError('Unexpected ISSUE PIQLE home markup; refusing to edit')
+    doc = remove_section(doc, START, END)
+    doc = remove_section(doc, STYLE_START, STYLE_END)
+    doc = re.sub(r'\s*' + re.escape(LEGACY_STYLE) + r'\s*<style>.*?</style>\s*', '\n', doc, flags=re.S)
+    # Put the unit after the entire top ranking section, including the expand button.
+    # The next original section starts with this unique marker.
+    next_section = '<!-- ④ 분야별 이슈 -->'
+    if doc.count(next_section) != 1:
+        raise ValueError('Cannot locate boundary after live issue ranking')
+    top = doc.index('<section class="sec" id="sec-top"')
+    boundary = doc.index(next_section)
+    if top >= boundary or '<button class="more" id="top-more"' not in doc[top:boundary]:
+        raise ValueError('Live issue ranking structure changed; refusing to insert')
     doc = doc.replace('</head>', STYLE + '\n</head>', 1)
-    # Insert only after the existing briefing and SEO utility line, before live rankings.
-    mark = re.search(r'(?P<prefix>\s*)(?P<section><section\s+class="sec"\s+id="sec-top")', doc)
-    if not mark:
-        raise SystemExit('Live issue ranking anchor changed; safe abort')
-    doc = doc[:mark.start()] + '\n' + BANNER + '\n' + doc[mark.start():]
-
-    if doc.count('new PartnersCoupang.G(') != 1 or doc.count(START) != 1:
-        raise SystemExit('Duplicated ad code; safe abort')
-    if '파트너스 추천' in BANNER:
-        raise SystemExit('Unexpected decorative label')
-    if not doc.index('</header>') < doc.index(START) < doc.index('id="sec-top"'):
-        raise SystemExit('Banner placement invalid')
-
-    DEST_PNG.parent.mkdir(parents=True, exist_ok=True)
-    shutil.copyfile(SOURCE_PNG, DEST_PNG)
-    HOME.write_text(doc, encoding='utf-8')
-    print('ISSUE PIQLE: quiet ad block without decorative title, before issue rankings; PNG disclosure kept.')
-
+    doc = doc.replace(next_section, BANNER + '\n\n  ' + next_section, 1)
+    if doc.count('new PartnersCoupang.G(') != 1:
+        raise ValueError('Exactly one Coupang unit expected')
+    if not doc.index('id="sec-top"') < doc.index(START) < doc.index('id="sec-cat"'):
+        raise ValueError('Ad placement outside intended ranking boundary')
+    if '"id":1051992' in doc or '"id":1051923' in doc:
+        raise ValueError('Legacy Coupang unit remains; not publishing duplicate ads')
+    DEST_PNG.parent.mkdir(parents=True,exist_ok=True)
+    shutil.copyfile(SOURCE_PNG,DEST_PNG)
+    HOME.write_text(doc,encoding='utf-8')
+    print('ISSUE PIQLE: one Coupang 200x150 unit after top 5/expand button and before categories.')
 
 if __name__ == '__main__':
     main()

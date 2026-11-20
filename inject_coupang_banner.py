@@ -24,15 +24,15 @@ DISCLOSURE = '이 포스팅은 쿠팡 파트너스 활동의 일환으로, 이�
 STYLE = f'''{STYLE_START}
 <style>
 /* Quiet editorial placement: after the live briefing, just before issue ranking */
-.ip-coupang{{max-width:45rem;margin:18px auto 26px;padding:0 var(--pad,16px);background:transparent}}
-.ip-coupang-inner{{border:1px solid var(--line,#e2e5e9);border-radius:15px;background:var(--card,#fff);overflow:hidden;padding:8px 0 7px}}
+.ip-coupang{{width:100%;max-width:none;box-sizing:border-box;margin:18px 0 26px;padding:0;background:transparent}}
+.ip-coupang-inner{{width:100%;border:1px solid var(--line,#e2e5e9);border-radius:var(--r-card,12px);box-shadow:var(--shadow,none);background:var(--card,#fff);overflow:hidden;padding:8px 0 7px}}
 .ip-coupang-scroll{{max-width:100%;width:100%;overflow-x:auto;overflow-y:hidden;-webkit-overflow-scrolling:touch;overscroll-behavior-x:contain;scrollbar-width:none;margin:0;padding:0}}
 .ip-coupang-scroll::-webkit-scrollbar{{display:none}}
 .ip-coupang-slot{{min-width:600px;width:600px;min-height:100px;height:100px;line-height:0}}
 .ip-coupang-disclosure{{overflow:hidden;text-align:left;padding:1px 8px 0;margin:0;line-height:0}}
-.ip-coupang-disclosure img{{display:block;width:371px;min-width:371px;height:22px;max-width:none;border:0;background:transparent;margin:0}}
+.ip-coupang-disclosure img{{display:block;width:371px;max-width:100%;height:auto;border:0;background:transparent;margin:0}}
 @media (min-width:720px){{.ip-coupang-scroll{{display:flex;justify-content:center}}}}
-@media (max-width:719px){{.ip-coupang{{margin:14px auto 23px;padding:0 var(--pad,16px)}}.ip-coupang-inner{{padding-top:5px}}}}
+@media (max-width:719px){{.ip-coupang{{margin:14px 0 23px;padding:0}}.ip-coupang-inner{{padding-top:5px}}}}
 </style>
 {STYLE_END}'''
 

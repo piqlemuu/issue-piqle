@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""ISSUE PIQLE: one 200x150 Coupang carousel AFTER the top-5/expand rankings.
+"""ISSUE PIQLE: one 600x180 Coupang carousel AFTER the top-5/expand rankings.
 
 Generated homepage only: this is run from .github/workflows/update.yml.
 Does not change source homepage or other editorial pages.
@@ -24,7 +24,10 @@ STYLE = f'''{STYLE_START}
 /* Ad has the exact content-column width of the existing ranking cards. */
 .ip-coupang{{width:100%;max-width:none;margin:22px 0 27px;padding:0;box-sizing:border-box}}
 .ip-coupang-inner{{width:100%;min-width:0;box-sizing:border-box;overflow:hidden;border:1px solid var(--line,#e2e5e9);border-radius:var(--r-card,12px);box-shadow:var(--shadow,none);background:var(--card,#fff);padding:14px 10px 10px}}
-.ip-coupang-slot{{width:200px;max-width:100%;height:150px;min-height:150px;line-height:0;margin:0 auto;overflow:hidden}}
+/* Keep the native 600x180 unit; mobile scrolls inside the card without shrinking the ad. */
+.ip-coupang-scroll{{width:100%;overflow-x:auto;overflow-y:hidden;-webkit-overflow-scrolling:touch;scrollbar-width:thin;overscroll-behavior-x:contain}}
+.ip-coupang-slot{{width:600px;min-width:600px;height:180px;min-height:180px;line-height:0;margin:0 auto;overflow:hidden}}
+@media(max-width:719px){{.ip-coupang-slot{{margin-left:0;margin-right:0}}}}
 .ip-coupang-slot iframe{{max-width:100%;border:0}}
 .ip-coupang-disclosure{{margin:8px 0 0;padding:0;text-align:left;line-height:0;overflow:hidden}}
 .ip-coupang-disclosure img{{display:block;width:371px;max-width:100%;height:auto;margin:0;border:0;background:transparent}}
@@ -35,10 +38,10 @@ STYLE = f'''{STYLE_START}
 BANNER = f'''{START}
 <section class="ip-coupang" aria-label="쿠팡 파트너스 광고">
   <div class="ip-coupang-inner">
-    <div class="ip-coupang-slot">
+    <div class="ip-coupang-scroll" role="region" aria-label="쿠팡 광고를 좌우로 스크롤하여 보기" tabindex="0"><div class="ip-coupang-slot">
       <script src="https://ads-partners.coupang.com/g.js"></script>
-      <script>new PartnersCoupang.G({{"id":1052403,"template":"carousel","trackingCode":"AF1144527","width":"200","height":"150","tsource":""}});</script>
-    </div>
+      <script>new PartnersCoupang.G({{"id":1052403,"template":"carousel","trackingCode":"AF1144527","width":"600","height":"180","tsource":""}});</script>
+    </div></div>
     <div class="ip-coupang-disclosure" role="note">
       <img src="assets/system/coupang-fee-disclosure.png" width="1484" height="88" alt="{DISCLOSURE}" loading="lazy">
     </div>
@@ -85,7 +88,7 @@ def main():
     DEST_PNG.parent.mkdir(parents=True,exist_ok=True)
     shutil.copyfile(SOURCE_PNG,DEST_PNG)
     HOME.write_text(doc,encoding='utf-8')
-    print('ISSUE PIQLE: one Coupang 200x150 unit after top 5/expand button and before categories.')
+    print('ISSUE PIQLE: one Coupang 600x180 unit after top 5/expand button and before categories.')
 
 if __name__ == '__main__':
     main()

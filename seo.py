@@ -816,6 +816,16 @@ def build_all(details, old_snaps, now_iso, memes_dict, daily=None):
     issues = (details or {}).get("issues", {})
     link_map = {}
     OUT_DIR.mkdir(parents=True, exist_ok=True)
+    # 아이폰·맥에서 올린 한글 파일 이름은 글자가 풀어 쓴 형태(NFD)로 저장돼서 주소가 달라져요.
+    # 배포 전에 원래 형태(NFC)로 맞춰, 검색에 나간 주소가 그대로 열리게 해요.
+    import unicodedata as _ud
+    for _p in list(OUT_DIR.iterdir()):
+        _nfc = _ud.normalize("NFC", _p.name)
+        if _nfc != _p.name:
+            _dst = OUT_DIR / _nfc
+            if not _dst.exists():
+                _p.rename(_dst)
+                print("[파일 이름] 한글 형태를 맞췄어요:", _nfc)
     for ex in explains:
         s = slug(ex["title"])
         cur = issues.get(ex["keyword"])
@@ -1376,6 +1386,7 @@ def build_index(explains):
         start = page.index(open_tag) + len(open_tag)
         end = page.index('<footer class="foot">', start)
         page = page[:start] + _wt_block(items) + "\n" + page[end:]
+        page = page.replace('<nav class="bnav" data-here="">', '<nav class="bnav" data-here="explain">', 1)
         page = _sk_re.sub(r"<title>.*?</title>", f"<title>{WT_NAME} | 이름은 봤는데 무슨 일인지 모를 때 - 이슈피클 해설</title>", page, count=1, flags=_sk_re.S)
         return page
     except Exception as err:

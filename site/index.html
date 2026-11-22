@@ -359,7 +359,7 @@ function briefLines(lines, small) {
 }
 const hourLabel = iso => { const d = new Date(iso); return `${d.getHours()}시 ${String(d.getMinutes()).padStart(2, "0")}분`; };
 function renderBrief() {
-  const b = DATA?.brief;
+  const b = null; // 브리핑은 홈에서 뺐어요 (2026-11)
   if (!b || !b.lines?.length) { $("brief").hidden = true; return; }
   $("brief").hidden = false;
   const H = [0, 9, 12, 15, 18, 21], h = new Date(b.slot || b.time).getHours();

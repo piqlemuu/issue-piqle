@@ -845,6 +845,15 @@ def build_all(details, old_snaps, now_iso, memes_dict, daily=None):
     if explains:
         urls.append((SITE_URL + "i/", explains[0]["date"] or today, "daily", "0.8"))
     urls += [(page_url(x["title"]), x["updated"] or x["date"] or None, "weekly", "0.8") for x in explains]
+    # editorial-articles.json 에 등록한 직접 작성 글(HTML)도 사이트맵에 넣어요. 주소는 파일 이름 그대로라 바뀌지 않아요.
+    try:
+        _known = {u for u, *_ in urls}
+        for _it in _piqle_editorial_items():
+            _loc = SITE_URL + "i/" + urllib.parse.quote(_it["url"])
+            if _loc not in _known and (OUT_DIR / _it["url"]).is_file():
+                urls.append((_loc, _it.get("updated") or _it["date"], "weekly", "0.8"))
+    except Exception as _err:
+        print("[sitemap] 직접 작성 글을 사이트맵에 넣지 못했어요:", _err)
     if good_days:
         urls.append((SITE_URL + "b/", good_days[-1], "daily", "0.7"))
     if months:

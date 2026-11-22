@@ -1,103 +1,333 @@
-<!DOCTYPE html>
-<html lang="ko"><head>
+<!doctype html>
+<html lang="ko">
+<head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>새콤해설 | 오늘의 이슈·생활경제·연예 뉴스 맥락 정리 - 이슈피클</title>
-<meta name="description" content="오늘 화제인 이슈를 왜 주목하는지 직접 해설합니다. 생활경제, 연예, 문화, 사회 이슈의 핵심 내용과 맥락, 근거 출처를 읽어보세요.">
-
-<meta property="og:type" content="article"><meta property="og:site_name" content="이슈피클">
-<meta property="og:title" content="새콤해설 | 오늘의 이슈·생활경제·연예 뉴스 맥락 정리 - 이슈피클"><meta property="og:description" content="오늘 화제인 이슈를 왜 주목하는지 직접 해설합니다. 생활경제, 연예, 문화, 사회 이슈의 핵심 내용과 맥락, 근거 출처를 읽어보세요."><meta property="og:url" content="https://piqlemuu.github.io/issue-piqle/i/">
-<meta property="og:image" content="https://piqlemuu.github.io/issue-piqle/og.jpg"><meta property="og:image:width" content="1200"><meta property="og:image:height" content="630">
-<meta name="twitter:card" content="summary_large_image">
-<link rel="alternate" type="application/rss+xml" title="이슈피클" href="../rss.xml">
-<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.min.css">
-<link rel="stylesheet" href="../style.css">
-<script>try{var d=document.documentElement,t=localStorage.getItem("theme"),f=localStorage.getItem("fsize");d.setAttribute("data-theme",t||(matchMedia("(prefers-color-scheme: dark)").matches?"dark":"light"));d.setAttribute("data-fs",{l:"l",xl:"xl"}[f]||"m")}catch(e){}</script>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>왜떴어? | 이름은 봤는데 무슨 일인지 모를 때 – 이슈피클 해설</title>
+<meta name="description" content="검색어에 뜬 그 이슈, 무슨 일인지 1분 만에. 생활 이슈는 지금 할 일까지, 화제 이슈는 왜 떴는지까지. 이슈피클 새콤기자가 근거 기사로 정리해요.">
+<meta property="og:title" content="왜떴어? – 이슈피클 해설">
+<meta property="og:description" content="이름은 봤는데, 무슨 일인지 모를 때. 1분 해설.">
+<meta property="og:image" content="https://piqlemuu.github.io/issue-piqle/og.jpg">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Gothic+A1:wght@700;800;900&family=Noto+Sans+KR:wght@400;500;700&family=Black+Han+Sans&display=swap" rel="stylesheet">
 <style>
-.ex h1{font-size:1.5rem;font-weight:700;letter-spacing:-.02em;line-height:1.3;margin:.375rem 0 0}
-.ex .sum{margin-top:.875rem;padding:1rem}
-.ex .sum h2{font-size:.875rem;color:var(--sub);font-weight:600;margin-bottom:.375rem}
-.ex .sum ul{margin:0;padding-left:1.1rem}.ex .sum li{margin:.25rem 0;line-height:1.6}
-.ex article{padding:1.125rem 1rem;font-size:1rem;line-height:1.75}
-.ex article h2{font-size:1.125rem;font-weight:700;margin:1.25rem 0 .375rem}.ex article h2:first-child{margin-top:0}
-.ex article p{margin:.375rem 0}
-.ex .by{color:var(--sub);font-size:.8125rem;margin-top:.5rem}
-.ex .rel .rs{display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;font-size:.875rem;line-height:1.5;color:var(--sub);margin-top:.125rem}
-.ex .sec-more{font-size:.8125rem;font-weight:600;color:var(--sub);white-space:nowrap;align-self:flex-end}
-.ex .go-home{margin-top:.75rem;padding:1rem;display:flex;flex-direction:column;gap:.25rem;background:var(--soft)}
-.ex .go-home b{font-size:1rem}.ex .go-home span{font-size:.875rem;color:var(--sub)}
-.ex .go-btn{margin-top:.5rem;display:flex;align-items:center;justify-content:center;min-height:2.75rem;border-radius:10px;background:var(--text);color:var(--card);font-weight:700}
-.ex .go-wide{display:grid;grid-template-columns:auto 1fr auto;gap:.75rem;align-items:center;margin-top:.625rem;padding:.875rem 1rem;border-radius:var(--r-card);background:var(--logo);color:#fff}
-.ex .go-wide .pk{font-size:1.5rem}.ex .go-wide b{display:block;font-size:1rem}.ex .go-wide small{display:block;font-size:.8125rem;opacity:.92}.ex .go-wide .ar{font-size:1.5rem;font-weight:300}
-.ex .live{display:flex;align-items:center;justify-content:center;min-height:2.75rem;margin-top:.75rem;border:1px solid var(--line);border-radius:10px;background:var(--card);font-weight:600}
+:root{--bg:#F6F4EE;--ink:#15161A;--sub:#5E5D59;--line:#E4E1D7;--chip:#D9D6CC;--red:#D23A22;--red-text:#B8301B;--red-soft:#FFF1EC;--tile:#2B2C33;--teal:#0F6E64;--teal-soft:#E3F2EF;--teal-tile:#123F3A}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:'Noto Sans KR',sans-serif;-webkit-font-smoothing:antialiased;word-break:keep-all;overflow-wrap:anywhere}
+a{color:inherit}
+.wrap{max-width:560px;margin:0 auto;padding:0 20px}
+.sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
+header.top{display:flex;justify-content:space-between;align-items:center;padding:14px 0 4px}
+.logo{display:flex;align-items:baseline;gap:8px;text-decoration:none}
+.logo b{font-family:'Gothic A1',sans-serif;font-weight:900;font-size:24px;letter-spacing:-0.02em}
+.logo b span{color:var(--red)}
+.logo small{font-size:12px;font-weight:700;color:var(--sub)}
+.home-link{font-size:13px;font-weight:700;color:var(--sub);text-decoration:none;padding:12px 4px}
+.hero{padding:10px 0 16px}
+.eyebrow{margin:0;font-size:13px;font-weight:700;color:var(--red-text)}
+h1{margin:6px 0 0;font-family:'Gothic A1',sans-serif;font-weight:900;font-size:30px;line-height:1.25;letter-spacing:-0.03em}
+form.search{margin-top:16px;display:flex;gap:8px}
+form.search input{flex:1;min-width:0;height:48px;border:2px solid var(--ink);border-radius:12px;padding:0 14px;font-size:16px;background:#fff;font-family:inherit;color:var(--ink)}
+form.search input:focus{outline:3px solid #F5B9AD;outline-offset:1px}
+form.search button{height:48px;padding:0 18px;border:0;border-radius:12px;background:var(--ink);color:#fff;font-weight:700;font-size:15px;font-family:inherit;cursor:pointer}
+.chips{margin-top:10px;display:flex;gap:6px;align-items:center;flex-wrap:wrap}
+.chips span{font-size:12px;color:var(--sub);margin-right:2px}
+.chip{padding:10px 13px;border-radius:999px;background:#fff;border:1px solid var(--chip);font-size:13px;font-weight:700;font-family:inherit;color:var(--ink);cursor:pointer}
+.chip:hover{border-color:var(--ink)}
+.tabs{position:sticky;top:0;z-index:3;background:var(--bg);display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:6px;padding:10px 0;margin-bottom:6px}
+.tabs button{height:52px;border-radius:14px;border:2px solid var(--ink);background:#fff;font-family:inherit;cursor:pointer;color:var(--ink);display:flex;flex-direction:column;align-items:center;justify-content:center;line-height:1.2}
+.tabs button b{font-family:'Gothic A1',sans-serif;font-weight:900;font-size:17px}
+.tabs button small{font-size:11px;color:var(--sub)}
+.tabs button[aria-selected="true"]{background:var(--ink);color:#fff}
+.tabs button[aria-selected="true"] small{color:#CFCDC6}
+.tile{position:relative;background:var(--tile);color:#F6F4EE;display:flex;align-items:flex-end;padding:14px 16px;font-family:'Gothic A1',sans-serif;font-weight:900;letter-spacing:-0.03em}
+.life .tile{background:var(--teal-tile)}
+.badge{position:absolute;top:12px;left:12px;background:var(--red);color:#fff;font-size:12px;font-weight:700;padding:5px 10px;border-radius:999px;font-family:'Noto Sans KR',sans-serif;letter-spacing:0}
+.life .badge{background:#fff;color:var(--teal)}
+.feature{background:#fff;border-radius:18px;overflow:hidden;border:1px solid var(--line)}
+.feature .tile{height:132px;font-size:40px}
+.feature .body{padding:14px 16px 16px}
+.meta{margin:0;font-size:12px;color:var(--sub)}
+.feature h2{margin:6px 0 0;font-family:'Gothic A1',sans-serif;font-weight:800;font-size:19px;line-height:1.35;letter-spacing:-0.02em}
+.answer{margin:10px 0 0;padding:10px 12px;background:var(--red-soft);border-radius:10px;font-size:14px;line-height:1.55}
+.answer b{color:var(--red-text);margin-right:4px}
+.todo{margin:8px 0 0;padding:10px 12px;background:var(--teal-soft);border-radius:10px;font-size:14px;line-height:1.55}
+.todo b{color:var(--teal);margin-right:4px}
+.btn{margin-top:12px;display:flex;height:48px;align-items:center;justify-content:center;background:var(--red);color:#fff;border-radius:12px;font-weight:700;text-decoration:none;font-size:15px}
+.btn:hover{background:#B8301B}
+.life .btn{background:var(--teal)}
+.life .btn:hover{background:#0B5A52}
+section.list{padding:22px 0 8px}
+.list-head{display:flex;justify-content:space-between;align-items:baseline;gap:8px}
+.list-head h3{margin:0;font-size:17px;font-family:'Gothic A1',sans-serif;font-weight:800}
+.list-head p{margin:0;font-size:12px;color:var(--sub)}
+.filters{display:flex;gap:6px;margin:12px 0 4px;overflow-x:auto;padding-bottom:4px}
+.filters button{flex:none;padding:9px 14px;border-radius:999px;border:1px solid var(--chip);background:transparent;font-family:inherit;font-size:13px;font-weight:700;color:var(--ink);cursor:pointer}
+.filters button[aria-pressed="true"]{background:var(--ink);border-color:var(--ink);color:#fff}
+.item{display:flex;gap:12px;padding:14px 0;border-bottom:1px solid var(--line);text-decoration:none}
+.item .tile{width:64px;height:64px;flex:none;border-radius:12px;padding:8px;font-size:14px;line-height:1.15}
+.item.is-life .tile{background:var(--teal-tile)}
+.item .txt{display:flex;flex-direction:column;gap:4px;min-width:0}
+.item .t{font-size:15px;font-weight:700;line-height:1.4}
+.item .a{font-size:13px;color:var(--sub);line-height:1.45}
+.item .d{font-size:13px;line-height:1.45;color:var(--teal);font-weight:700}
+.item:hover .t{text-decoration:underline}
+.kind{display:inline-block;font-size:11px;font-weight:700;padding:2px 7px;border-radius:999px;background:var(--line);color:#3A3936;margin-right:4px}
+.empty{padding:20px 16px;margin-top:12px;background:#fff;border:1px dashed var(--chip);border-radius:14px;font-size:14px;line-height:1.6}
+.empty a{color:var(--red-text);font-weight:700}
+.result-note{margin:12px 0 0;font-size:13px;color:var(--sub)}
+.result-note button{border:0;background:none;color:var(--red-text);font-weight:700;font-family:inherit;font-size:13px;cursor:pointer;padding:8px 4px}
+.side{margin:22px 0 0;display:block;background:#121214;color:#F2F2F2;border-radius:18px;padding:18px;text-decoration:none}
+.side b{font-family:'Black Han Sans','Gothic A1',sans-serif;font-weight:400;font-size:22px;color:#FF4F9A}
+.side p{margin:6px 0 0;font-size:13px;color:#C4C4CC;line-height:1.5}
+.side span{display:inline-block;margin-top:10px;font-size:13px;font-weight:700;color:#D6FF3F}
+.rules{margin:26px 0 0;padding:16px;border-radius:14px;background:#EFECE3;font-size:13px;line-height:1.65;color:#3A3936}
+.rules b{display:block;color:var(--ink);margin-bottom:4px}
+footer{padding:28px 0 40px;font-size:12px;color:var(--sub);line-height:1.7}
+footer a{color:var(--sub)}
 </style>
-<script type="application/ld+json">{"@context": "https://schema.org", "@type": "CollectionPage", "name": "이슈피클 새콤 해설", "url": "https://piqlemuu.github.io/issue-piqle/i/"}</script>
-<!-- ISSUEPIQLE_LATEST_STYLE --><style>
-.ip-latest-hero{display:block;margin:14px 0 24px;border:1px solid var(--line,#ddd);border-radius:17px;overflow:hidden;background:var(--card,#fff);text-decoration:none}
-.ip-latest-hero>img{display:block;width:100%;height:auto;aspect-ratio:16/9;max-height:360px;object-fit:cover}
-.ip-latest-hero .sk-t{padding:18px 20px 22px}
-.ip-latest-hero h2{font-size:clamp(1.3rem,2.9vw,1.9rem);line-height:1.45;margin:12px 0 8px;word-break:keep-all}
-.ip-latest-hero .sk-sum{font-size:.93rem;line-height:1.7;margin-top:10px}
-.ip-hero-placeholder{height:180px;display:grid;place-items:center;background:var(--soft,#edf4f1);font-weight:900;letter-spacing:.12em}
-@media(max-width:600px){.ip-latest-hero .sk-t{padding:15px}.ip-latest-hero>img{max-height:240px}}
-</style>
-<link rel="canonical" href="https://piqlemuu.github.io/issue-piqle/i/">
-<!-- PIQLE_SECTION_SCHEMA_BEGIN --><script type="application/ld+json">{"@context":"https://schema.org","@type":"ItemList","name":"새콤해설 최신 기사","itemListElement":[{"@type":"ListItem","position":1,"name":"수능 D-2, 안경 전수점검·단추 스티커…정부 추가 대책 정리","url":"https://piqlemuu.github.io/issue-piqle/i/csat-ai-20261117.html"},{"@type":"ListItem","position":2,"name":"방탄소년단 6관왕…MMA2026 대상 5개, 누가 받았나","url":"https://piqlemuu.github.io/issue-piqle/i/방탄소년단-6관왕-MMA2026-대상-5개-누가-받았나.html"},{"@type":"ListItem","position":3,"name":"\"취소표 구하려고\" 터미널 폭발물 허위 글…장난 글도 '공중협박죄'로 처벌돼요","url":"https://piqlemuu.github.io/issue-piqle/i/취소표-구하려고-터미널-폭발물-허위-글-장난-글도-공중협박죄-로-처벌돼요.html"},{"@type":"ListItem","position":4,"name":"노란우산 가입자 정보 '제3자 조회' 정황…7개 항목 유출 가능성","url":"https://piqlemuu.github.io/issue-piqle/i/노란우산-가입자-정보-제3자-조회-정황-7개-항목-유출-가능성.html"},{"@type":"ListItem","position":5,"name":"미국 전역 항공기 이륙 4시간 20분 '올스톱'…인천발 미국행도 한때 결항","url":"https://piqlemuu.github.io/issue-piqle/i/미국-전역-항공기-이륙-4시간-20분-올스톱-인천발-미국행도-한때-결항.html"},{"@type":"ListItem","position":6,"name":"투모로우바이투게더, 서울 공연 마치고 16일 미니 9집 'PERFECT STORM' 낸다","url":"https://piqlemuu.github.io/issue-piqle/i/투모로우바이투게더-서울-공연-마치고-16일-미니-9집-PERFECT-STORM-낸다.html"},{"@type":"ListItem","position":7,"name":"소득 끊긴 프리랜서, 국민연금 ‘납부예외’ 신청 쉬워진다","url":"https://piqlemuu.github.io/issue-piqle/i/소득-끊긴-프리랜서-국민연금-납부예외-신청-쉬워진다.html"},{"@type":"ListItem","position":8,"name":"강동원·김고은, 넷플릭스 사극 '혼: 삼각의 시간'에서 부부로 만나요","url":"https://piqlemuu.github.io/issue-piqle/i/강동원-김고은-넷플릭스-사극-혼-삼각의-시간-에서-부부로-만나요.html"},{"@type":"ListItem","position":9,"name":"민속촌 '귀신 참교육' 아동학대 논란, 법은 어떻게 볼까","url":"https://piqlemuu.github.io/issue-piqle/i/민속촌-귀신-참교육-아동학대-논란-법은-어떻게-볼까.html"},{"@type":"ListItem","position":10,"name":"할인해 준 금액엔 ‘수수료 0원’…배민, 무엇이 바뀌나?","url":"https://piqlemuu.github.io/issue-piqle/i/할인해-준-금액엔-수수료-0원-배민-무엇이-바뀌나.html"},{"@type":"ListItem","position":11,"name":"코인 거래소, 해킹 ‘의심’만 돼도 입출금 먼저 막는다","url":"https://piqlemuu.github.io/issue-piqle/i/코인-거래소-해킹-의심-만-돼도-입출금-먼저-막는다.html"},{"@type":"ListItem","position":12,"name":"강동원·김고은, ‘백 년 원수’ 집안 부부로…넷플릭스 사극 ‘혼: 삼각의 시간’","url":"https://piqlemuu.github.io/issue-piqle/i/강동원-김고은-백-년-원수-집안-부부로-넷플릭스-사극-혼-삼각의-시간.html"},{"@type":"ListItem","position":13,"name":"수능 준비물·입실 시간, 스마트안경 규정 총정리","url":"https://piqlemuu.github.io/issue-piqle/i/수능-준비물-입실-시간-스마트안경-규정-총정리.html"},{"@type":"ListItem","position":14,"name":"금융보안원 해킹, 무엇이 새어 나갔나","url":"https://piqlemuu.github.io/issue-piqle/i/금융보안원-해킹-무엇이-새어-나갔나.html"},{"@type":"ListItem","position":15,"name":"전세사기 피해자 보증금 '최소 3분의 1' 보장, 13일 시행","url":"https://piqlemuu.github.io/issue-piqle/i/전세사기-피해자-보증금-최소-3분의-1-보장-13일-시행.html"},{"@type":"ListItem","position":16,"name":"난임치료휴가 유급 2일→4일, 11월 27일부터","url":"https://piqlemuu.github.io/issue-piqle/i/난임치료휴가-유급-2일-4일-11월-27일부터.html"},{"@type":"ListItem","position":17,"name":"10월 가계대출 6.4조 원 늘어, 한 달 만에 다시 증가","url":"https://piqlemuu.github.io/issue-piqle/i/10월-가계대출-6-4조-원-늘어-한-달-만에-다시-증가.html"},{"@type":"ListItem","position":18,"name":"지수·NCT·베이비몬스터 등 한국 5팀, 2027 코첼라 무대에 서요","url":"https://piqlemuu.github.io/issue-piqle/i/지수-NCT-베이비몬스터-등-한국-5팀-2027-코첼라-무대에-서요.html"},{"@type":"ListItem","position":19,"name":"보이스피싱 피해자, 생계비 최대 200만 원 받는다","url":"https://piqlemuu.github.io/issue-piqle/i/보이스피싱-피해자-생계비-최대-200만-원-받는다.html"},{"@type":"ListItem","position":20,"name":"ITZY 채령, 데뷔 7년여 만에 솔로 앨범 'Lovesick' 발매","url":"https://piqlemuu.github.io/issue-piqle/i/ITZY-채령-데뷔-7년여-만에-솔로-앨범-Lovesick-발매.html"},{"@type":"ListItem","position":21,"name":"\"밤 10시 이후 샤워 자제\" 공지문 논란, 물소리는 층간소음일까?","url":"https://piqlemuu.github.io/issue-piqle/i/밤-10시-이후-샤워-자제-공지문-논란-물소리는-층간소음일까.html"},{"@type":"ListItem","position":22,"name":"삼성 12년 만의 한국시리즈 우승","url":"https://piqlemuu.github.io/issue-piqle/i/삼성-12년-만의-한국시리즈-우승.html"},{"@type":"ListItem","position":23,"name":"배민·쿠팡이츠 과징금 6,319억 원","url":"https://piqlemuu.github.io/issue-piqle/i/배민-쿠팡이츠-과징금-6-319억-원.html"},{"@type":"ListItem","position":24,"name":"AI 구독료, 넷플릭스처럼 '고정비'가 됐다","url":"https://piqlemuu.github.io/issue-piqle/i/AI-구독료-넷플릭스처럼-고정비-가-됐다.html"},{"@type":"ListItem","position":25,"name":"있지 채령, 데뷔 7년 만에 첫 솔로 앨범 '러브식'","url":"https://piqlemuu.github.io/issue-piqle/i/있지-채령-데뷔-7년-만에-첫-솔로-앨범-러브식.html"},{"@type":"ListItem","position":26,"name":"악뮤 강릉 콘서트 VIP석 '시야 제한' 논란","url":"https://piqlemuu.github.io/issue-piqle/i/악뮤-강릉-콘서트-VIP석-시야-제한-논란.html"},{"@type":"ListItem","position":27,"name":"듀스, 31년 만의 정규 4집…AI로 되살린 김성재 목소리","url":"https://piqlemuu.github.io/issue-piqle/i/듀스-31년-만의-정규-4집-AI로-되살린-김성재-목소리.html"},{"@type":"ListItem","position":28,"name":"\"밤 10시 이후 샤워 자제\"…층간소음 공지문 갑론을박","url":"https://piqlemuu.github.io/issue-piqle/i/밤-10시-이후-샤워-자제-층간소음-공지문-갑론을박.html"}]}</script><!-- PIQLE_SECTION_SCHEMA_END -->
-<style id="piqle-feature-size">.sk-feat img{height:clamp(160px,30vw,240px);object-fit:cover;object-position:center 18%}</style></head>
+</head>
 <body>
-<header class="top"><div class="wrap top-in"><div class="logo"><a href="../index.html">이슈<span>피클</span></a></div>
-<button class="icon-btn" id="settings-btn" aria-label="화면 설정" aria-haspopup="dialog" aria-controls="settings"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="3"/><path d="M12 2v3M12 19v3M4.2 4.2l2.1 2.1M17.7 17.7l2.1 2.1M2 12h3M19 12h3M4.2 19.8l2.1-2.1M17.7 6.3l2.1-2.1"/></svg></button></div></header>
-<main class="wrap ex">
-<a class="back" href="../index.html">‹ 홈으로</a><style>
-.sk{max-width:720px;margin:0 auto;padding:0 0 1rem;word-break:keep-all}
-.sk *{box-sizing:border-box}
-.sk-intro{margin:.5rem 0 1rem}
-.sk-intro h1{font-size:1.5rem;font-weight:900;margin:0}
-.sk-intro p{color:var(--sub);font-size:.875rem;margin:.25rem 0 0;line-height:1.6}
-.sk-tabs{display:flex;gap:.5rem;overflow-x:auto;padding-bottom:.25rem;margin-bottom:.75rem}
-.sk-tab{flex:none;font:inherit;font-size:.8125rem;font-weight:700;padding:.4rem .8rem;border-radius:999px;
- background:var(--card);border:1px solid var(--line);color:var(--sub);cursor:pointer}
-.sk-tab.on{background:var(--text);color:var(--bg);border-color:var(--text)}
-.sk a{color:inherit;text-decoration:none}
-.sk-card{display:block;background:var(--card);border:1px solid var(--line);border-radius:16px;overflow:hidden;margin-top:.75rem}
-.sk-feat img{display:block;width:100%;height:auto}
-.sk-feat .sk-t{padding:.9rem 1rem 1rem}
-.sk-feat h2{font-size:1.2rem;line-height:1.4;margin:.4rem 0 0;font-weight:900}
-.sk-row{display:flex;gap:.75rem;padding:.75rem}
-.sk-th{flex:none;width:112px;height:76px;border-radius:10px;background-size:cover;background-position:center;
- display:flex;align-items:center;justify-content:center;text-align:center;font-size:.8125rem;font-weight:900;
- line-height:1.35;padding:.4rem;color:#1d1d1f}
-.sk-row h3{font-size:.95rem;line-height:1.4;margin:.3rem 0 0;font-weight:800}
-.sk-sum{font-size:.85rem;color:var(--sub);line-height:1.55;margin:.35rem 0 0}
-.sk-meta{font-size:.75rem;color:var(--sub);margin-top:.4rem;opacity:.85}
-.sk-chip{display:inline-block;font-size:.72rem;font-weight:700;padding:.15rem .5rem;border-radius:6px;background:#e9f7f3;color:#0f8a75}
-.sk-new{display:inline-block;margin-left:.35rem;font-size:.7rem;font-weight:800;color:#fff;background:#e5484d;padding:.1rem .4rem;border-radius:5px}
-.sk-sec{font-size:1rem;font-weight:900;margin:1.4rem 0 .25rem}
-.sk-author{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:1rem;margin-top:1rem}
-.sk-author b{font-size:1rem}.sk-author p{margin:.2rem 0 0;font-size:.85rem;color:var(--sub);line-height:1.6}
-.sk-author a{color:#14a38b;font-weight:700}
-.sk-pn{display:flex;gap:.6rem;margin-top:.75rem}
-.sk-pn a,.sk-pn span.sk-empty{flex:1;background:var(--card);border:1px solid var(--line);border-radius:14px;padding:.75rem;
- font-size:.85rem;font-weight:700;line-height:1.4}
-.sk-pn small{display:block;font-size:.72rem;color:var(--sub);font-weight:500;margin-bottom:.25rem}
-.sk-pn span.sk-empty{visibility:hidden}
-.sk-grid{display:grid;grid-template-columns:1fr 1fr;gap:.6rem}
-.sk-grid .sk-card{margin-top:.5rem}
-.sk-grid .sk-th{width:100%;height:86px;border-radius:0}
-.sk-grid .sk-tx{padding:.55rem .65rem .7rem;font-size:.82rem;font-weight:800;line-height:1.4}
-.sk-hide{display:none!important}
-</style><div class="sk" id="sk-list"><div class="sk-intro"><h1>새콤 해설</h1><p>새콤기자가 오늘 화제인 이슈를 무슨 일인지, 왜 화제인지 쉽게 풀어 드려요</p></div><div class="sk-tabs"><button class="sk-tab on" data-c="전체">전체</button><button class="sk-tab" data-c="생활·경제">생활·경제</button><button class="sk-tab" data-c="연예">연예</button><button class="sk-tab" data-c="커뮤니티">커뮤니티</button><button class="sk-tab" data-c="스포츠">스포츠</button></div>
-<a class="sk-card sk-feat ip-latest-hero" data-c="생활·경제" href="cgv-suneung-discount-20261119.html"><img src="assets/cgv-suneung-20261119/cover.jpg" alt="" loading="eager" decoding="async"><div class="sk-t"><span class="sk-chip">최신 새콤해설</span><h2>수능 안 본 어른도 받는다, CGV 영화·콤보 할인</h2><p class="sk-sum">청소년 7천 원 관람과 일반 회원 3천 원 할인의 차이, 예매 전 받을 쿠폰을 정리했습니다.</p><div class="sk-meta">2026-11-19 · 새콤해설</div></div></a>
-<div class="sk-sec">최신 해설</div><a class="sk-card sk-row" data-c="생활·경제" href="csat-ai-20261117.html"><div class="sk-th" style="background-image:url('assets/csat-ai-20261117-v1/image-02.jpg')"></div><div><span class="sk-chip">생활·경제</span><h3>수능 D-2, 안경 전수점검·단추 스티커…정부 추가 대책 정리</h3><div class="sk-meta">2026.11.17 · PIQLE 에디터 · 4분 읽기</div></div></a><a class="sk-card sk-row" data-c="이슈" href="코인원-상담-외주업체-해킹-상담-때-남긴-주민번호-계좌번호까지-새어-나갔어요.html"><div class="sk-th" style="background-image:url('https://piqlemuu.github.io/issue-piqle/coinone-lead.png')"></div><div><span class="sk-chip">이슈</span><h3>코인원 상담 외주업체 해킹…상담 때 남긴 주민번호·계좌번호까지 새어 나갔어요</h3><div class="sk-meta">2026.11.16 · 새콤기자 · 1분 읽기</div></div></a><a class="sk-card sk-row" data-c="이슈" href="방탄소년단-6관왕-MMA2026-대상-5개-누가-받았나.html"><div class="sk-th" style="background-image:url('https://piqlemuu.github.io/issue-piqle/mma-lead.png')"></div><div><span class="sk-chip">이슈</span><h3>방탄소년단 6관왕…MMA2026 대상 5개, 누가 받았나</h3><div class="sk-meta">2026.11.16 · 새콤기자 · 1분 읽기</div></div></a><a class="sk-card sk-row" data-c="이슈" href="취소표-구하려고-터미널-폭발물-허위-글-장난-글도-공중협박죄-로-처벌돼요.html"><div class="sk-th" style="background-image:url('https://piqlemuu.github.io/issue-piqle/threat-lead.png')"></div><div><span class="sk-chip">이슈</span><h3>&quot;취소표 구하려고&quot; 터미널 폭발물 허위 글…장난 글도 &#x27;공중협박죄&#x27;로 처벌돼요</h3><div class="sk-meta">2026.11.16 · 새콤기자 · 1분 읽기</div></div></a><a class="sk-card sk-row" data-c="이슈" href="노란우산-가입자-정보-제3자-조회-정황-7개-항목-유출-가능성.html"><div class="sk-th" style="background-image:url('https://piqlemuu.github.io/issue-piqle/yellowumbrella-lead.png')"></div><div><span class="sk-chip">이슈</span><h3>노란우산 가입자 정보 &#x27;제3자 조회&#x27; 정황…7개 항목 유출 가능성</h3><div class="sk-meta">2026.11.14 · 새콤기자 · 2분 읽기</div></div></a><a class="sk-card sk-row" data-c="이슈" href="미국-전역-항공기-이륙-4시간-20분-올스톱-인천발-미국행도-한때-결항.html"><div class="sk-th" style="background-image:url('https://piqlemuu.github.io/issue-piqle/faastop-lead.png')"></div><div><span class="sk-chip">이슈</span><h3>미국 전역 항공기 이륙 4시간 20분 &#x27;올스톱&#x27;…인천발 미국행도 한때 결항</h3><div class="sk-meta">2026.11.14 · 새콤기자 · 1분 읽기</div></div></a><a class="sk-card sk-row" data-c="이슈" href="투모로우바이투게더-서울-공연-마치고-16일-미니-9집-PERFECT-STORM-낸다.html"><div class="sk-th" style="background-image:url('https://piqlemuu.github.io/issue-piqle/txtstorm-lead.png')"></div><div><span class="sk-chip">이슈</span><h3>투모로우바이투게더, 서울 공연 마치고 16일 미니 9집 &#x27;PERFECT STORM&#x27; 낸다</h3><div class="sk-meta">2026.11.14 · 새콤기자 · 1분 읽기</div></div></a><a class="sk-card sk-row" data-c="생활·경제" href="소득-끊긴-프리랜서-국민연금-납부예외-신청-쉬워진다.html"><div class="sk-th" style="background-image:url('https://piqlemuu.github.io/issue-piqle/pension-lead.png')"></div><div><span class="sk-chip">생활·경제</span><h3>소득 끊긴 프리랜서, 국민연금 ‘납부예외’ 신청 쉬워진다</h3><div class="sk-meta">2026.11.13 · 새콤기자 · 1분 읽기</div></div></a><a class="sk-card sk-row" data-c="이슈" href="강동원-김고은-넷플릭스-사극-혼-삼각의-시간-에서-부부로-만나요.html"><div class="sk-th" style="background-image:url('https://piqlemuu.github.io/issue-piqle/drama-lead.png')"></div><div><span class="sk-chip">이슈</span><h3>강동원·김고은, 넷플릭스 사극 &#x27;혼: 삼각의 시간&#x27;에서 부부로 만나요</h3><div class="sk-meta">2026.11.13 · 새콤기자 · 1분 읽기</div></div></a><a class="sk-card sk-row" data-c="이슈" href="민속촌-귀신-참교육-아동학대-논란-법은-어떻게-볼까.html"><div class="sk-th" style="background-image:url('https://piqlemuu.github.io/issue-piqle/ghostedu-lead.png')"></div><div><span class="sk-chip">이슈</span><h3>민속촌 &#x27;귀신 참교육&#x27; 아동학대 논란, 법은 어떻게 볼까</h3><div class="sk-meta">2026.11.13 · 새콤기자 · 1분 읽기</div></div></a><a class="sk-card sk-row" data-c="생활·경제" href="할인해-준-금액엔-수수료-0원-배민-무엇이-바뀌나.html"><div class="sk-th" style="background-image:url('https://piqlemuu.github.io/issue-piqle/fee-lead.png')"></div><div><span class="sk-chip">생활·경제</span><h3>할인해 준 금액엔 ‘수수료 0원’…배민, 무엇이 바뀌나?</h3><div class="sk-meta">2026.11.12 · 새콤기자 · 1분 읽기</div></div></a><a class="sk-card sk-row" data-c="생활·경제" href="코인-거래소-해킹-의심-만-돼도-입출금-먼저-막는다.html"><div class="sk-th" style="background-image:url('https://piqlemuu.github.io/issue-piqle/coin-lead.png')"></div><div><span class="sk-chip">생활·경제</span><h3>코인 거래소, 해킹 ‘의심’만 돼도 입출금 먼저 막는다</h3><div class="sk-meta">2026.11.12 · 새콤기자 · 1분 읽기</div></div></a><a class="sk-card sk-row" data-c="연예" href="강동원-김고은-백-년-원수-집안-부부로-넷플릭스-사극-혼-삼각의-시간.html"><div class="sk-th" style="background-image:url('https://piqlemuu.github.io/issue-piqle/drama-lead.png')"></div><div><span class="sk-chip">연예</span><h3>강동원·김고은, ‘백 년 원수’ 집안 부부로…넷플릭스 사극 ‘혼: 삼각의 시간’</h3><div class="sk-meta">2026.11.12 · 새콤기자 · 1분 읽기</div></div></a><a class="sk-card sk-row" data-c="생활·경제" href="수능-준비물-입실-시간-스마트안경-규정-총정리.html"><div class="sk-th" style="background:#fde3dd">수능 준비물·입실 시간, </div><div><span class="sk-chip">생활·경제</span><h3>수능 준비물·입실 시간, 스마트안경 규정 총정리</h3><div class="sk-meta">2026.11.11 · 새콤기자 · 2분 읽기</div></div></a><a class="sk-card sk-row" data-c="생활·경제" href="금융보안원-해킹-무엇이-새어-나갔나.html"><div class="sk-th" style="background:#e6f4ff">금융보안원 해킹, 무엇이 </div><div><span class="sk-chip">생활·경제</span><h3>금융보안원 해킹, 무엇이 새어 나갔나</h3><div class="sk-meta">2026.11.11 · 새콤기자 · 1분 읽기</div></div></a><a class="sk-card sk-row" data-c="생활·경제" href="전세사기-피해자-보증금-최소-3분의-1-보장-13일-시행.html"><div class="sk-th" style="background:#d9f3ec">전세사기 피해자 보증금 &#x27;</div><div><span class="sk-chip">생활·경제</span><h3>전세사기 피해자 보증금 &#x27;최소 3분의 1&#x27; 보장, 13일 시행</h3><div class="sk-meta">2026.11.11 · 새콤기자 · 1분 읽기</div></div></a><a class="sk-card sk-row" data-c="생활·경제" href="난임치료휴가-유급-2일-4일-11월-27일부터.html"><div class="sk-th" style="background:#fff1e0">난임치료휴가 유급 2일→4</div><div><span class="sk-chip">생활·경제</span><h3>난임치료휴가 유급 2일→4일, 11월 27일부터</h3><div class="sk-meta">2026.11.11 · 새콤기자 · 1분 읽기</div></div></a><a class="sk-card sk-row" data-c="생활·경제" href="10월-가계대출-6-4조-원-늘어-한-달-만에-다시-증가.html"><div class="sk-th" style="background:#efedff">10월 가계대출 6.4조 </div><div><span class="sk-chip">생활·경제</span><h3>10월 가계대출 6.4조 원 늘어, 한 달 만에 다시 증가</h3><div class="sk-meta">2026.11.11 · 새콤기자 · 1분 읽기</div></div></a><a class="sk-card sk-row" data-c="연예" href="지수-NCT-베이비몬스터-등-한국-5팀-2027-코첼라-무대에-서요.html"><div class="sk-th" style="background:#fde3dd">지수·NCT·베이비몬스터 </div><div><span class="sk-chip">연예</span><h3>지수·NCT·베이비몬스터 등 한국 5팀, 2027 코첼라 무대에 서요</h3><div class="sk-meta">2026.11.11 · 새콤기자 · 1분 읽기</div></div></a><a class="sk-card sk-row" data-c="생활·경제" href="보이스피싱-피해자-생계비-최대-200만-원-받는다.html"><div class="sk-th" style="background:#e6f4ff">보이스피싱 피해자, 생계비</div><div><span class="sk-chip">생활·경제</span><h3>보이스피싱 피해자, 생계비 최대 200만 원 받는다</h3><div class="sk-meta">2026.11.10 · 새콤기자 · 1분 읽기</div></div></a><a class="sk-card sk-row" data-c="연예" href="ITZY-채령-데뷔-7년여-만에-솔로-앨범-Lovesick-발매.html"><div class="sk-th" style="background:#d9f3ec">ITZY 채령, 데뷔 7년</div><div><span class="sk-chip">연예</span><h3>ITZY 채령, 데뷔 7년여 만에 솔로 앨범 &#x27;Lovesick&#x27; 발매</h3><div class="sk-meta">2026.11.10 · 새콤기자 · 1분 읽기</div></div></a><a class="sk-card sk-row" data-c="커뮤니티" href="밤-10시-이후-샤워-자제-공지문-논란-물소리는-층간소음일까.html"><div class="sk-th" style="background:#fff1e0">&quot;밤 10시 이후 샤워 자</div><div><span class="sk-chip">커뮤니티</span><h3>&quot;밤 10시 이후 샤워 자제&quot; 공지문 논란, 물소리는 층간소음일까?</h3><div class="sk-meta">2026.11.10 · 새콤기자 · 1분 읽기</div></div></a><a class="sk-card sk-row" data-c="스포츠" href="삼성-12년-만의-한국시리즈-우승.html"><div class="sk-th" style="background:#efedff">삼성 12년 만의 한국시리</div><div><span class="sk-chip">스포츠</span><h3>삼성 12년 만의 한국시리즈 우승</h3><div class="sk-meta">2026.11.09 · 새콤기자 · 1분 읽기</div></div></a><a class="sk-card sk-row" data-c="생활·경제" href="배민-쿠팡이츠-과징금-6-319억-원.html"><div class="sk-th" style="background:#fde3dd">배민·쿠팡이츠 과징금 6,</div><div><span class="sk-chip">생활·경제</span><h3>배민·쿠팡이츠 과징금 6,319억 원</h3><div class="sk-meta">2026.11.09 · 새콤기자 · 1분 읽기</div></div></a><a class="sk-card sk-row" data-c="생활·경제" href="AI-구독료-넷플릭스처럼-고정비-가-됐다.html"><div class="sk-th" style="background:#e6f4ff">AI 구독료, 넷플릭스처럼</div><div><span class="sk-chip">생활·경제</span><h3>AI 구독료, 넷플릭스처럼 &#x27;고정비&#x27;가 됐다</h3><div class="sk-meta">2026.11.09 · 새콤기자 · 1분 읽기</div></div></a><a class="sk-card sk-row" data-c="연예" href="있지-채령-데뷔-7년-만에-첫-솔로-앨범-러브식.html"><div class="sk-th" style="background:#d9f3ec">있지 채령, 데뷔 7년 만</div><div><span class="sk-chip">연예</span><h3>있지 채령, 데뷔 7년 만에 첫 솔로 앨범 &#x27;러브식&#x27;</h3><div class="sk-meta">2026.11.09 · 새콤기자 · 1분 읽기</div></div></a><a class="sk-card sk-row" data-c="연예" href="악뮤-강릉-콘서트-VIP석-시야-제한-논란.html"><div class="sk-th" style="background:#fff1e0">악뮤 강릉 콘서트 VIP석</div><div><span class="sk-chip">연예</span><h3>악뮤 강릉 콘서트 VIP석 &#x27;시야 제한&#x27; 논란</h3><div class="sk-meta">2026.11.09 · 새콤기자 · 1분 읽기</div></div></a><a class="sk-card sk-row" data-c="연예" href="듀스-31년-만의-정규-4집-AI로-되살린-김성재-목소리.html"><div class="sk-th" style="background:#efedff">듀스, 31년 만의 정규 </div><div><span class="sk-chip">연예</span><h3>듀스, 31년 만의 정규 4집…AI로 되살린 김성재 목소리</h3><div class="sk-meta">2026.11.09 · 새콤기자 · 1분 읽기</div></div></a><a class="sk-card sk-row" data-c="커뮤니티" href="밤-10시-이후-샤워-자제-층간소음-공지문-갑론을박.html"><div class="sk-th" style="background:#fde3dd">&quot;밤 10시 이후 샤워 자</div><div><span class="sk-chip">커뮤니티</span><h3>&quot;밤 10시 이후 샤워 자제&quot;…층간소음 공지문 갑론을박</h3><div class="sk-meta">2026.11.09 · 새콤기자 · 1분 읽기</div></div></a></div><script>(function(){var b=document.querySelectorAll('.sk-tab');b.forEach(function(t){t.onclick=function(){
-b.forEach(function(x){x.classList.remove('on')});t.classList.add('on');var c=t.getAttribute('data-c');
-document.querySelectorAll('.sk-card').forEach(function(a){a.style.display=(c==='전체'||a.getAttribute('data-c')===c)?'':'none'});
-document.querySelectorAll('.sk-sec').forEach(function(s){s.style.display=c==='전체'?'':'none'})}})})();</script><style>#sk-list ~ :not(nav):not(script):not(footer):not(style){display:none!important}</style><p class="note">요즘 화제가 된 이슈를 새콤기자가 짧게 정리했어요.</p><div class="box" style="margin-top:.75rem"><ul class="nlist"><li><a href="코인원-상담-외주업체-해킹-상담-때-남긴-주민번호-계좌번호까지-새어-나갔어요.html"><span><span class="tt">코인원 상담 외주업체 해킹…상담 때 남긴 주민번호·계좌번호까지 새어 나갔어요</span><small>2026.11.16 · 코인원은 15일, 상담 업무를 맡긴 외주업체 &#x27;메타엠&#x27; 서버가 12일 새벽 해킹돼 고객 정보가 유출됐다고 알</small></span></a></li><li><a href="방탄소년단-6관왕-MMA2026-대상-5개-누가-받았나.html"><span><span class="tt">방탄소년단 6관왕…MMA2026 대상 5개, 누가 받았나</span><small>2026.11.16 · 14~15일 서울 고척스카이돔에서 열린 제18회 멜론뮤직어워드(MMA2026)에서 방탄소년단이 대상 2개를 </small></span></a></li><li><a href="취소표-구하려고-터미널-폭발물-허위-글-장난-글도-공중협박죄-로-처벌돼요.html"><span><span class="tt">&quot;취소표 구하려고&quot; 터미널 폭발물 허위 글…장난 글도 &#x27;공중협박죄&#x27;로 처벌돼요</span><small>2026.11.16 · 15일 대학생 온라인 커뮤니티에 &quot;광주종합버스터미널 폭발물이 터진다&quot;는 허위 글이 올라와 경찰·소방이 수색했</small></span></a></li><li><a href="노란우산-가입자-정보-제3자-조회-정황-7개-항목-유출-가능성.html"><span><span class="tt">노란우산 가입자 정보 &#x27;제3자 조회&#x27; 정황…7개 항목 유출 가능성</span><small>2026.11.14 · 중소기업중앙회가 14일, 지난 11일 노란우산 홈페이지에 외부의 비정상 접근이 있었고 일부 고객 정보가 제3</small></span></a></li><li><a href="미국-전역-항공기-이륙-4시간-20분-올스톱-인천발-미국행도-한때-결항.html"><span><span class="tt">미국 전역 항공기 이륙 4시간 20분 &#x27;올스톱&#x27;…인천발 미국행도 한때 결항</span><small>2026.11.14 · 미국 연방항공청(FAA)이 13일 오후(미 동부시간) 관제 통신 장애로 미국 모든 공항의 이륙을 멈췄다가 약</small></span></a></li><li><a href="투모로우바이투게더-서울-공연-마치고-16일-미니-9집-PERFECT-STORM-낸다.html"><span><span class="tt">투모로우바이투게더, 서울 공연 마치고 16일 미니 9집 &#x27;PERFECT STORM&#x27; 낸다</span><small>2026.11.14 · 투모로우바이투게더가 13~15일 사흘간 서울 KSPO DOME에서 다섯 번째 월드투어 공연을 열고, 16일 </small></span></a></li><li><a href="소득-끊긴-프리랜서-국민연금-납부예외-신청-쉬워진다.html"><span><span class="tt">소득 끊긴 프리랜서, 국민연금 ‘납부예외’ 신청 쉬워진다</span><small>2026.11.13 · 소득이 끊긴 프리랜서가 국민연금 납부예외를 신청할 때 해촉증명서를 안 내도 돼요.</small></span></a></li><li><a href="강동원-김고은-넷플릭스-사극-혼-삼각의-시간-에서-부부로-만나요.html"><span><span class="tt">강동원·김고은, 넷플릭스 사극 &#x27;혼: 삼각의 시간&#x27;에서 부부로 만나요</span><small>2026.11.13 · 넷플릭스가 11월 12일 새 시리즈 &#x27;혼: 삼각의 시간&#x27; 제작을 확정하고 강동원·김고은 캐스팅을 알렸어요.</small></span></a></li><li><a href="민속촌-귀신-참교육-아동학대-논란-법은-어떻게-볼까.html"><span><span class="tt">민속촌 &#x27;귀신 참교육&#x27; 아동학대 논란, 법은 어떻게 볼까</span><small>2026.11.13 · 한국민속촌의 &#x27;귀신 참교육&#x27; 체험에 아동학대라는 민원과 경찰 조사 의뢰가 들어가 논란이 됐어요. 프로그램은 </small></span></a></li><li><a href="할인해-준-금액엔-수수료-0원-배민-무엇이-바뀌나.html"><span><span class="tt">할인해 준 금액엔 ‘수수료 0원’…배민, 무엇이 바뀌나?</span><small>2026.11.12 · 배민이 업주가 부담하는 음식값·배달팁 할인액에 중개수수료를 받지 않기로 했어요.</small></span></a></li><li><a href="코인-거래소-해킹-의심-만-돼도-입출금-먼저-막는다.html"><span><span class="tt">코인 거래소, 해킹 ‘의심’만 돼도 입출금 먼저 막는다</span><small>2026.11.12 · 금융위원회가 해킹이 의심되면 가상자산 거래소가 입출금을 먼저 막을 수 있게 하기로 했어요.</small></span></a></li><li><a href="강동원-김고은-백-년-원수-집안-부부로-넷플릭스-사극-혼-삼각의-시간.html"><span><span class="tt">강동원·김고은, ‘백 년 원수’ 집안 부부로…넷플릭스 사극 ‘혼: 삼각의 시간’</span><small>2026.11.12 · 넷플릭스가 강동원·김고은 주연 사극 &#x27;혼: 삼각의 시간&#x27; 제작을 11월 12일 확정했어요.</small></span></a></li><li><a href="수능-준비물-입실-시간-스마트안경-규정-총정리.html"><span><span class="tt">수능 준비물·입실 시간, 스마트안경 규정 총정리</span><small>2026.11.11 · 2027학년도 수능은 11월 19일(목)이에요. 하루 전인 18일(수) 예비소집에서 수험표를 받고, 당일 오</small></span></a></li><li><a href="금융보안원-해킹-무엇이-새어-나갔나.html"><span><span class="tt">금융보안원 해킹, 무엇이 새어 나갔나</span><small>2026.11.11 · 금융권 보안을 맡은 금융보안원이 해킹을 당했어요. 11월 9일 오후 3시쯤 금융회사 평가용 &#x27;상시평가 시스템</small></span></a></li><li><a href="전세사기-피해자-보증금-최소-3분의-1-보장-13일-시행.html"><span><span class="tt">전세사기 피해자 보증금 &#x27;최소 3분의 1&#x27; 보장, 13일 시행</span><small>2026.11.11 · 11월 13일부터 전세사기 피해자가 경매·공매 등으로 돌려받은 돈이 보증금의 3분의 1에 못 미치면, 모자란</small></span></a></li><li><a href="난임치료휴가-유급-2일-4일-11월-27일부터.html"><span><span class="tt">난임치료휴가 유급 2일→4일, 11월 27일부터</span><small>2026.11.11 · 11월 27일부터 연 6일인 난임치료휴가 중 월급이 나오는 유급 기간이 2일에서 4일로 늘어나요. 전체 휴가</small></span></a></li><li><a href="10월-가계대출-6-4조-원-늘어-한-달-만에-다시-증가.html"><span><span class="tt">10월 가계대출 6.4조 원 늘어, 한 달 만에 다시 증가</span><small>2026.11.11 · 금융당국이 11일 발표했어요. 10월 전 금융권 가계대출이 한 달 새 6조4000억 원 늘었어요.</small></span></a></li><li><a href="지수-NCT-베이비몬스터-등-한국-5팀-2027-코첼라-무대에-서요.html"><span><span class="tt">지수·NCT·베이비몬스터 등 한국 5팀, 2027 코첼라 무대에 서요</span><small>2026.11.11 · 미국 음악 축제 코첼라가 2027년 라인업을 공개했어요. 한국 아티스트는 5팀이에요.</small></span></a></li><li><a href="보이스피싱-피해자-생계비-최대-200만-원-받는다.html"><span><span class="tt">보이스피싱 피해자, 생계비 최대 200만 원 받는다</span><small>2026.11.10 · 금감원과 금융권이 11월 9일 보이스피싱 피해자 생활 회복 지원을 시작했어요. 생계비는 최대 200만 원이에</small></span></a></li><li><a href="ITZY-채령-데뷔-7년여-만에-솔로-앨범-Lovesick-발매.html"><span><span class="tt">ITZY 채령, 데뷔 7년여 만에 솔로 앨범 &#x27;Lovesick&#x27; 발매</span><small>2026.11.10 · 채령이 11월 9일 오후 6시 첫 솔로 미니앨범 &#x27;Lovesick&#x27;을 냈어요. 모두 4곡이에요.</small></span></a></li><li><a href="밤-10시-이후-샤워-자제-공지문-논란-물소리는-층간소음일까.html"><span><span class="tt">&quot;밤 10시 이후 샤워 자제&quot; 공지문 논란, 물소리는 층간소음일까?</span><small>2026.11.10 · 밤 10시 이후 샤워와 세탁기를 자제해 달라는 아파트 공지문 사진이 SNS에 퍼졌어요.</small></span></a></li><li><a href="삼성-12년-만의-한국시리즈-우승.html"><span><span class="tt">삼성 12년 만의 한국시리즈 우승</span><small>2026.11.09 · 삼성 라이온즈가 11월 8일 한국시리즈 5차전에서 KT 위즈를 12대 1로 이기고 4승 1패로 우승했어요. </small></span></a></li><li><a href="배민-쿠팡이츠-과징금-6-319억-원.html"><span><span class="tt">배민·쿠팡이츠 과징금 6,319억 원</span><small>2026.11.09 · 공정거래위원회가 11월 9일 배달의민족(3,311억 원)과 쿠팡이츠(3,008억 원)에 합계 6,319억 원</small></span></a></li><li><a href="AI-구독료-넷플릭스처럼-고정비-가-됐다.html"><span><span class="tt">AI 구독료, 넷플릭스처럼 &#x27;고정비&#x27;가 됐다</span><small>2026.11.09 · 11월 9일 &#x27;넷플릭스는 해지해도 챗GPT는 못 끊는다&#x27;는 보도가 나오면서 AI 구독료가 화제가 됐어요.</small></span></a></li><li><a href="있지-채령-데뷔-7년-만에-첫-솔로-앨범-러브식.html"><span><span class="tt">있지 채령, 데뷔 7년 만에 첫 솔로 앨범 &#x27;러브식&#x27;</span><small>2026.11.09 · 있지(ITZY) 멤버 채령이 11월 9일 첫 솔로 미니앨범 &#x27;러브식(Lovesick)&#x27;을 내고 쇼케이스를 열</small></span></a></li><li><a href="악뮤-강릉-콘서트-VIP석-시야-제한-논란.html"><span><span class="tt">악뮤 강릉 콘서트 VIP석 &#x27;시야 제한&#x27; 논란</span><small>2026.11.09 · 악뮤(AKMU)가 11월 7일 강릉에서 연 전국투어 공연에서 17만 6천 원짜리 플로어 VIP석 관객 일부가</small></span></a></li><li><a href="듀스-31년-만의-정규-4집-AI로-되살린-김성재-목소리.html"><span><span class="tt">듀스, 31년 만의 정규 4집…AI로 되살린 김성재 목소리</span><small>2026.11.09 · 1990년대 힙합 듀오 듀스(DEUX)가 11월 21일 정규 4집을 낸다고 11월 9일 발표했어요. 1995</small></span></a></li><li><a href="밤-10시-이후-샤워-자제-층간소음-공지문-갑론을박.html"><span><span class="tt">&quot;밤 10시 이후 샤워 자제&quot;…층간소음 공지문 갑론을박</span><small>2026.11.09 · 11월 9일 밤 10시 이후 샤워·세탁기 사용을 자제해 달라는 아파트 층간소음 공지문 사진이 SNS와 커뮤니</small></span></a></li></ul></div>
-<footer class="foot">
-<p><b>이슈피클</b> — 해설은 새콤기자가 근거 기사를 바탕으로 직접 정리했어요. 기사 저작권은 각 언론사에 있어요.</p>
-<nav aria-label="사이트 안내"><a href="../about.html">이슈피클이란?</a><a href="../copyright.html">저작권 정책</a><a href="../privacy.html">개인정보처리방침</a><a href="../terms.html">이용약관</a></nav>
-<p>© 2026 이슈피클</p></footer>
-</main>
-<nav class="bnav" data-here=""></nav>
-<script src="../ui.js"></script>
-<script>document.querySelectorAll('.bnav a').forEach(a=>{const h=a.getAttribute('href');if(!/^(https?:|\.\.\/|#)/.test(h))a.setAttribute('href','../'+h)})</script>
-</body></html>
+<div class="wrap">
+<header class="top">
+<a class="logo" href="index.html" aria-label="왜떴어? 홈"><b>왜떴어<span>?</span></b><small>by 이슈피클</small></a>
+<a class="home-link" href="https://piqlemuu.github.io/issue-piqle/">실시간 순위 ›</a>
+</header>
+
+<section class="hero">
+<p class="eyebrow">이름은 봤는데, 무슨 일인지 모를 때</p>
+<h1>오늘 뜬 이슈,<br>1분이면 따라잡아요</h1>
+<form class="search" id="searchForm" role="search">
+<label class="sr" for="q">궁금한 이슈 검색</label>
+<input id="q" name="q" type="search" placeholder="궁금한 이름·단어" autocomplete="off" enterkeyhint="search">
+<button type="submit">찾기</button>
+</form>
+<div class="chips" aria-label="많이 찾는 단어">
+<span>많이 찾는</span>
+<button type="button" class="chip" data-q="기차">기차</button>
+<button type="button" class="chip" data-q="빼난지원금">빼난지원금</button>
+<button type="button" class="chip" data-q="채령">채령</button>
+<button type="button" class="chip" data-q="국민연금">국민연금</button>
+</div>
+</section>
+
+<div class="tabs" role="tablist" aria-label="해설 종류">
+<button type="button" role="tab" id="tab-life" data-tab="life" aria-controls="panel"><b>생활</b><small>지금 할 일까지</small></button>
+<button type="button" role="tab" id="tab-buzz" data-tab="buzz" aria-controls="panel"><b>화제</b><small>왜 떴는지까지</small></button>
+</div>
+
+<div id="panel" role="tabpanel">
+<article class="feature" id="feature"></article>
+<section class="list" aria-labelledby="listTitle">
+<div class="list-head">
+<h3 id="listTitle">최신 해설</h3>
+<p>근거 기사 2곳 이상 확인한 것만</p>
+</div>
+<div class="filters" id="filters" role="group" aria-label="분야 고르기"></div>
+<p class="result-note" id="resultNote" hidden></p>
+<div id="list"></div>
+</section>
+</div>
+
+<a class="side" href="tteokbap.html">
+<b>떡밥정리소</b>
+<p>팬 시선으로 이어 보는 정리 모음은 따로 모았어요. 컴백 순서, 라인업처럼 줄 세워 봐야 보이는 것들이요.</p>
+<span>떡밥정리소 가기 ›</span>
+</a>
+
+<aside class="rules">
+<b>새콤기자가 쓰는 기준</b>
+공식 발표와 기사 2곳 이상이 있고, ‘왜 지금 떴는지’를 한 줄로 말할 수 있을 때만 써요. 생활 해설에는 근거 기사에 나온 ‘지금 할 일’만 적어요. 열애·사생활 추측, 확인 안 된 폭로, 외모 평가는 다루지 않아요.
+</aside>
+
+<footer>
+<p>이슈피클 — 해설은 새콤기자가 근거 기사를 바탕으로 직접 정리했어요. 기사 저작권은 각 언론사에 있어요.</p>
+<p><a href="https://piqlemuu.github.io/issue-piqle/">이슈피클 홈</a> · © 2026 이슈피클</p>
+</footer>
+</div>
+
+<script>
+var BASE = 'https://piqlemuu.github.io/issue-piqle/i/';
+/* 새 글은 맨 위에 한 줄씩 추가해요. tab: 'life'(생활) 또는 'buzz'(화제). todo는 근거 기사에 나온 행동만, 없으면 비워 둬요. */
+var ARTICLES = [
+  {tab:'life', cat:'교통', name:'기차', keys:['기차','열차','코레일','KTX','지연','위약금','파업','준법투쟁','철도노조'], date:'11월 22일', mins:1,
+   title:'23일부터 기차가 늦을 수 있어요, 표는 지금 바꿔도 위약금이 없어요',
+   answer:'철도노조가 23일 오전 9시부터 준법투쟁을 시작해 일부 열차가 늦을 수 있어요.', todo:'표는 바꾸거나 환불해도 위약금이 없어요. 타기 전 운행 상황부터 확인해요.',
+   url:'w-korail-20261123.html', feature:true},
+  {tab:'life', cat:'쇼핑·할인', name:'블프', keys:['블랙프라이데이','블프','쿠팡','라이브','할인'], date:'11월 19일', mins:1,
+   title:'블랙프라이데이 왜 떴어? 지금 사면 손해일 수도 있어요',
+   answer:'블랙프라이데이 라이브에 추가 혜택이 걸려 있어요.', todo:'결제 전에 11월 23일 라이브 혜택 조건 다섯 가지를 확인해요.',
+   url:BASE+'coupang-blackfriday-2026-buy-now-or-wait.html'},
+  {tab:'life', cat:'쇼핑·할인', name:'CGV', keys:['CGV','수능','영화','콤보','할인','청소년'], date:'11월 19일', mins:1,
+   title:'CGV 수능 할인 왜 떴어? 청소년 7천 원, 일반 회원 3천 원',
+   answer:'수능 뒤 CGV 할인이 청소년과 일반 회원에게 다르게 적용돼요.', todo:'예매 전에 받을 수 있는 쿠폰부터 확인해요.',
+   url:BASE+'cgv-suneung-discount-20261119.html'},
+  {tab:'life', cat:'보안', name:'코인원', keys:['코인원','해킹','유출','주민번호','계좌번호','외주'], date:'11월 16일', mins:1,
+   title:'코인원 왜 떴어? 상담 외주업체 해킹, 상담 때 남긴 정보까지 유출',
+   answer:'상담 외주업체 서버가 해킹돼 상담 때 남긴 고객 정보가 새어 나갔어요.', todo:'',
+   url:BASE+'코인원-상담-외주업체-해킹-상담-때-남긴-주민번호-계좌번호까지-새어-나갔어요.html'},
+  {tab:'life', cat:'보안', name:'노란우산', keys:['노란우산','중소기업중앙회','유출','조회'], date:'11월 14일', mins:2,
+   title:'노란우산 왜 떴어? 가입자 정보 제3자 조회 정황, 7개 항목 유출 가능성',
+   answer:'중기중앙회 홈페이지에 외부의 비정상 접근이 있었어요.', todo:'가입자라면 중기중앙회 공지를 확인해요.',
+   url:BASE+'노란우산-가입자-정보-제3자-조회-정황-7개-항목-유출-가능성.html'},
+  {tab:'life', cat:'돈·제도', name:'국민연금', keys:['국민연금','프리랜서','납부예외','해촉증명서'], date:'11월 13일', mins:1,
+   title:'국민연금 왜 떴어? 소득 끊긴 프리랜서, 납부예외 신청 쉬워져요',
+   answer:'소득이 끊긴 프리랜서의 납부예외 신청 서류 부담이 줄어요.', todo:'납부예외는 해촉증명서 없이 신청할 수 있어요.',
+   url:BASE+'소득-끊긴-프리랜서-국민연금-납부예외-신청-쉬워진다.html'},
+  {tab:'life', cat:'돈·제도', name:'배민', keys:['배민','배달의민족','수수료','할인'], date:'11월 12일', mins:1,
+   title:'배민 왜 떴어? 할인해 준 금액엔 수수료 0원',
+   answer:'업주가 부담한 할인액에는 중개수수료를 매기지 않기로 했어요.', todo:'할인 주문 때 수수료가 어떻게 바뀌는지 확인해요.',
+   url:BASE+'할인해-준-금액엔-수수료-0원-배민-무엇이-바뀌나.html'},
+  {tab:'life', cat:'돈·제도', name:'코인 거래소', keys:['코인','거래소','금융위','해킹','입출금'], date:'11월 12일', mins:1,
+   title:'코인 거래소 왜 떴어? 해킹 의심만 돼도 입출금 먼저 막아요',
+   answer:'해킹이 의심만 돼도 거래소가 입출금을 먼저 막을 수 있게 돼요.', todo:'거래소 입출금이 잠시 막힐 수 있다는 점을 알아 둬요.',
+   url:BASE+'코인-거래소-해킹-의심-만-돼도-입출금-먼저-막는다.html'},
+
+  {tab:'buzz', cat:'연예', name:'채령', keys:['채령','ITZY','있지','Lovesick','러브식','JYP'], date:'11월 10일', mins:1,
+   title:"채령 'Lovesick' 왜 떴어? ITZY 세 번째 솔로, 데뷔 7년여 만의 첫 단독",
+   answer:'11월 9일 저녁, 채령의 첫 솔로 미니앨범이 나왔어요.', url:'w-chaeryeong-lovesick.html', feature:true},
+  {tab:'buzz', cat:'연예', name:'방탄소년단', keys:['방탄소년단','BTS','MMA','MMA2026','멜론뮤직어워드'], date:'11월 16일', mins:1,
+   title:'방탄소년단 왜 떴어? MMA2026 대상 5개로 6관왕',
+   answer:'멜론뮤직어워드에서 대상 5개를 포함해 6관왕에 올랐어요.',
+   url:BASE+'방탄소년단-6관왕-MMA2026-대상-5개-누가-받았나.html'},
+  {tab:'buzz', cat:'사회', name:'터미널 허위 글', keys:['터미널','폭발물','허위','공중협박죄','취소표','광주'], date:'11월 16일', mins:1,
+   title:'터미널 폭발물 허위 글 왜 떴어? 장난 글도 공중협박죄로 처벌돼요',
+   answer:'취소표를 구하려고 터미널 폭발물 허위 글을 올린 사건이에요.',
+   url:BASE+'취소표-구하려고-터미널-폭발물-허위-글-장난-글도-공중협박죄-로-처벌돼요.html'},
+  {tab:'buzz', cat:'연예', name:'투바투', keys:['투모로우바이투게더','투바투','TXT','PERFECT STORM'], date:'11월 14일', mins:1,
+   title:"투모로우바이투게더 왜 떴어? 서울 공연 마치고 미니 9집 'PERFECT STORM'",
+   answer:"서울 공연을 마치고 16일 미니 9집 'PERFECT STORM'을 냈어요.",
+   url:BASE+'투모로우바이투게더-서울-공연-마치고-16일-미니-9집-PERFECT-STORM-낸다.html'},
+  {tab:'buzz', cat:'사회', name:'민속촌', keys:['민속촌','한국민속촌','귀신','참교육','아동학대'], date:'11월 13일', mins:1,
+   title:"민속촌 '귀신 참교육' 왜 떴어? 아동학대 논란, 법은 어떻게 볼까",
+   answer:'민속촌 체험 프로그램이 민원과 경찰 조사 의뢰로 이어졌어요.',
+   url:BASE+'민속촌-귀신-참교육-아동학대-논란-법은-어떻게-볼까.html'},
+  {tab:'buzz', cat:'연예', name:'강동원 김고은', keys:['강동원','김고은','혼','삼각의 시간','넷플릭스','사극'], date:'11월 13일', mins:1,
+   title:"강동원·김고은 왜 떴어? 넷플릭스 사극 '혼: 삼각의 시간' 부부로 만나요",
+   answer:"넷플릭스 사극 '혼: 삼각의 시간'에 부부로 출연해요.",
+   url:BASE+'강동원-김고은-넷플릭스-사극-혼-삼각의-시간-에서-부부로-만나요.html'},
+  {tab:'buzz', cat:'밈', name:'빼난 지원금', keys:['빼난지원금','빼난 지원금','빼빼로','빼빼로데이','밈','뜻'], date:'11월 11일', mins:1,
+   title:'빼난지원금 뜻? 빼빼로데이에 나온 말장난',
+   answer:"빼빼로를 하나도 못 받은 사람에게 주는 위로 빼빼로예요. '빼빼로'와 '재난지원금'을 합친 말이에요.",
+   url:'https://piqlemuu.github.io/issue-piqle/meme-ppenan-jiwongeum-2026-11.html'},
+  {tab:'buzz', cat:'연예', name:'코첼라', keys:['코첼라','Coachella','지수','블랙핑크','NCT','베이비몬스터'], date:'11월 11일', mins:1,
+   title:'코첼라 왜 떴어? 2027 라인업에 한국 5팀',
+   answer:'2027년 코첼라 라인업에 지수, NCT, 베이비몬스터 등 한국 5팀이 올랐어요.',
+   url:BASE+'지수-NCT-베이비몬스터-등-한국-5팀-2027-코첼라-무대에-서요.html'},
+  {tab:'buzz', cat:'연예', name:'악뮤', keys:['악뮤','AKMU','강릉','콘서트','VIP','시야'], date:'11월 9일', mins:1,
+   title:'악뮤 강릉 콘서트 왜 떴어? VIP석 시야 제한 논란',
+   answer:'강릉 공연 VIP석 일부에서 무대가 잘 안 보였다는 논란이 나왔어요.',
+   url:BASE+'악뮤-강릉-콘서트-VIP석-시야-제한-논란.html'},
+  {tab:'buzz', cat:'연예', name:'듀스', keys:['듀스','DEUX','김성재','AI','정규 4집'], date:'11월 9일', mins:1,
+   title:'듀스 왜 떴어? 31년 만의 정규 4집, AI로 되살린 김성재 목소리',
+   answer:'31년 만에 정규 4집을 냈고, AI로 김성재의 목소리를 되살렸어요.',
+   url:BASE+'듀스-31년-만의-정규-4집-AI로-되살린-김성재-목소리.html'}
+];
+var TABS = {
+  life:{label:'생활', cats:['전체','교통','돈·제도','쇼핑·할인','보안'], cta:'지금 할 일 보기'},
+  buzz:{label:'화제', cats:['전체','연예','밈','사회'], cta:'1분 해설 보기'}
+};
+var state = {tab:'life', cat:'전체', q:''};
+
+function esc(s){return String(s).replace(/[&<>"']/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c];});}
+function norm(s){return String(s).toLowerCase().replace(/\s+/g,'');}
+
+function renderTabs(){
+  document.querySelectorAll('.tabs button').forEach(function(b){
+    var on = b.getAttribute('data-tab')===state.tab;
+    b.setAttribute('aria-selected', on); b.tabIndex = on ? 0 : -1;
+  });
+  document.getElementById('panel').setAttribute('aria-labelledby','tab-'+state.tab);
+}
+function renderFeature(){
+  var box = document.getElementById('feature');
+  box.hidden = !!state.q;
+  if(state.q) return;
+  var a = ARTICLES.filter(function(x){return x.tab===state.tab && x.feature;})[0];
+  box.className = 'feature' + (state.tab==='life' ? ' life' : '');
+  var life = state.tab==='life';
+  box.innerHTML =
+    '<div class="tile" aria-hidden="true"><span class="badge">'+(life?'지금 할 일 있어요':'왜 떴어?')+'</span>'+esc(a.name)+'</div>'+
+    '<div class="body"><p class="meta">'+a.cat+' · '+a.date+' · 새콤기자 · '+a.mins+'분</p>'+
+    '<h2>'+esc(a.title)+'</h2>'+
+    '<p class="answer"><b>한 줄 답</b>'+esc(a.answer)+'</p>'+
+    (a.todo ? '<p class="todo"><b>지금 할 일</b>'+esc(a.todo)+'</p>' : '')+
+    '<a class="btn" href="'+esc(a.url)+'">'+TABS[state.tab].cta+'</a></div>';
+}
+function renderFilters(){
+  var f = document.getElementById('filters');
+  f.hidden = !!state.q;
+  f.innerHTML = TABS[state.tab].cats.map(function(c){
+    return '<button type="button" data-cat="'+c+'" aria-pressed="'+(state.cat===c)+'">'+c+'</button>';
+  }).join('');
+}
+function row(a, showKind){
+  var life = a.tab==='life';
+  return '<a class="item'+(life?' is-life':'')+'" href="'+esc(a.url)+'"><span class="tile" aria-hidden="true">'+esc(a.name)+'</span>'+
+    '<span class="txt"><span class="t">'+esc(a.title)+'</span>'+
+    (life && a.todo ? '<span class="d">할 일 · '+esc(a.todo)+'</span>' : '<span class="a">'+esc(a.answer)+'</span>')+
+    '<span class="meta">'+(showKind?'<span class="kind">'+TABS[a.tab].label+'</span>':'')+a.cat+' · '+a.date+' · '+a.mins+'분</span></span></a>';
+}
+function renderList(){
+  var q = norm(state.q);
+  var rows = ARTICLES.filter(function(a){
+    if(q) return a.keys.concat([a.name,a.title]).some(function(k){return norm(k).indexOf(q)>-1;});
+    return a.tab===state.tab && !a.feature && (state.cat==='전체' || a.cat===state.cat) || (a.tab===state.tab && a.feature && state.cat!=='전체' && a.cat===state.cat);
+  });
+  document.getElementById('listTitle').textContent = q ? '검색 결과' : TABS[state.tab].label+' 최신 해설';
+  var note = document.getElementById('resultNote');
+  if(state.q){
+    note.hidden = false;
+    note.innerHTML = '‘'+esc(state.q)+'’ 해설 '+rows.length+'개 · 생활·화제 모두에서 찾았어요 <button type="button" id="clearQ">검색 지우기</button>';
+    document.getElementById('clearQ').onclick = function(){ setQuery(''); document.getElementById('q').focus(); };
+  } else { note.hidden = true; }
+  var list = document.getElementById('list');
+  if(!rows.length){
+    list.innerHTML = '<div class="empty"><b>아직 ‘'+esc(state.q)+'’ 해설이 없어요.</b><br>새콤기자는 근거 기사가 2곳 이상 나온 이슈만 써요. 지금 뜨는 이슈는 <a href="https://piqlemuu.github.io/issue-piqle/">실시간 이슈 순위</a>에서 먼저 확인해 보세요.</div>';
+    return;
+  }
+  list.innerHTML = rows.map(function(a){return row(a, !!q);}).join('');
+}
+function renderAll(){ renderTabs(); renderFeature(); renderFilters(); renderList(); }
+function syncUrl(){
+  var url = new URL(location.href);
+  if(state.q) url.searchParams.set('q', state.q); else url.searchParams.delete('q');
+  if(state.tab==='buzz') url.searchParams.set('tab','buzz'); else url.searchParams.delete('tab');
+  try{ history.replaceState(null,'',url); }catch(e){}
+}
+function setQuery(q){
+  state.q = q.trim();
+  document.getElementById('q').value = state.q;
+  syncUrl(); renderAll();
+}
+function setTab(t){
+  state.tab = t; state.cat = '전체'; state.q = ''; document.getElementById('q').value = '';
+  syncUrl(); renderAll();
+}
+function jumpToList(){ document.getElementById('listTitle').scrollIntoView({behavior:'smooth', block:'start'}); }
+
+document.getElementById('searchForm').addEventListener('submit', function(e){
+  e.preventDefault(); setQuery(document.getElementById('q').value); jumpToList();
+});
+document.getElementById('q').addEventListener('input', function(e){ state.q = e.target.value.trim(); renderFeature(); renderFilters(); renderList(); });
+document.querySelectorAll('.chip[data-q]').forEach(function(b){
+  b.addEventListener('click', function(){ setQuery(b.getAttribute('data-q')); jumpToList(); });
+});
+document.querySelectorAll('.tabs button').forEach(function(b){
+  b.addEventListener('click', function(){ setTab(b.getAttribute('data-tab')); });
+  b.addEventListener('keydown', function(e){
+    if(e.key==='ArrowRight'||e.key==='ArrowLeft'){ var t = state.tab==='life'?'buzz':'life'; setTab(t); document.getElementById('tab-'+t).focus(); }
+  });
+});
+document.getElementById('filters').addEventListener('click', function(e){
+  var c = e.target.getAttribute('data-cat'); if(!c) return;
+  state.cat = c; renderFilters(); renderList();
+});
+
+var params = new URLSearchParams(location.search);
+if(params.get('tab')==='buzz') state.tab = 'buzz';
+if(params.get('q')) state.q = params.get('q').trim(), document.getElementById('q').value = state.q;
+renderAll();
+</script>
+</body>
+</html>

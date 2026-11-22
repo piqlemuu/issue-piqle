@@ -93,6 +93,42 @@ h1{margin:6px 0 0;font-family:'Gothic A1',sans-serif;font-weight:900;font-size:2
 .note{margin:8px 0 0;font-size:13px;color:var(--sub);line-height:1.6}
 .warn{margin:10px 0 0;padding-left:20px;font-size:15px;line-height:1.7}
 .warn li+li{margin-top:6px}
+.tl5{display:grid;grid-template-columns:2fr 3fr 2fr 2fr 1fr;gap:3px;margin:14px 0 4px}
+.tl5 span{height:30px;display:flex;align-items:center;justify-content:center;border-radius:8px;font-weight:800;font-size:14px;color:#fff;background:#256477}
+.tl5 .g1,.tl5 .g2{background:#22343A}.tl5 .g5{background:#635D00}
+.tl5y{display:grid;grid-template-columns:2fr 3fr 2fr 2fr 1fr;font-size:12px;color:var(--sub)}
+.tl5y span{text-align:right;transform:translateX(50%)}
+.gen{margin-top:10px;padding:14px;background:#fff;border:1px solid var(--line);border-radius:14px}
+.gen.hot{background:#FFFBEA;border-color:#E9D98A}
+.gen-h{display:flex;align-items:baseline;gap:8px;flex-wrap:wrap}
+.gen-h b{font-size:18px}.gen-h span{font-size:13px;color:var(--sub)}
+.gen-h em{font-style:normal;font-size:12px;font-weight:700;background:#F8ED43;color:#22343A;padding:2px 8px;border-radius:99px;margin-left:auto}
+.gen-n{margin:2px 0 8px;font-size:14px;color:var(--sub)}
+.gen dl{display:grid;grid-template-columns:92px 1fr;gap:4px 10px;margin:0;font-size:14px;line-height:1.5}
+.gen dt{color:var(--sub)}.gen dd{margin:0;font-weight:600}.gen dd small{font-weight:400;color:var(--sub)}
+.gen-bar{position:relative;margin-top:10px;height:26px;background:#EEF1F2;border-radius:8px;overflow:hidden}
+.gen-bar i{position:absolute;inset:0 auto 0 0;background:#A7D4E4;border-radius:8px}
+.gen.hot .gen-bar i{background:#F2D55C}
+.gen-bar span{position:relative;display:block;padding:0 10px;line-height:26px;font-size:13px;font-weight:700}
+.gen-t{margin:20px 0 6px;font-size:16px}
+.tbl{overflow-x:auto}.age{width:100%;border-collapse:collapse;font-size:13px;text-align:center;background:#fff}
+.age caption{caption-side:bottom;text-align:left;font-size:12px;color:var(--sub);padding-top:6px}
+.age th,.age td{border:1px solid var(--line);padding:7px 3px}.age tr:first-child th{background:#22343A;color:#fff}
+.pay{margin-top:8px}
+.pay-r{padding:12px 14px;background:#fff;border:1px solid var(--line);border-radius:14px;margin-top:8px}
+.pay-h{display:flex;justify-content:space-between;gap:8px;font-size:14px}.pay-h span{font-weight:700}.pay-h b{font-weight:500;color:var(--sub);white-space:nowrap}
+.pay-bar{position:relative;margin:8px 0 6px;height:30px;background:#EEF1F2;border-radius:8px;overflow:hidden}
+.pay-bar i{position:absolute;inset:0 auto 0 0;background:#F2B8A0;border-radius:8px}
+.pay-r.x .pay-bar i{background:#E0715A}.pay-r.ok .pay-bar i{background:#A7D4E4}
+.pay-bar span{position:relative;display:block;padding:0 10px;line-height:30px;font-size:15px;font-weight:800}
+.pay-r p{margin:0;font-size:13px;color:var(--sub);line-height:1.5}
+.pay-cap{margin:10px 0 0;padding:10px 14px;background:#E4F7FE;border-radius:12px;font-size:14px}
+.caution{margin:14px 0;padding:12px 14px;background:#FFF6C7;border:1px solid #E9D98A;border-radius:14px}
+.caution b{display:block;font-size:15px}.caution p{margin:4px 0 0;font-size:14px;line-height:1.55}
+.words{margin:12px 0 0;padding:12px 14px;background:#FFFFFF;border:1px solid var(--line);border-radius:14px;font-size:14px;line-height:1.6}
+.words b{display:block;margin-bottom:4px}
+.words ul{margin:0;padding-left:18px}
+.sec p b{font-size:16px}
 @media(max-width:360px){.two{grid-template-columns:1fr}}
 footer{padding:28px 0 40px;font-size:12px;color:var(--sub);line-height:1.7}
 footer a{color:var(--sub)}
@@ -113,7 +149,7 @@ footer a{color:var(--sub)}
 <div class="check"><b>1분 확인 · 나도 해당될까?</b>
 <ul>
 <li>실손보험에 <strong>2013년 3월 이전</strong>에 가입했다</li>
-<li>가입한 상품에 <strong>재가입 조건이 없다</strong> (정해진 주기마다 새 약관으로 다시 가입하는 조건)</li>
+<li>몇 년마다 <strong>새 약관으로 다시 가입하는 조건이 없는</strong> 상품이다 (잘 모르겠으면 보험사에 물어보면 돼요)</li>
 </ul>
 <p>둘 다 해당되면 대상이에요. 금융당국은 대상자를 약 1,630만 명으로 보고 있어요.</p></div>
 
@@ -123,10 +159,53 @@ footer a{color:var(--sub)}
 <li><label><input type="checkbox"><span><b>‘내보험찾아줌’에서 가입 시기부터 확인</b><span>내 실손보험이 언제 가입한 계약인지, 보험기간이 어떻게 되는지 볼 수 있어요.</span></span></label></li>
 <li><label><input type="checkbox"><span><b>최근 병원 이용과 보험금 받은 기록 떠올리기</b><span>금융당국도 낸 보험료, 받은 보험금, 건강 상태, 앞으로 병원 갈 계획을 같이 따져 보라고 안내했어요.</span></span></label></li>
 <li><label><input type="checkbox"><span><b>보험사에 대상 여부와 예상 보험료 묻기</b><span>홈페이지, 앱, 콜센터, 지점, 설계사 등 창구는 보험사마다 달라요.</span></span></label></li>
-<li><label><input type="checkbox"><span><b>지금 계약의 특약 해지·감액은 잠시 멈추기</b><span>전환 신청 전 6개월 안에 특약을 해지하거나 보장을 줄이면 할인을 못 받을 수 있어요.</span></span></label></li>
+<li><label><input type="checkbox"><span><b>지금 보험의 일부 해지는 잠시 멈추기</b><span>바꾸기 전 6개월 안에 지금 보험의 일부를 해지하거나 보장을 줄이면 할인을 못 받을 수 있어요.</span></span></label></li>
 <li><label><input type="checkbox"><span><b>바꾼 뒤 아니다 싶으면 3개월 안에 철회</b><span>3개월 안에는 이유와 상관없이 되돌릴 수 있어요. 다만 철회하면 전환 할인은 다시 쓸 수 없어요.</span></span></label></li>
 </ol>
 <a class="official" href="https://cont.insure.or.kr" target="_blank" rel="noopener">내보험찾아줌에서 가입 내역 조회 ›</a>
+</section>
+
+<section class="sec" id="gens">
+<h2>내 실손은 몇 세대? 한눈에 보기</h2>
+<div class="tl5" aria-hidden="true"><span class="g1">1</span><span class="g2">2</span><span class="g3">3</span><span class="g4">4</span><span class="g5">5</span></div>
+<div class="tl5y" aria-hidden="true"><span>2009</span><span>2017</span><span>2021</span><span>2026</span></div>
+<p class="note">가입한 <b>날짜</b>로 세대가 정해져요. 막대는 40대 남성이 평균적으로 내는 월 보험료예요(손해보험사 기준).</p>
+<div class="gen hot">
+<div class="gen-h"><b>1세대</b><span>~2009년 9월</span><em>이번 할인 대상</em></div>
+<p class="gen-n">처음 나온 실손</p>
+<dl><dt>내가 내는 비율</dt><dd>거의 없음<br><small>손보사 0% · 생보사 20%</small></dd><dt>비급여 보장</dt><dd>기본으로 다 보장</dd><dt>다시 가입</dt><dd>재가입 조건 없음</dd></dl>
+<div class="gen-bar"><i style="width:100%"></i><span>약 6.6만 원</span></div>
+</div><div class="gen hot">
+<div class="gen-h"><b>2세대</b><span>2009년 10월~2017년 3월</span><em>이번 할인 대상</em></div>
+<p class="gen-n">표준화 실손</p>
+<dl><dt>내가 내는 비율</dt><dd>10~20%</dd><dt>비급여 보장</dt><dd>기본으로 다 보장</dd><dt>다시 가입</dt><dd>2013년 4월 이후 가입은 15년마다</dd></dl>
+<div class="gen-bar"><i style="width:74%"></i><span>약 4.9만 원</span></div>
+</div><div class="gen">
+<div class="gen-h"><b>3세대</b><span>2017년 4월~2021년 6월</span></div>
+<p class="gen-n">착한 실손</p>
+<dl><dt>내가 내는 비율</dt><dd>10~20%<br><small>도수치료·주사·MRI는 30%</small></dd><dt>비급여 보장</dt><dd>도수치료·비급여 주사·MRI만 특약으로 따로</dd><dt>다시 가입</dt><dd>15년마다</dd></dl>
+<div class="gen-bar"><i style="width:47%"></i><span>약 3.1만 원</span></div>
+</div><div class="gen">
+<div class="gen-h"><b>4세대</b><span>2021년 7월~2026년 5월</span></div>
+<p class="gen-n">쓴 만큼 보험료가 오르내리는 실손</p>
+<dl><dt>내가 내는 비율</dt><dd>건강보험 되는 진료 20%<br>비급여 30%</dd><dt>비급여 보장</dt><dd>비급여 전체를 특약으로 따로</dd><dt>다시 가입</dt><dd>5년마다</dd></dl>
+<div class="gen-bar"><i style="width:33%"></i><span>약 2.2만 원</span></div>
+</div><div class="gen">
+<div class="gen-h"><b>5세대</b><span>2026년 5월~</span></div>
+<p class="gen-n">새 실손</p>
+<dl><dt>내가 내는 비율</dt><dd>큰 병 비급여 30%<br>큰 병 아닌 비급여 50%</dd><dt>비급여 보장</dt><dd>비급여를 큰 병 / 큰 병 아님 특약으로 나눔 · 도수치료 등은 보장 안 함</dd><dt>다시 가입</dt><dd>5년마다</dd></dl>
+<div class="gen-bar"><i style="width:23%"></i><span>약 1.54만 원 <small>(추정)</small></span></div>
+</div>
+<h3 class="gen-t">나이대별 월 보험료 (4·5세대)</h3>
+<div class="tbl"><table class="age">
+<caption>보험사별 가장 싼 곳~비싼 곳, 2026년 7월 공시 기준</caption>
+<tr><th scope="col">나이</th><th scope="col">4세대 남</th><th scope="col">4세대 여</th><th scope="col">5세대 남</th><th scope="col">5세대 여</th></tr>
+<tr><th scope="row">30세</th><td>1.4~2.7만</td><td>1.6~3.2만</td><td>0.7~1.8만</td><td>0.9~2.2만</td></tr>
+<tr><th scope="row">40세</th><td>1.7~3.4만</td><td>1.8~4.4만</td><td>1.0~2.3만</td><td>1.2~3.2만</td></tr>
+<tr><th scope="row">50세</th><td>2.5~4.5만</td><td>3.0~5.6만</td><td>1.4~3.3만</td><td>2.0~4.2만</td></tr>
+<tr><th scope="row">60세</th><td>2.9~6.9만</td><td>3.2~7.3만</td><td>2.1~5.3만</td><td>2.2~5.5만</td></tr>
+</table></div>
+<p class="note">1~3세대는 지금 팔지 않아서 나이대별로 공개된 표가 없어요. 같은 세대여도 보험사와 갱신 시점에 따라 금액이 크게 달라요. 내 보험료는 가입한 보험사 앱에서 확인하는 게 정확해요. 위의 ‘보험료 예시’와 금액이 다른 것도 이 때문이에요.</p>
 </section>
 
 <section class="sec">
@@ -136,14 +215,14 @@ footer a{color:var(--sub)}
 <p>지금 보험사의 5세대 실손보험으로 바꾸면 <strong>3년간 보험료 50% 할인</strong>. 원칙적으로 별도 심사 없이 바꿀 수 있어요.</p>
 <p class="small">신청: 2026년 11월 23일 ~ 2027년 5월 22일<br>3년 뒤에는 그때의 5세대 보험료를 다 내요.</p></div>
 <div class="opt"><span class="tag b">유지하며 줄이기</span><b>선택형 할인특약</b>
-<p>지금 보험은 그대로 두고 <strong>필요 없는 보장만 빼서</strong> 보험료를 낮춰요. 세 가지 중 골라요.</p>
+<p>지금 보험은 그대로 두고 <strong>잘 안 쓰는 보장만 빼서</strong> 보험료를 낮춰요. 아래 세 가지 중 골라요.</p>
 <p class="small">신청: 따로 안내가 있을 때까지 계속 운영</p></div>
 </div>
 <table class="ticket">
 <caption>선택형 할인특약 옵션 (1세대 기준 예상 할인)</caption>
-<tr><th scope="row">옵션 1</th><td>도수치료 같은 근골격계 물리치료, 체외충격파, 비급여 주사제 보장 빼기 · 약 15~20%</td></tr>
+<tr><th scope="row">옵션 1</th><td>도수치료 같은 물리치료, 체외충격파, 비급여 주사를 보장에서 빼기 · 약 15~20%</td></tr>
 <tr><th scope="row">옵션 2</th><td>비급여 MRI·MRA 보장 빼기 · 약 2~4%</td></tr>
-<tr><th scope="row">옵션 3</th><td>자기부담률 20%로 올리기(급여·비급여 모두) · 약 9~17%</td></tr>
+<tr><th scope="row">옵션 3</th><td>병원비의 20%를 내가 내기(모든 진료) · 약 9~17%</td></tr>
 <tr><th scope="row">셋 다</th><td>1세대 약 37%, 2세대 약 27%</td></tr>
 </table>
 <p class="note">실제 할인율은 보험사와 상품마다 달라요.</p>
@@ -172,12 +251,30 @@ footer a{color:var(--sub)}
 
 <section class="sec">
 <h2>바꾸기 전에 꼭 볼 점</h2>
+<div class="words"><b>먼저 단어 3개만</b>
+<ul>
+<li><strong>비급여</strong> = 건강보험이 안 돼서 내 돈으로 다 내는 진료 (도수치료, MRI 같은 것)</li>
+<li><strong>큰 병 / 큰 병 아님</strong> = 기사에서는 ‘중증 / 비중증’이라고 써요. 큰 병은 암, 뇌혈관·심장 질환, 희귀 난치병 같은 거예요.</li>
+<li><strong>자기부담</strong> = 병원비 중에서 보험이 안 주고 내가 내는 부분</li>
+</ul></div>
+<p><b>병원비가 이만큼 나오면, 5세대에서 내가 내는 돈</b></p>
+<div class="pay">
+<div class="pay-r x"><div class="pay-h"><span>도수치료</span><b>병원비 10만 원</b></div>
+<div class="pay-bar"><i style="width:100%"></i><span>내가 10만 원 전부</span></div><p>보험금이 안 나와요. 체외충격파·영양주사 같은 비급여 주사도 같아요.</p></div>
+<div class="pay-r"><div class="pay-h"><span>큰 병 아닌데 입원 · 비급여</span><b>병원비 100만 원</b></div>
+<div class="pay-bar"><i style="width:50%"></i><span>내가 50만 원</span></div><p>절반은 내가 내요.</p></div>
+<div class="pay-r"><div class="pay-h"><span>큰 병 아닌데 통원·MRI · 비급여</span><b>병원비 20만 원</b></div>
+<div class="pay-bar"><i style="width:50%"></i><span>내가 10만 원</span></div><p>절반과 5만 원 중 더 큰 금액을 내가 내요.</p></div>
+<div class="pay-r ok"><div class="pay-h"><span>암·뇌·심장 같은 큰 병 입원 · 비급여</span><b>병원비 100만 원</b></div>
+<div class="pay-bar"><i style="width:30%"></i><span>내가 30만 원</span></div><p>30%만 내가 내요.</p></div>
+<p class="pay-cap">큰 병원(상급종합·종합병원)에 큰 병으로 입원하면, 내가 내는 돈은 <b>1년에 500만 원까지</b>만이에요.</p>
+<p class="note">예시 금액이에요. 실제 금액은 진료 내용과 약관에 따라 달라요.</p>
+</div>
+<div class="caution"><b>⚠ 선택형 특약은 되돌리기 어려워요</b><p>지금 보험을 유지하며 보장을 빼는 방법이에요. 나중에 빼는 항목을 더하거나 일부만 취소할 수 없고, 한 번 해지하면 다시 가입할 수 없어요.</p></div>
+<p><b>그 밖에 알아 둘 점</b></p>
 <ul class="warn">
-<li><b>5세대는 보장이 달라요.</b> 비중증 비급여 입원은 자기부담률 50%, 도수치료 같은 물리치료와 체외충격파, 비급여 주사제는 비중증 비급여 특약에서 보장하지 않아요.</li>
-<li><b>중증 질환은 따로 봐요.</b> 암, 뇌혈관·심장질환 같은 중증 비급여는 입원 시 자기부담률 30%이고, 상급종합·종합병원 입원 시 연간 자기부담 한도 500만 원이 적용돼요.</li>
-<li><b>선택형 특약은 되돌리기 어려워요.</b> 가입 뒤 옵션을 추가하거나 일부만 해지할 수 없고, 해지하면 다시 가입할 수 없어요.</li>
-<li><b>먼저 걸려 온 권유 전화는 서두르지 마세요.</b> 보험사나 설계사가 먼저 연락해 전환을 권유하는 영업은 제한돼요.</li>
-<li><b>보험사마다 시작일이 달라요.</b> 예별손해보험은 계약전환 할인을 2027년 2월 1일부터 시행할 예정이에요.</li>
+<li><b>보험사에서 먼저 걸려 온 전화로 서두르지 마세요.</b> 보험사나 설계사가 먼저 연락해 바꾸라고 권하는 영업은 제한돼 있어요.</li>
+<li><b>보험사마다 시작일이 달라요.</b> 예별손해보험은 5세대 전환 할인을 2027년 2월 1일부터 해요.</li>
 </ul>
 </section>
 
@@ -204,6 +301,9 @@ footer a{color:var(--sub)}
 <li><a href="https://www.kukinews.com/article/view/kuk202611190117" target="_blank" rel="noopener">쿠키뉴스, 1·2세대 실손보험, 갈아타거나 유지하거나 (11월 19일)</a></li>
 <li><a href="http://www.srtimes.kr/news/articleView.html?idxno=218099" target="_blank" rel="noopener">SR타임스, 초기 실손보험료 최대 50% 할인 (11월 19일)</a></li>
 <li><a href="https://kpenews.com/View.aspx?No=4323699" target="_blank" rel="noopener">한국정경신문, 오래된 실손보험료 낮춘다 (11월 22일)</a></li>
+<li><a href="https://www.fsc.go.kr/no010101/86831" target="_blank" rel="noopener">금융위원회, 5세대 실손보험 출시 보도자료</a></li>
+<li><a href="https://kbthink.com/insurance/basics/2nd-generation.html" target="_blank" rel="noopener">KB Think, 세대별 가입 시기·2세대 실손 정리</a></li>
+<li><a href="https://www.banksalad.com/articles/%EB%B3%B4%ED%97%98-%EC%8B%A4%EB%B9%84%EB%B3%B4%ED%97%98-%EC%8B%A4%EC%86%90%EB%B3%B4%ED%97%98-%EC%84%B8%EB%8C%80%EB%B3%84-%EB%B9%84%EA%B5%90" target="_blank" rel="noopener">뱅크샐러드, 세대별 평균 보험료(금감원 2025 실적)·나이별 보험료(금융위 공시)</a></li>
 </ul>
 </section>
 

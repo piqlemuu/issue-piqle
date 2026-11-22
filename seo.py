@@ -829,6 +829,14 @@ def build_all(details, old_snaps, now_iso, memes_dict, daily=None):
         if snap:
             snap["live"] = bool(cur)
         (OUT_DIR / f"{s}.html").write_text(build_page(ex, snap or None, explains), encoding="utf-8")
+    # editorial-articles.json 글에 "keyword"가 있으면, 순위에 그 키워드가 뜰 때 '왜떴어?' 표시로 이어 줘요.
+    try:
+        for _it in _piqle_editorial_items():
+            _kw = str(_it.get("keyword") or "").strip()
+            if _kw and _kw in issues and _kw not in link_map and (OUT_DIR / _it["url"]).is_file():
+                link_map[_kw] = {"url": "i/" + _it["url"], "summary": [plain(_it.get("sum") or "")][:1]}
+    except Exception as _err:
+        print("[왜떴어] 순위 연결을 만들지 못했어요:", _err)
     (OUT_DIR / "index.html").write_text(build_index(explains), encoding="utf-8")
     weeks = read_weekly()
     good_weeks = build_weeks(weeks, explains, set(daily or {}), now_iso[:10])
@@ -1124,7 +1132,7 @@ def _piqle_editorial_items():
         if not isinstance(record, dict):
             raise ValueError("글 목록 항목이 올바르지 않습니다")
         item = dict(record)
-        if not re.fullmatch(r"[A-Za-z0-9][A-Za-z0-9_.-]*\.html", str(item.get("url", ""))):
+        if not re.fullmatch(r"[0-9A-Za-z가-힣][0-9A-Za-z가-힣_.-]*\.html", str(item.get("url", ""))):
             raise ValueError("직접 작성 글 경로는 i 폴더 안의 HTML 파일명이어야 합니다")
         datetime.strptime(item["date"], "%Y-%m-%d")
         if not item.get("title"):

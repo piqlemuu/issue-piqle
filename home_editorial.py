@@ -76,19 +76,35 @@ FEATURE_STYLE = '''<!-- ISSUEPIQLE_LATEST_STYLE --><style>
 </style>'''
 
 HOME_STYLE = STYLE + '''<style>
-.ip-original-list{list-style:none;display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px;margin:14px 0 18px;padding:0}
+.ip-original .sec-head h2{font-size:1.375rem;font-weight:900}
+.ip-original .ip-q{color:#D23A22}
+.ip-original-list{list-style:none;display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;margin:12px 0 10px;padding:0}
 .ip-original-list li{min-width:0}
-.ip-original-list a{display:flex;flex-direction:column;gap:7px;height:100%;padding:17px;border:1px solid var(--line,#ddd);border-radius:13px;background:var(--card,#fff);color:var(--text,inherit);text-decoration:none}
-.ip-original-list strong{font-size:1rem;line-height:1.5;word-break:keep-all}
-.ip-original-list time{font-size:.75rem;color:var(--sub,#64748b)}
-.ip-original-list span{font-size:.84rem;line-height:1.65;color:var(--sub,#64748b)}
+.ip-original-list a{display:flex;flex-direction:column;gap:6px;height:100%;padding:15px 16px;border:1px solid var(--line,#ddd);border-radius:14px;background:var(--card,#fff);color:var(--text,inherit);text-decoration:none}
+.ip-original-list a:hover strong{text-decoration:underline}
+.ip-lab{align-self:flex-start;font-size:.6875rem;font-weight:800;padding:2px 8px;border-radius:999px;background:#D23A22;color:#fff}
+.ip-life .ip-lab{background:#0F6E64}
+.ip-original-list strong{font-size:.98rem;line-height:1.45;word-break:keep-all}
+.ip-original-list .ip-sum{font-size:.84rem;line-height:1.55;color:var(--sub,#64748b);display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.ip-original-list .ip-do{font-size:.84rem;line-height:1.55;color:#0F6E64;font-weight:700}
+html[data-theme=dark] .ip-original-list .ip-do{color:#5FD3C1}
+.ip-original-list time{font-size:.75rem;color:var(--sub,#64748b);margin-top:auto}
+.ip-wt-links{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}
+.ip-wt-links .more{margin-top:0}
 @media(max-width:650px){.ip-original-list{grid-template-columns:1fr}}
 </style>'''
+
+
+WT_MARK = '<!-- WT_LAYOUT -->'
 
 
 def change_index(doc):
     # Run on generated HTML. Remove old hero and newest row before making the hero.
     all_matches = [(m, extract(m.group())) for m in CARD.finditer(doc)]
+    if WT_MARK in doc:
+        # 왜떴어? 화면은 seo.py가 대표 카드까지 직접 만들어요. 목록만 읽어 홈에 씁니다.
+        published = sorted([c for m, c in all_matches if is_published(c)], key=lambda x: x['date'], reverse=True)
+        return doc, published
     published = [(m,c) for m,c in all_matches if is_published(c)]
     if not published:
         print('No eligible published editorial cards, keeping the original page.')
@@ -108,25 +124,46 @@ def change_index(doc):
     return doc,[latest]+other
 
 
+BANNER_START = '<!-- ISSUEPIQLE_SIGNGATE_START -->'
+BANNER_END = '<!-- ISSUEPIQLE_SIGNGATE_END -->'
+LIFE_CATS = {'생활·경제', '소비·쇼핑', '생활', '교통', '돈·제도', '쇼핑·할인', '보안'}
+HOME_ANCHOR = '<!-- ④ 분야별 이슈 -->'
+
+
+def _tab(c):
+    t = c.get('tab') or ''
+    if t in ('생활', 'life'): return 'life'
+    if t in ('화제', 'buzz'): return 'buzz'
+    return 'life' if c.get('category') in LIFE_CATS else 'buzz'
+
+
 def change_home(doc, items):
     if not items: return doc
-    doc=re.sub(re.escape(START)+r'.*?'+re.escape(END),'',doc,flags=re.S)
+    doc=re.sub(re.escape(START)+r'.*?'+re.escape(END)+r'\n?','',doc,flags=re.S)
+    doc=re.sub(re.escape(BANNER_START)+r'.*?'+re.escape(BANNER_END)+r'\n?','',doc,flags=re.S)
     doc=re.sub(re.escape(STYLE)+r'<style>.*?</style>','',doc,flags=re.S)
-    if '</head>' not in doc or '<footer class="foot">' not in doc:
+    if '</head>' not in doc or '<footer class="foot">' not in doc or doc.count(HOME_ANCHOR)!=1:
         raise ValueError('Expected homepage elements absent; aborting.')
     doc=doc.replace('</head>',HOME_STYLE+'\n</head>',1)
-    cards=[]
-    for c in items[:6]:
-        esc=lambda s:html.escape(s,quote=True)
-        cards.append(f'<li><a href="i/{esc(c["href"])}"><strong>{esc(c["title"])}</strong>'
-                     +f'<time datetime="{esc(c["date"])}">{esc(c["date"])}</time></a></li>')
+    esc=lambda s:html.escape(str(s or ''),quote=True)
+    life=[c for c in items if _tab(c)=='life'][:2]
+    buzz=[c for c in items if _tab(c)=='buzz'][:2]
+    def card(c):
+        t=_tab(c)
+        lab='생활' if t=='life' else '화제'
+        line=(f'<span class="ip-do">할 일 · {esc(c["todo"])}</span>' if t=='life' and c.get('todo')
+              else (f'<span class="ip-sum">{esc(c["summary"])}</span>' if c.get('summary') else ''))
+        return (f'<li class="ip-{t}"><a href="i/{esc(c["href"])}"><span class="ip-lab">{lab}</span>'
+                f'<strong>{esc(c["title"])}</strong>{line}<time datetime="{esc(c["date"])}">{esc(c["date"].replace("-","."))}</time></a></li>')
+    cards=[card(c) for c in life+buzz] or [card(c) for c in items[:4]]
     section=(START+'\n<section class="sec ip-original" aria-labelledby="ip-original-heading">'
-       +'<div class="sec-head"><div><h2 id="ip-original-heading">이슈피클이 직접 정리한 이야기</h2>'
-       +'<p>실시간 순위와 별개로 출처와 맥락을 확인해 정리한 새콤해설입니다.</p></div></div>'
+       +'<div class="sec-head"><div><h2 id="ip-original-heading">왜떴어<span class="ip-q">?</span></h2>'
+       +'<p>이름은 봤는데 무슨 일인지 모를 때, 새콤기자가 1분 만에 풀어 드려요</p></div></div>'
        +'<ul class="ip-original-list">'+''.join(cards)+'</ul>'
-       +'<a class="more" href="i/">새콤해설 전체 보기 ›</a></section>\n'
-       +SIGNGATE_BANNER+'\n'+END)
-    doc=doc.replace('<footer class="foot">',section+'\n<footer class="foot">',1)
+       +'<div class="ip-wt-links"><a class="more" href="i/">생활 해설 전체 ›</a><a class="more" href="i/?tab=buzz">화제 해설 전체 ›</a></div></section>\n'
+       +END+'\n')
+    doc=doc.replace(HOME_ANCHOR,section+'\n  '+HOME_ANCHOR,1)
+    doc=doc.replace('<footer class="foot">',BANNER_START+'\n'+SIGNGATE_BANNER+'\n'+BANNER_END+'\n<footer class="foot">',1)
     if 'rel="canonical"' not in doc:
         doc=doc.replace('</head>','<link rel="canonical" href="https://piqlemuu.github.io/issue-piqle/">\n</head>',1)
     return doc
@@ -144,7 +181,8 @@ def registered_home_items(items):
         for record in records:
             item = dict(href=record.get('url', ''), title=record.get('title', ''),
                         date=record.get('date', ''), summary=record.get('sum', ''),
-                        category=record.get('cat', '생활·경제'), image=record.get('img', ''))
+                        category=record.get('cat', '생활·경제'), image=record.get('img', ''),
+                        tab=record.get('tab', ''), todo=record.get('todo', ''))
             if is_published(item):
                 merged[item['href']] = item
     return sorted(merged.values(), key=lambda item: item['date'], reverse=True)

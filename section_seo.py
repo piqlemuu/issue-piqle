@@ -133,8 +133,8 @@ def month_index(path):
 def editorial_index(path):
     source = path.read_text(encoding='utf-8')
     url = BASE + 'i/'
-    title = '새콤해설 | 오늘의 이슈·생활경제·연예 뉴스 맥락 정리 - 이슈피클'
-    description = '오늘 화제인 이슈를 왜 주목하는지 직접 해설합니다. 생활경제, 연예, 문화, 사회 이슈의 핵심 내용과 맥락, 근거 출처를 읽어보세요.'
+    title = '왜떴어? | 이름은 봤는데 무슨 일인지 모를 때 - 이슈피클 해설'
+    description = '검색어에 뜬 그 이슈, 무슨 일인지 1분 만에. 생활 이슈는 지금 할 일까지, 연예·스포츠·사회 화제는 왜 떴는지까지 새콤기자가 근거 기사로 정리해요.'
     source = re.sub(re.escape(START) + r'.*?' + re.escape(END), '', source, flags=re.S)
     source = update_meta(source, title=title, description=description, canonical=url, og_title=title)
     anchor = '<div class="sk-tabs">'
@@ -145,7 +145,8 @@ def editorial_index(path):
              '각 글에서 사건의 개요와 관련 출처를 확인할 수 있습니다.</p>'
              '<p style="margin:.35rem 0 0;font-size:.85rem;color:var(--sub)">'
              '관심 있는 주제를 선택하거나 최신 글부터 살펴보세요.</p></div>\n' + END)
-    source = source.replace(anchor, block + '\n' + anchor, 1)
+    if '<!-- WT_LAYOUT -->' not in source:
+        source = source.replace(anchor, block + '\n' + anchor, 1)
     # Only include cards with a title/link and actual HTML file.
     cards=[]; seen=set()
     for m in re.finditer(r'<a\b[^>]*class="[^"]*\bsk-(?:feat|row)\b[^"]*"[^>]*>.*?</a>',source,re.S):
@@ -162,7 +163,7 @@ def editorial_index(path):
         if len(cards)>=50: break
     # Current generator already outputs CollectionPage; ItemList adds real linked articles.
     source = insert_schema(source,{'@context':'https://schema.org','@type':'ItemList',
-                                   'name':'새콤해설 최신 기사','itemListElement':cards})
+                                   'name':'왜떴어? 최신 해설','itemListElement':cards})
     path.write_text(source,encoding='utf-8')
     print('[editorial index]',len(cards))
 

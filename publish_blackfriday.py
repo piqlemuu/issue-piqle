@@ -83,7 +83,7 @@ def insert_teasers():
     if not index.is_file():raise FileNotFoundError('site/i/index.html is missing')
     src=index.read_text(encoding='utf-8')
     teaser=f'''{MARK}<div class="ip-bf-feature" style="border:1px solid var(--line,#ddd);border-radius:14px;padding:16px;margin:18px 0;background:var(--card,#fff)"><span style="display:block;font-size:12px;color:var(--sub,#777)">NEW · 2026.11.19 · 소비·쇼핑</span><a style="font-weight:800;font-size:19px;line-height:1.5;display:block;margin:6px 0" href="coupang-blackfriday-2026-buy-now-or-wait.html">블랙프라이데이, 지금 사면 손해일 수도 있어요</a><p style="font-size:14px;color:var(--sub,#777);margin:0">11월 23일 라이브 추가 혜택, 오늘 결제해도 괜찮을까? 확인할 조건 다섯 가지.</p></div>'''
-    if MARK not in src:
+    if MARK not in src and '<!-- WT_LAYOUT -->' not in src:
         # Prefer top of editorial list, immediately after its intro; no fragile source replacements.
         marker='<div class="sk-tabs">'
         hero=re.search(r'<a class="sk-card sk-feat ip-latest-hero".*?</a>',src,re.S)

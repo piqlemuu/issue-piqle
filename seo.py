@@ -1133,3 +1133,234 @@ def _sk_items(explains):
     for item in _piqle_editorial_items():
         merged[item["url"]] = item
     return sorted(merged.values(), key=lambda item: item["date"], reverse=True)
+
+
+# ── 왜떴어? (2026-11 리뉴얼) ──────────────────────────────────────────────
+# 해설 모음(i/index.html)을 '생활 | 화제' 두 칸 구조로 만들어요.
+# - 생활: 돈·제도·쇼핑·보안처럼 내 생활에 바로 영향이 있는 글. editorial-articles.json 에 "todo"(지금 할 일)를 적으면 카드에 같이 보여요.
+# - 화제: 연예·스포츠·커뮤니티·사회·밈.
+# - explain.md 의 '분야:' 로 칸이 정해져요. 직접 정하고 싶으면 editorial-articles.json 에 "tab": "생활" 또는 "화제".
+# 다른 스크립트(home_editorial, section_seo)가 찾는 표시(<div class="sk-tabs">, sk-row 카드)는 그대로 둬요.
+WT_NAME = "왜떴어?"
+WT_MARK = "<!-- WT_LAYOUT -->"
+WT_LIFE_CATS = {"생활·경제", "소비·쇼핑", "생활", "교통", "돈·제도", "쇼핑·할인", "보안"}
+WT_TABS = {"life": "생활", "buzz": "화제"}
+
+WT_CSS = """<style>
+.wt{--wt-red:#D23A22;--wt-red-text:var(--red);--wt-red-soft:#FFF1EC;--wt-teal:#0F6E64;--wt-teal-soft:#E3F2EF;--wt-tile:#2B2C33;--wt-tile-life:#123F3A}
+html[data-theme=dark] .wt{--wt-red-soft:rgba(255,122,127,.13);--wt-teal:#5FD3C1;--wt-teal-soft:rgba(95,211,193,.12);--wt-tile:#2A2C33;--wt-tile-life:#173A36}
+.wt{padding-bottom:8px}
+.wt-eyebrow{margin:18px 0 0;font-size:.8125rem;font-weight:700;color:var(--wt-red-text)}
+.wt h1{margin:6px 0 0;font-size:1.875rem;font-weight:900;line-height:1.25;letter-spacing:-.03em}
+.wt-search{margin-top:16px;display:flex;gap:8px}
+.wt-search input{flex:1;min-width:0;height:48px;border:2px solid var(--text);border-radius:12px;padding:0 14px;font:inherit;font-size:1rem;background:var(--card);color:var(--text)}
+.wt-search button{height:48px;padding:0 18px;border:0;border-radius:12px;background:var(--text);color:var(--bg);font-weight:700;font-size:.9375rem;cursor:pointer}
+.wt-chips{margin-top:10px;display:flex;gap:6px;align-items:center;flex-wrap:wrap}
+.wt-chips span{font-size:.75rem;color:var(--sub)}
+.wt-chip{padding:9px 13px;border-radius:999px;background:var(--card);border:1px solid var(--line);font-size:.8125rem;font-weight:700;cursor:pointer;color:var(--text)}
+.wt .sk-tabs{position:sticky;top:3.25rem;z-index:5;background:var(--bg);display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:6px;padding:10px 0;margin:14px 0 6px}
+.wt .sk-tabs button{height:52px;border-radius:14px;border:2px solid var(--text);background:var(--card);cursor:pointer;color:var(--text);display:flex;flex-direction:column;align-items:center;justify-content:center;line-height:1.2}
+.wt .sk-tabs b{font-weight:900;font-size:1.0625rem}
+.wt .sk-tabs small{font-size:.6875rem;color:var(--sub)}
+.wt .sk-tabs button[aria-selected=true]{background:var(--text);color:var(--bg)}
+.wt .sk-tabs button[aria-selected=true] small{color:var(--line)}
+.wt-feature{display:block;background:var(--card);border:1px solid var(--line);border-radius:18px;overflow:hidden;color:var(--text)}
+.wt-feature[hidden],.wt-item[hidden]{display:none}
+.wt-tile{position:relative;background:var(--wt-tile);color:#F6F4EE;display:flex;align-items:flex-end;padding:14px 16px;font-weight:900;letter-spacing:-.03em;overflow:hidden;background-size:cover;background-position:center}
+.wt-life .wt-tile,.wt-item.wt-life .wt-tile{background-color:var(--wt-tile-life)}
+.wt-tile.has-img{color:transparent}
+.wt-feature .wt-tile{height:150px;font-size:2.25rem}
+.wt-badge{position:absolute;top:12px;left:12px;background:var(--wt-red);color:#fff;font-size:.75rem;font-weight:700;padding:5px 10px;border-radius:999px;letter-spacing:0}
+.wt-life .wt-badge{background:#fff;color:#0F6E64}
+.wt-fbody{padding:14px 16px 16px}
+.wt-meta{display:block;margin:0;font-size:.75rem;color:var(--sub)}
+.wt-feature h2{margin:6px 0 0;font-weight:800;font-size:1.1875rem;line-height:1.38;letter-spacing:-.02em}
+.wt-answer{margin:10px 0 0;padding:10px 12px;background:var(--wt-red-soft);border-radius:10px;font-size:.875rem;line-height:1.55}
+.wt-answer b{color:var(--wt-red-text);margin-right:4px}
+.wt-todo{margin:8px 0 0;padding:10px 12px;background:var(--wt-teal-soft);border-radius:10px;font-size:.875rem;line-height:1.55}
+.wt-todo b{color:var(--wt-teal);margin-right:4px}
+.wt-btn{margin-top:12px;display:flex;height:48px;align-items:center;justify-content:center;background:var(--wt-red);color:#fff;border-radius:12px;font-weight:700;font-size:.9375rem}
+.wt-life .wt-btn{background:#0F6E64}
+.wt-listhead{display:flex;justify-content:space-between;align-items:baseline;gap:8px;margin-top:24px}
+.wt-listhead h2{font-size:1.0625rem;font-weight:800}
+.wt-listhead p{margin:0;font-size:.75rem;color:var(--sub)}
+.wt-filters{display:flex;gap:6px;margin:12px 0 4px;overflow-x:auto;padding-bottom:4px}
+.wt-filters button{flex:none;padding:9px 14px;border-radius:999px;border:1px solid var(--line);background:transparent;font-size:.8125rem;font-weight:700;color:var(--text);cursor:pointer}
+.wt-filters button[aria-pressed=true]{background:var(--text);border-color:var(--text);color:var(--bg)}
+.wt-note{margin:12px 0 0;font-size:.8125rem;color:var(--sub)}
+.wt-note button{border:0;background:none;color:var(--wt-red-text);font-weight:700;font-size:.8125rem;cursor:pointer;padding:8px 4px}
+.wt-item{display:flex;gap:12px;padding:14px 0;border-bottom:1px solid var(--line);color:var(--text)}
+.wt-item .wt-tile{width:64px;height:64px;flex:none;border-radius:12px;padding:8px;font-size:.8125rem;line-height:1.15}
+.wt-txt{display:flex;flex-direction:column;gap:4px;min-width:0}
+.wt-item h3{margin:0;font-size:.9375rem;font-weight:700;line-height:1.4}
+.wt-item .sk-sum{margin:0;font-size:.8125rem;color:var(--sub);line-height:1.45;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.wt-item .wt-do{font-size:.8125rem;line-height:1.45;color:var(--wt-teal);font-weight:700}
+.wt-item:hover h3{text-decoration:underline}
+.wt-kind{display:inline-block;font-size:.6875rem;font-weight:700;padding:1px 7px;border-radius:999px;background:var(--soft);margin-right:4px}
+.wt-empty{padding:18px 16px;margin-top:12px;background:var(--card);border:1px dashed var(--line);border-radius:14px;font-size:.875rem;line-height:1.6}
+.wt-empty a{color:var(--wt-red-text);font-weight:700}
+.wt-side{margin:22px 0 0;display:block;background:#121214;color:#F2F2F2;border-radius:18px;padding:18px}
+.wt-side b{font-weight:900;font-size:1.25rem;color:#FF4F9A}
+.wt-side p{margin:6px 0 0;font-size:.8125rem;color:#C4C4CC;line-height:1.5}
+.wt-side span{display:inline-block;margin-top:10px;font-size:.8125rem;font-weight:700;color:#D6FF3F}
+.wt-rules{margin:22px 0 0;padding:16px;border-radius:14px;background:var(--soft);font-size:.8125rem;line-height:1.65;color:var(--sub)}
+.wt-rules b{display:block;color:var(--text);margin-bottom:4px}
+</style>"""
+
+WT_JS = """<script>(function(){
+var root=document.getElementById('wt');if(!root)return;
+var tabsBox=root.querySelector('.sk-tabs');tabsBox.setAttribute('role','tablist');tabsBox.setAttribute('aria-label','해설 종류');
+var tabs=[].slice.call(tabsBox.querySelectorAll('button'));
+var items=[].slice.call(root.querySelectorAll('.wt-item'));
+var feats=[].slice.call(root.querySelectorAll('.wt-feature'));
+var filters=document.getElementById('wt-filters'),note=document.getElementById('wt-note'),empty=document.getElementById('wt-empty');
+var q=document.getElementById('wt-q'),head=document.getElementById('wt-listtitle');
+var CATS=JSON.parse(root.getAttribute('data-cats'));
+var st={tab:'life',cat:'전체',q:''};
+var p=new URLSearchParams(location.search);if(p.get('tab')==='buzz')st.tab='buzz';if(p.get('q')){st.q=p.get('q').trim();q.value=st.q;}
+function norm(s){return String(s||'').toLowerCase().replace(/\\s+/g,'');}
+function esc(s){return String(s).replace(/[&<>"']/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c];});}
+function sync(){try{var u=new URL(location.href);st.q?u.searchParams.set('q',st.q):u.searchParams.delete('q');st.tab==='buzz'?u.searchParams.set('tab','buzz'):u.searchParams.delete('tab');history.replaceState(null,'',u);}catch(e){}}
+function render(){
+ var nq=norm(st.q);
+ tabs.forEach(function(b){var on=b.getAttribute('data-tab')===st.tab;b.setAttribute('role','tab');b.setAttribute('aria-selected',on);b.tabIndex=on?0:-1;});
+ feats.forEach(function(f){f.hidden=!!nq||f.getAttribute('data-tab')!==st.tab;});
+ filters.hidden=!!nq;
+ filters.innerHTML=(['전체'].concat(CATS[st.tab]||[])).map(function(c){return '<button type="button" data-cat="'+esc(c)+'" aria-pressed="'+(st.cat===c)+'">'+esc(c)+'</button>';}).join('');
+ var n=0;
+ items.forEach(function(a){
+  var ok;
+  if(nq){ok=norm(a.getAttribute('data-k')).indexOf(nq)>-1;}
+  else{ok=a.getAttribute('data-tab')===st.tab&&(st.cat==='전체'?!a.hasAttribute('data-feature'):a.getAttribute('data-c')===st.cat);}
+  a.hidden=!ok;if(ok)n++;
+  var k=a.querySelector('.wt-kind');if(k)k.hidden=!nq;
+ });
+ head.textContent=nq?'검색 결과':(st.tab==='life'?'생활':'화제')+' 최신 해설';
+ if(nq){note.hidden=false;note.innerHTML='‘'+esc(st.q)+'’ 해설 '+n+'개 · 생활·화제 모두에서 찾았어요 <button type="button" id="wt-clear">검색 지우기</button>';document.getElementById('wt-clear').onclick=function(){setQ('');q.focus();};}
+ else note.hidden=true;
+ empty.hidden=n>0;
+ if(!n){empty.querySelector('b').textContent=nq?'아직 ‘'+st.q+'’ 해설이 없어요.':'아직 이 분야 해설이 없어요.';}
+}
+function setQ(v){st.q=v.trim();q.value=st.q;sync();render();}
+function setTab(t){st.tab=t;st.cat='전체';st.q='';q.value='';sync();render();}
+function jump(){head.scrollIntoView({behavior:'smooth',block:'start'});}
+document.getElementById('wt-form').addEventListener('submit',function(e){e.preventDefault();setQ(q.value);jump();});
+q.addEventListener('input',function(){st.q=q.value.trim();render();});
+root.querySelectorAll('.wt-chip').forEach(function(b){b.addEventListener('click',function(){setQ(b.getAttribute('data-q'));jump();});});
+tabs.forEach(function(b){b.addEventListener('click',function(){setTab(b.getAttribute('data-tab'));});
+ b.addEventListener('keydown',function(e){if(e.key==='ArrowRight'||e.key==='ArrowLeft'){var t=st.tab==='life'?'buzz':'life';setTab(t);tabsBox.querySelector('[data-tab='+t+']').focus();}});});
+filters.addEventListener('click',function(e){var c=e.target.getAttribute('data-cat');if(!c)return;st.cat=c;render();});
+render();
+})();</script>"""
+
+
+def _wt_tab(it):
+    t = str(it.get("tab") or "").strip()
+    if t in ("생활", "life"):
+        return "life"
+    if t in ("화제", "buzz"):
+        return "buzz"
+    return "life" if it.get("cat") in WT_LIFE_CATS else "buzz"
+
+
+def _wt_items(explains):
+    kw = {(ex.get("title") or "").strip(): ex.get("keyword") or "" for ex in explains or []}
+    out = []
+    for it in _sk_items(explains):
+        it = dict(it)
+        it["tab"] = _wt_tab(it)
+        it["name"] = (it.get("name") or kw.get(it["title"], "") or it["title"])[:12]
+        out.append(it)
+    return out
+
+
+def _wt_tile(it, badge=""):
+    img = str(it.get("img") or "")
+    style = ""
+    cls = "wt-tile"
+    if img and not img.lower().startswith(("javascript:", "data:")):
+        style = f' style="background-image:url(\'{_sk_e(img)}\')"'
+        cls += " has-img"
+    return f'<span class="{cls}" aria-hidden="true"{style}>{badge}{_sk_e(it["name"])}</span>'
+
+
+def _wt_block(items):
+    cats = {t: [] for t in WT_TABS}
+    for it in items:
+        if it["cat"] not in cats[it["tab"]]:
+            cats[it["tab"]].append(it["cat"])
+    feats, rows, featured = [], [], set()
+    for tab in WT_TABS:
+        first = next((it for it in items if it["tab"] == tab), None)
+        if not first:
+            continue
+        featured.add(first["url"])
+        life = tab == "life"
+        badge = '<span class="wt-badge">' + ("지금 할 일 있어요" if life and first.get("todo") else "왜 떴어?") + "</span>"
+        feats.append(
+            f'<a class="wt-feature{" wt-life" if life else ""}" data-tab="{tab}" href="{_sk_e(first["url"])}">'
+            + _wt_tile(first, badge)
+            + '<span class="wt-fbody" style="display:block">'
+            + f'<span class="wt-meta">{_sk_e(first["cat"])} · {_sk_e(_sk_date(first["date"]))} · 새콤기자 · {first["mins"]}분</span>'
+            + f'<h2>{_sk_e(first["title"])}</h2>'
+            + (f'<span class="wt-answer" style="display:block"><b>한 줄 답</b>{_sk_e(first["sum"])}</span>' if first.get("sum") else "")
+            + (f'<span class="wt-todo" style="display:block"><b>지금 할 일</b>{_sk_e(first["todo"])}</span>' if first.get("todo") else "")
+            + f'<span class="wt-btn">{"지금 할 일 보기" if life and first.get("todo") else "1분 해설 보기"}</span>'
+            + "</span></a>")
+    for it in items:
+        life = it["tab"] == "life"
+        blob = " ".join([it["title"], it["name"], it["cat"], it.get("sum", ""), it.get("keyword", "")])
+        line = (f'<span class="wt-do">할 일 · {_sk_e(it["todo"])}</span>' if life and it.get("todo")
+                else f'<p class="sk-sum">{_sk_e(it.get("sum", ""))}</p>')
+        rows.append(
+            f'<a class="wt-item sk-row{" wt-life" if life else ""}" data-tab="{it["tab"]}" data-c="{_sk_e(it["cat"])}"'
+            + (' data-feature=""' if it["url"] in featured else "")
+            + f' data-k="{_sk_e(blob)}" href="{_sk_e(it["url"])}">'
+            + _wt_tile(it)
+            + f'<span class="wt-txt"><h3>{_sk_e(it["title"])}</h3>{line}'
+            + f'<span class="wt-meta"><span class="wt-kind" hidden>{WT_TABS[it["tab"]]}</span>'
+            + f'{_sk_e(it["cat"])} · {_sk_e(_sk_date(it["date"]))} · {it["mins"]}분</span></span></a>')
+    chips_src = [it["name"] for it in items[:4]]
+    chips = "".join(f'<button type="button" class="wt-chip" data-q="{_sk_e(c)}">{_sk_e(c)}</button>' for c in chips_src)
+    return (WT_MARK + WT_CSS
+        + f'<div class="wt" id="wt" data-cats=\'{_sk_e(json.dumps(cats, ensure_ascii=False))}\'>'
+        + '<p class="wt-eyebrow">이름은 봤는데, 무슨 일인지 모를 때</p>'
+        + '<h1>오늘 뜬 이슈,<br>1분이면 따라잡아요</h1>'
+        + '<form class="wt-search" id="wt-form" role="search"><label class="sr" for="wt-q">궁금한 이슈 검색</label>'
+        + '<input id="wt-q" type="search" placeholder="궁금한 이름·단어" autocomplete="off" enterkeyhint="search">'
+        + '<button type="submit">찾기</button></form>'
+        + f'<div class="wt-chips" aria-label="최근 해설 키워드"><span>최근 뜬</span>{chips}</div>'
+        + '<div class="sk-tabs"><button type="button" data-tab="life"><b>생활</b><small>지금 할 일까지</small></button>'
+        + '<button type="button" data-tab="buzz"><b>화제</b><small>왜 떴는지까지</small></button></div>'
+        + "".join(feats)
+        + '<div class="wt-listhead"><h2 id="wt-listtitle">최신 해설</h2><p>근거 기사 2곳 이상 확인한 것만</p></div>'
+        + '<div class="wt-filters" id="wt-filters" role="group" aria-label="분야 고르기"></div>'
+        + '<p class="wt-note" id="wt-note" hidden></p>'
+        + '<div class="wt-list">' + "".join(rows) + '</div>'
+        + '<div class="wt-empty" id="wt-empty" hidden><b></b><br>새콤기자는 근거 기사가 2곳 이상 나온 이슈만 써요. '
+        + '지금 뜨는 이슈는 <a href="../">실시간 이슈 순위</a>에서 먼저 확인해 보세요.</div>'
+        + '<a class="wt-side" href="tteokbap.html"><b>떡밥정리소</b><p>팬 시선으로 이어 보는 정리 모음은 따로 모았어요. '
+        + '컴백 순서, 라인업처럼 줄 세워 봐야 보이는 것들이요.</p><span>떡밥정리소 가기 ›</span></a>'
+        + '<aside class="wt-rules"><b>새콤기자가 쓰는 기준</b>공식 발표와 기사 2곳 이상이 있고, ‘왜 지금 떴는지’를 한 줄로 말할 수 있을 때만 써요. '
+        + '생활 해설에는 근거 기사에 나온 ‘지금 할 일’만 적어요. 열애·사생활 추측, 확인 안 된 폭로, 외모 평가는 다루지 않아요.</aside>'
+        + '</div>' + WT_JS)
+
+
+_wt_prev_build_index = build_index
+
+
+def build_index(explains):
+    page = _wt_prev_build_index(explains)
+    try:
+        items = _wt_items(explains)
+        open_tag = '<main class="wrap ex">'
+        if not items or open_tag not in page or '<footer class="foot">' not in page:
+            raise ValueError("skip")
+        start = page.index(open_tag) + len(open_tag)
+        end = page.index('<footer class="foot">', start)
+        page = page[:start] + _wt_block(items) + "\n" + page[end:]
+        page = _sk_re.sub(r"<title>.*?</title>", f"<title>{WT_NAME} | 이름은 봤는데 무슨 일인지 모를 때 - 이슈피클 해설</title>", page, count=1, flags=_sk_re.S)
+        return page
+    except Exception as err:
+        print("[왜떴어] 새 해설 모음을 만들지 못해 예전 화면을 써요:", err)
+        return page

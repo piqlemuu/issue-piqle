@@ -100,7 +100,7 @@ def change_index(doc):
         doc=doc[:start]+doc[end:]
     tabs=re.search(r'<div class="sk-tabs">.*?</div>',doc,re.S)
     if not tabs: raise ValueError('The existing category tabs were not found; aborting.')
-    doc=doc[:tabs.end()]+'\n'+hero(latest)+'\n'+doc[tabs.end():]
+    doc=doc[:tabs.start()]+hero(latest)+'\n'+doc[tabs.start():]  # 소개 문구 바로 아래에 최신 새콤해설
     if 'ISSUEPIQLE_LATEST_STYLE' not in doc:
         doc=doc.replace('</head>', FEATURE_STYLE+'\n</head>',1)
     other=sorted([c for m,c in published if m.start()!=latest_m.start() and c['href']!=latest['href']],

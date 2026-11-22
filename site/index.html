@@ -78,7 +78,7 @@
 
 <main class="wrap">
   <!-- ② 업데이트 시각 · 집계 범위 -->
-  <p class="intro">언론 보도·검색·커뮤니티 반응을 모아 <b>30분마다</b> 갱신하는 실시간 이슈 순위</p>
+  <p class="intro"><b>뜨는 이슈만 골라 새콤하게.</b> 언론 보도·검색·커뮤니티 반응을 모아 30분마다 순위를 새로 매기고, 왜 떴는지는 새콤기자가 풀어 드려요.</p>
   <p class="status" id="status"><i class="dot" aria-hidden="true"></i><span id="updated">불러오는 중…</span></p>
   <div class="alert" id="alert" role="alert" hidden><span>데이터를 불러오지 못했어요. 인터넷 연결을 확인해 주세요.</span><button id="retry">다시 시도</button></div>
 
@@ -250,7 +250,7 @@ function row(it, i, opt = {}) {
   return `<li><a class="row ${th ? "has-img" : ""}" href="${issueLink(it.keyword)}">
     <span class="rank">${i}</span>
     ${th ? `<img class="th" src="${esc(th)}" alt="" loading="lazy" referrerpolicy="no-referrer" decoding="async" width="74" height="51" onerror="this.parentNode.classList.remove('has-img');this.remove()">` : ""}
-    <span class="mid"><span class="l1">${!opt.noCat ? catLbl(it.cat) : ""}<span class="kw">${esc(opt.useKw ? it.keyword : (it.title || it.keyword))}</span>${opt.noChg ? "" : chg(it.change)}${it.explain ? '<span class="lbl ex">해설</span>' : ""}</span>
+    <span class="mid"><span class="l1">${!opt.noCat ? catLbl(it.cat) : ""}<span class="kw">${esc(opt.useKw ? it.keyword : (it.title || it.keyword))}</span>${opt.noChg ? "" : chg(it.change)}${it.explain ? '<span class="lbl ex">왜떴어?</span>' : ""}</span>
       ${it.headline ? `<span class="hl">${esc(it.headline)}</span>` : ""}
       <span class="meta">${meta}</span></span>
     <span class="end">${opt.end ?? `<b class="${tempLv(it.temp)}">${it.temp}°</b><small>${tempWord(it.temp)}</small>`}</span>
@@ -278,7 +278,7 @@ function renderRising() {
     const th = it.img || findThumb(it.keyword);
     return `<a class="box rcard ${th ? "has-img" : ""}" href="${issueLink(it.keyword)}">
       ${th ? `<img class="th" src="${esc(th)}" alt="" loading="lazy" referrerpolicy="no-referrer" decoding="async" width="74" height="51" onerror="this.parentNode.classList.remove('has-img');this.remove()">` : ""}
-      <span class="mid"><span class="kw">${it.is_new ? '<span class="lbl new" style="margin-right:.375rem">NEW</span>' : ""}${catLbl(it.cat)}${esc(it.title || it.keyword)}${it.explain ? '<span class="lbl ex">해설</span>' : ""}</span>
+      <span class="mid"><span class="kw">${it.is_new ? '<span class="lbl new" style="margin-right:.375rem">NEW</span>' : ""}${catLbl(it.cat)}${esc(it.title || it.keyword)}${it.explain ? '<span class="lbl ex">왜떴어?</span>' : ""}</span>
         <span class="hl">${esc(it.headline)}</span>
         <span class="meta">${M(`<b class="${tempLv(it.temp)}">${it.temp}°</b> ${tempWord(it.temp)}`, it.latest ? ago(it.latest) : "", `매체 ${it.sources}곳`)}</span></span>
       <span class="end">${risingSide(it)}</span></a>`;
@@ -305,7 +305,7 @@ function catLead(it) {                              // 분야 1위: 사진을 �
   const th = it.img || findThumb(it.keyword);
   return `<li><a class="clead ${th ? "" : "noimg"}" href="${issueLink(it.keyword)}">
     ${th ? `<span class="ph"><img src="${esc(th)}" alt="" loading="lazy" referrerpolicy="no-referrer" decoding="async" onerror="this.closest('.clead').classList.add('noimg');this.parentNode.remove()"></span>` : ""}
-    <span class="cb"><span class="no">1</span><span class="kw">${esc(it.title || it.keyword)}${chg(it.change)}${it.explain ? '<span class="lbl ex">해설</span>' : ""}</span>
+    <span class="cb"><span class="no">1</span><span class="kw">${esc(it.title || it.keyword)}${chg(it.change)}${it.explain ? '<span class="lbl ex">왜떴어?</span>' : ""}</span>
       ${it.headline ? `<span class="hl">${esc(it.headline)}</span>` : ""}
       <span class="meta">${M(`<b class="${tempLv(it.temp)}">${it.temp}°</b> ${tempWord(it.temp)}`, `매체 ${it.sources}곳`, it.news?.[0]?.time ? ago(it.news[0].time) : "")}</span></span></a></li>`;
 }

@@ -76,7 +76,8 @@ FEATURE_STYLE = '''<!-- ISSUEPIQLE_LATEST_STYLE --><style>
 </style>'''
 
 HOME_STYLE = STYLE + '''<style>
-.ip-original .sec-head h2{font-size:1.375rem;font-weight:900}
+.ip-original{margin-top:1.25rem}
+.ip-original .sec-head h2{font-size:1.5rem;font-weight:900}
 .ip-original .ip-q{color:#D23A22}
 .ip-original-list{list-style:none;display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;margin:12px 0 10px;padding:0}
 .ip-original-list li{min-width:0}
@@ -127,7 +128,7 @@ def change_index(doc):
 BANNER_START = '<!-- ISSUEPIQLE_SIGNGATE_START -->'
 BANNER_END = '<!-- ISSUEPIQLE_SIGNGATE_END -->'
 LIFE_CATS = {'생활·경제', '소비·쇼핑', '생활', '교통', '돈·제도', '쇼핑·할인', '보안'}
-HOME_ANCHOR = '<!-- ④ 분야별 이슈 -->'
+HOME_ANCHOR = '<!-- ②-2 브리핑: 3시간 사이 가장 큰 변화 한 줄 (누르면 펼쳐짐) -->'  # 홈 첫 화면: 왜떴어? → 실시간 순위
 
 
 def _tab(c):
@@ -146,8 +147,8 @@ def change_home(doc, items):
         raise ValueError('Expected homepage elements absent; aborting.')
     doc=doc.replace('</head>',HOME_STYLE+'\n</head>',1)
     esc=lambda s:html.escape(str(s or ''),quote=True)
-    life=[c for c in items if _tab(c)=='life'][:2]
-    buzz=[c for c in items if _tab(c)=='buzz'][:2]
+    life=[c for c in items if _tab(c)=='life'][:1]
+    buzz=[c for c in items if _tab(c)=='buzz'][:1]
     def card(c):
         t=_tab(c)
         lab='생활' if t=='life' else '화제'
@@ -155,7 +156,7 @@ def change_home(doc, items):
               else (f'<span class="ip-sum">{esc(c["summary"])}</span>' if c.get('summary') else ''))
         return (f'<li class="ip-{t}"><a href="i/{esc(c["href"])}"><span class="ip-lab">{lab}</span>'
                 f'<strong>{esc(c["title"])}</strong>{line}<time datetime="{esc(c["date"])}">{esc(c["date"].replace("-","."))}</time></a></li>')
-    cards=[card(c) for c in life+buzz] or [card(c) for c in items[:4]]
+    cards=[card(c) for c in life+buzz] or [card(c) for c in items[:2]]
     section=(START+'\n<section class="sec ip-original" aria-labelledby="ip-original-heading">'
        +'<div class="sec-head"><div><h2 id="ip-original-heading">왜떴어<span class="ip-q">?</span></h2>'
        +'<p>이름은 봤는데 무슨 일인지 모를 때, 새콤기자가 1분 만에 풀어 드려요</p></div></div>'

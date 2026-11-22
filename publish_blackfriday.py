@@ -86,7 +86,9 @@ def insert_teasers():
     if MARK not in src:
         # Prefer top of editorial list, immediately after its intro; no fragile source replacements.
         marker='<div class="sk-tabs">'
-        if marker in src:src=src.replace(marker,teaser+'\n'+marker,1)
+        tabs=re.search(r'<div class="sk-tabs">.*?</div>',src,re.S)
+        if tabs:src=src[:tabs.end()]+'\n'+teaser+src[tabs.end():]
+        elif marker in src:src=src.replace(marker,teaser+'\n'+marker,1)
         elif '<main class="wrap ex">' in src:src=src.replace('<main class="wrap ex">','<main class="wrap ex">'+teaser,1)
         else:raise ValueError('Could not find editorial index main container')
     index.write_text(src,encoding='utf-8')
@@ -95,7 +97,8 @@ def insert_teasers():
         src=home.read_text(encoding='utf-8')
         if MARK not in src:
             card=f'''{MARK}<section class="sec" style="padding:14px 0 22px"><a href="i/coupang-blackfriday-2026-buy-now-or-wait.html" style="display:block;background:var(--card,#fff);border:1px solid var(--line,#ddd);padding:17px;border-radius:13px;text-decoration:none;color:inherit"><small style="color:var(--sub,#888)">NEW · 새콤해설 · 2026.11.19</small><strong style="display:block;font-size:18px;margin:5px 0">블랙프라이데이, 지금 사면 손해일 수도 있어요</strong><span style="color:var(--sub,#888);font-size:14px">쿠팡 가전·디지털 블프, 라이브 기다릴지 지금 살지 비교하기 ›</span></a></section>'''
-            if '<footer class="foot">' in src:src=src.replace('<footer class="foot">',card+'\n<footer class="foot">',1)
+            if '<!-- ISSUEPIQLE_ORIGINAL_START -->' in src:src=src.replace('<!-- ISSUEPIQLE_ORIGINAL_START -->',card+'\n<!-- ISSUEPIQLE_ORIGINAL_START -->',1)
+            elif '<footer class="foot">' in src:src=src.replace('<footer class="foot">',card+'\n<footer class="foot">',1)
             else:raise ValueError('Homepage footer anchor missing')
         home.write_text(src,encoding='utf-8')
 

@@ -79,7 +79,7 @@
       ["explain", "i/index.html", "왜떴어?", '<path d="M6 3h9l4 4v14H6z"/><path d="M14 3v5h5M9 13h6M9 17h4"/>'],
       ["tteok", "i/tteokbap.html", "떡밥정리소", '<rect x="4" y="4" width="16" height="4" rx="1.5"/><rect x="4" y="10" width="16" height="4" rx="1.5"/><rect x="4" y="16" width="10" height="4" rx="1.5"/>'],
       ["memes", "memes.html", "밈절임", '<path d="M4 5h16v11H9l-5 4z"/><path d="M8.5 10.5h.01M12 10.5h.01M15.5 10.5h.01"/>'],
-      ["cal", "m/", "일정", '<rect x="3" y="5" width="18" height="16" rx="2"/><path d="M3 10h18M8 3v4M16 3v4"/>'],
+      ["cal", home ? "#sec-cal" : "https://piqlemuu.github.io/issue-piqle/#sec-cal", "일정", '<rect x="3" y="5" width="18" height="16" rx="2"/><path d="M3 10h18M8 3v4M16 3v4"/>'],
       ["content", "content.html", "콘텐츠", '<rect x="3" y="5" width="18" height="14" rx="2"/><path d="m10 9 5 3-5 3z"/>']
     ];
     nav.setAttribute("aria-label", "주요 메뉴");

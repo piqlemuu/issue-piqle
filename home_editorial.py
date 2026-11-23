@@ -76,23 +76,18 @@ FEATURE_STYLE = '''<!-- ISSUEPIQLE_LATEST_STYLE --><style>
 </style>'''
 
 HOME_STYLE = STYLE + '''<style>
-.ip-original{margin-top:1.25rem}
-.ip-original .sec-head h2{font-size:1.5rem;font-weight:900}
-.ip-original .ip-q{color:#D23A22}
-.ip-original-list{list-style:none;display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;margin:12px 0 10px;padding:0}
-.ip-original-list li{min-width:0}
-.ip-original-list a{display:flex;flex-direction:column;gap:6px;height:100%;padding:15px 16px;border:1px solid var(--line,#ddd);border-radius:14px;background:var(--card,#fff);color:var(--text,inherit);text-decoration:none}
+.ip-original .sec-head h2{font-size:1.25rem;font-weight:900}
+.ip-original .sec-head .ip-all{font-size:.8125rem;color:var(--sub);white-space:nowrap}
+.ip-original-list{list-style:none;margin:2px 0 0;padding:0}
+.ip-original-list li+li{border-top:1px solid var(--line)}
+.ip-original-list a{display:flex;gap:10px;align-items:baseline;padding:10px 0;color:var(--text);text-decoration:none}
 .ip-original-list a:hover strong{text-decoration:underline}
-.ip-lab{align-self:flex-start;font-size:.6875rem;font-weight:800;padding:2px 8px;border-radius:999px;background:#D23A22;color:#fff}
+.ip-lab{flex:none;font-size:.6875rem;font-weight:800;padding:2px 7px;border-radius:4px;background:#D23A22;color:#fff}
 .ip-life .ip-lab{background:#0F6E64}
-.ip-original-list strong{font-size:.98rem;line-height:1.45;word-break:keep-all}
-.ip-original-list .ip-sum{font-size:.84rem;line-height:1.55;color:var(--sub,#64748b);display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
-.ip-original-list .ip-do{font-size:.84rem;line-height:1.55;color:#0F6E64;font-weight:700}
+.ip-txt{display:flex;flex-direction:column;gap:2px;min-width:0}
+.ip-original-list strong{font-size:.98rem;line-height:1.42;word-break:keep-all}
+.ip-original-list .ip-do{font-size:.8125rem;line-height:1.5;color:#0F6E64;font-weight:700}
 html[data-theme=dark] .ip-original-list .ip-do{color:#5FD3C1}
-.ip-original-list time{font-size:.75rem;color:var(--sub,#64748b);margin-top:auto}
-.ip-wt-links{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}
-.ip-wt-links .more{margin-top:0}
-@media(max-width:650px){.ip-original-list{grid-template-columns:1fr}}
 </style>'''
 
 
@@ -147,21 +142,20 @@ def change_home(doc, items):
         raise ValueError('Expected homepage elements absent; aborting.')
     doc=doc.replace('</head>',HOME_STYLE+'\n</head>',1)
     esc=lambda s:html.escape(str(s or ''),quote=True)
-    life=[c for c in items if _tab(c)=='life'][:1]
+    life=[c for c in items if _tab(c)=='life'][:2]
     buzz=[c for c in items if _tab(c)=='buzz'][:1]
     def card(c):
         t=_tab(c)
         lab='생활' if t=='life' else '화제'
-        line=(f'<span class="ip-do">할 일 · {esc(c["todo"])}</span>' if t=='life' and c.get('todo')
-              else (f'<span class="ip-sum">{esc(c["summary"])}</span>' if c.get('summary') else ''))
+        line=(f'<span class="ip-do">할 일 · {esc(c["todo"])}</span>' if t=='life' and c.get('todo') else '')
         return (f'<li class="ip-{t}"><a href="i/{esc(c["href"])}"><span class="ip-lab">{lab}</span>'
-                f'<strong>{esc(c["title"])}</strong>{line}<time datetime="{esc(c["date"])}">{esc(c["date"].replace("-","."))}</time></a></li>')
-    cards=[card(c) for c in life+buzz] or [card(c) for c in items[:2]]
+                f'<span class="ip-txt"><strong>{esc(c["title"])}</strong>{line}</span></a></li>')
+    pick=sorted(life+buzz,key=lambda c:c['date'],reverse=True)[:3]
+    cards=[card(c) for c in pick] or [card(c) for c in items[:3]]
     section=(START+'\n<section class="sec ip-original" aria-labelledby="ip-original-heading">'
-       +'<div class="sec-head"><div><h2 id="ip-original-heading">왜떴어<span class="ip-q">?</span></h2>'
-       +'<p>이름은 봤는데 무슨 일인지 모를 때, 새콤기자가 1분 만에 풀어 드려요</p></div></div>'
+       +'<div class="sec-head"><div><h2 id="ip-original-heading">왜떴어?</h2></div><a class="ip-all" href="i/">전체 ›</a></div>'
        +'<ul class="ip-original-list">'+''.join(cards)+'</ul>'
-       +'<div class="ip-wt-links"><a class="more" href="i/">생활 해설 전체 ›</a><a class="more" href="i/?tab=buzz">화제 해설 전체 ›</a></div></section>\n'
+       +'</section>\n'
        +END+'\n')
     doc=doc.replace(HOME_ANCHOR,section+'\n  '+HOME_ANCHOR,1)
     doc=doc.replace('<footer class="foot">',BANNER_START+'\n'+SIGNGATE_BANNER+'\n'+BANNER_END+'\n<footer class="foot">',1)

@@ -598,6 +598,69 @@ def who_html(x):
     return f'<p class="who">대상: {e(x["who"])}</p>' if x["who"] else ""
 
 
+CAL_DARK_CSS = (
+    "#cal-dk{background:#111;color:#F3EEE6;border-radius:24px;padding:22px 14px 16px;margin-top:.75rem}"
+    "#cal-dk .mo{margin:0;font-size:2.75rem;line-height:1;font-weight:900;letter-spacing:-.04em;color:#F3EEE6}"
+    "#cal-dk h2{margin:6px 0 0;font-size:1.0625rem;font-weight:800;color:#F3EEE6}"
+    "#cal-dk .sub{margin:.25rem 0 0;font-size:.8125rem;color:#A9A49B}"
+    "#cal-dk .grid7{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:4px;margin-top:18px}"
+    "#cal-dk .cw{text-align:center;font-size:.75rem;font-weight:800;padding-bottom:4px}#cal-dk .cw.sun{color:#8D8A84}"
+    "#cal-dk .cd{display:flex;flex-direction:column;align-items:center;gap:2px;aspect-ratio:1/1.25;border-radius:9px;background:#2E2E2E;padding-top:6px;min-width:0;color:#F3EEE6;text-decoration:none}"
+    "#cal-dk .cd b{font-size:.8125rem;font-weight:800}#cal-dk .cd.sun b,#cal-dk .cd.past b{color:#7D7A75}"
+    "#cal-dk .cd.today{box-shadow:inset 0 0 0 2px #F3EEE6}#cal-dk .cd.on{background:#F3EEE6}#cal-dk .cd.on b{color:#111}"
+    "#cal-dk .cd small{font-size:.5625rem;font-weight:700;color:#3A3A3A;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:100%;padding:0 2px}"
+    "#cal-dk .tiles{margin-top:14px;display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}"
+    "#cal-dk .ct{display:flex;flex-direction:column;gap:4px;padding:12px;border-radius:14px;background:#F3EEE6;color:#111;text-decoration:none}"
+    "#cal-dk .ct:nth-child(3n+2){background:#2E2E2E;color:#F3EEE6}"
+    "#cal-dk .ct .t{display:flex;align-items:baseline;justify-content:space-between;gap:6px}"
+    "#cal-dk .ct .n{font-size:1.5rem;font-weight:900;letter-spacing:-.03em;line-height:1}"
+    "#cal-dk .ct .dd{white-space:nowrap;font-size:.75rem;font-weight:800;padding:2px 7px;border-radius:999px;background:rgba(17,17,17,.08)}"
+    "#cal-dk .ct:nth-child(3n+2) .dd{background:rgba(243,238,230,.14)}#cal-dk .ct .dd.hot{background:#E5533D;color:#fff}"
+    "#cal-dk .ct .w{font-size:.75rem;font-weight:700;opacity:.8}"
+    "#cal-dk .ct .k{font-size:.875rem;font-weight:800;line-height:1.4;letter-spacing:-.02em;display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden}"
+    "#cal-dk .ct .c{margin-top:auto;font-size:.6875rem;font-weight:700;opacity:.8}"
+)
+MONTH_EN = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"]
+
+
+def cal_dark_html(today, items):
+    """m/ 첫 화면용 검은 달력: 이번 달 칸 + 다가오는 일정 카드 (calendar.md의 실제 날짜만 씀)"""
+    import calendar as _cal
+    td = datetime.strptime(today, "%Y-%m-%d")
+    mon = today[:7]
+    on = {}
+    for x in items:
+        if len(x["date"]) == 10 and x["date"][:7] == mon:
+            on.setdefault(int(x["date"][8:]), x)
+    first = (datetime(td.year, td.month, 1).weekday() + 1) % 7      # 일요일=0
+    last = _cal.monthrange(td.year, td.month)[1]
+    cells = "".join(f'<span class="cw{" sun" if i == 0 else ""}">{w}</span>' for i, w in enumerate("SMTWTFS"))
+    cells += '<span></span>' * first
+    for d in range(1, last + 1):
+        x = on.get(d)
+        cls = " ".join(c for c in ["cd", "on" if x else "", "past" if d < td.day else "", "today" if d == td.day else "",
+                                    "sun" if (first + d - 1) % 7 == 0 else ""] if c)
+        inner = f'<b>{d}</b>' + (f'<small>{e(x["cat"] or "일정")}</small>' if x else "")
+        cells += (f'<a class="{cls}" href="{mon}.html#{e(slug(x["title"]))}">{inner}</a>' if x else f'<span class="{cls}">{inner}</span>')
+    tiles = []
+    for t in calendar_home(today, n=8):
+        md = re.match(r"(\d{1,2})월\s*(\d{1,2})일", t["when"])
+        mm = re.match(r"(\d{1,2})월", t["when"])
+        if md and t["month"] == mon:
+            num = md.group(2)
+        elif md:
+            num = f"{md.group(1)}.{md.group(2)}"
+        else:
+            num = f"{mm.group(1)}월" if mm else e(t["when"])
+        hot = " hot" if re.match(r"^D-[0-7]$|오늘", t["dday"]) else ""
+        tiles.append(f'<a class="ct" href="{t["month"]}.html#{e(t["anchor"])}"><span class="t"><b class="n">{num}</b>'
+                     f'<b class="dd{hot}">{e(t["dday"])}</b></span><span class="w">{e(t["when"])}</span>'
+                     f'<span class="k">{e(t["title"])}</span>' + (f'<span class="c">{e(t["cat"])}</span>' if t["cat"] else "") + '</a>')
+    return (f'<section id="cal-dk" aria-labelledby="cal-h"><p class="mo" aria-hidden="true">{MONTH_EN[td.month - 1]}</p>'
+            f'<h2 id="cal-h">다가오는 생활 일정</h2><p class="sub">이번 달 시행되거나 바뀌는 제도와 일정이에요 · {td.month}월 {td.day}일 기준</p>'
+            f'<div class="grid7">{cells}</div>' + (f'<div class="tiles">{"".join(tiles)}</div>' if tiles else "") + '</section>')
+
+
 def build_months(today):
     items = read_calendar()
     MON_DIR.mkdir(parents=True, exist_ok=True)
@@ -661,9 +724,12 @@ def build_months(today):
                        url=url, ogtitle="월별 달라지는 것 — 이슈피클", ogimg=e(OG_IMG), ld=json.dumps(ld, ensure_ascii=False))
     lis = "".join(f'<li><a href="{mm}.html"><span><span class="tt">{int(mm[:4])}년 {int(mm[5:])}월 달라지는 것</span>'
                   f'<small>{sum(1 for x in items if x["date"][:7] == mm)}가지</small></span></a></li>' for mm in reversed(months))
-    (MON_DIR / "index.html").write_text(head + '<a class="back" href="../index.html">‹ 홈으로</a><h1>월별 달라지는 것</h1>'
+    head = head.replace("</style>", CAL_DARK_CSS + "</style>", 1)
+    (MON_DIR / "index.html").write_text(head + '<a class="back" href="../index.html">‹ 홈으로</a><h1>월별 달라지는 것</h1>' + cal_dark_html(today, items) +
         f'<div class="box" style="margin-top:.75rem"><ul class="nlist">{lis or "<li class=state>아직 정리한 달이 없어요.</li>"}</ul></div>' + FOOT,
         encoding="utf-8")
+    _ix = MON_DIR / "index.html"
+    _ix.write_text(_ix.read_text(encoding="utf-8").replace('<nav class="bnav" data-here="">', '<nav class="bnav" data-here="cal">', 1), encoding="utf-8")
     return [mm for mm in months if sum(1 for x in items if x["date"][:7] == mm) >= CAL_MIN_INDEX]
 
 

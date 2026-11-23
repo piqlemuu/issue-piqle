@@ -53,6 +53,37 @@
 html:not([data-theme=dark]) .logo a{color:#1F2A30}
 html:not([data-theme=dark]) .logo span{color:#0B74B8;background:linear-gradient(transparent 58%,#FFF06A 58%);padding:0 1px}
 </style>
+<style>/* CAL_DARK: 일정 — 다크 달력 */
+#sec-cal{scroll-margin-top:72px}
+#sec-cal.cal-dk{background:#111;color:#F3EEE6;border-radius:24px;padding:22px 14px 16px;margin-left:-4px;margin-right:-4px}
+.cal-hd h2{margin:6px 0 0;font-size:1.0625rem;font-weight:800;color:#F3EEE6}
+.cal-hd p{margin:.25rem 0 0;font-size:.8125rem;color:#A9A49B}
+.cal-hd .cal-mo{margin:0;font-size:2.75rem;line-height:1;font-weight:900;letter-spacing:-.04em;color:#F3EEE6}
+.cal-month{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:4px;margin-top:18px}
+.cal-month .cw{text-align:center;font-size:.75rem;font-weight:800;color:#F3EEE6;padding-bottom:4px}
+.cal-month .cw.sun{color:#8D8A84}
+.cal-month .cd{display:flex;flex-direction:column;align-items:center;gap:2px;aspect-ratio:1/1.25;border-radius:9px;background:#2E2E2E;padding-top:6px;min-width:0}
+.cal-month .cd.blank{background:#1C1C1C}
+.cal-month .cd b{font-size:.8125rem;font-weight:800;color:#F3EEE6}
+.cal-month .cd.sun b,.cal-month .cd.past b{color:#7D7A75}
+.cal-month .cd.today{box-shadow:inset 0 0 0 2px #F3EEE6}
+.cal-month .cd.on{background:#F3EEE6}
+.cal-month .cd.on b{color:#111}
+.cal-month .cd small{font-size:.5625rem;font-weight:700;color:#3A3A3A;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:100%;padding:0 2px}
+#sec-cal .calgrid{margin-top:14px;display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}
+#sec-cal .ctile{display:flex;flex-direction:column;gap:4px;padding:12px;border-radius:14px;background:#F3EEE6;color:#111;text-decoration:none}
+#sec-cal .ctile:nth-child(3n+2){background:#2E2E2E;color:#F3EEE6}
+#sec-cal .ctile .ct{display:flex;align-items:baseline;justify-content:space-between;gap:6px}
+#sec-cal .ctile .num{font-size:1.5rem;font-weight:900;letter-spacing:-.03em;line-height:1}
+#sec-cal .ctile .dd{white-space:nowrap;font-size:.75rem;font-weight:800;padding:2px 7px;border-radius:999px;background:rgba(17,17,17,.08)}
+#sec-cal .ctile:nth-child(3n+2) .dd{background:rgba(243,238,230,.14)}
+#sec-cal .ctile .dd.hot{background:#E5533D;color:#fff}
+#sec-cal .ctile .dd{color:inherit}
+#sec-cal .ctile .dt{color:inherit;font-size:.75rem;font-weight:700;opacity:.8}
+#sec-cal .ctile .kw{font-size:.875rem;font-weight:800;line-height:1.4;letter-spacing:-.02em;display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden}
+#sec-cal .ctile .cc{color:inherit;margin-top:auto;font-size:.6875rem;font-weight:700;opacity:.8}
+#sec-cal .more{color:#F3EEE6;border-color:#3A3A3A;background:transparent}
+</style>
 </head>
 <body>
 <header class="top">
@@ -133,8 +164,9 @@ html:not([data-theme=dark]) .logo span{color:#0B74B8;background:linear-gradient(
   </section>
 
   <!-- ⑤-2 이번 달 달라지는 것 (calendar.md) -->
-  <section class="sec" id="sec-cal" aria-labelledby="h-cal" hidden>
-    <div class="sec-head"><div><h2 id="h-cal">📅 다가오는 생활 일정</h2><p>이번 달 시행되거나 바뀌는 제도와 일정이에요</p></div></div>
+  <section class="sec cal-dk" id="sec-cal" aria-labelledby="h-cal" hidden>
+    <div class="cal-hd"><p class="cal-mo" id="cal-mo" aria-hidden="true"></p><h2 id="h-cal">다가오는 생활 일정</h2><p>이번 달 시행되거나 바뀌는 제도와 일정이에요</p></div>
+    <div class="cal-month" id="cal-month" aria-hidden="true"></div>
     <div class="calgrid" id="cal"></div>
     <a class="more" id="cal-more" href="m/">월별 달라지는 것 전체 보기 ›</a>
   </section>
@@ -386,14 +418,49 @@ function renderBrief() {
 }
 
 // ── 다가오는 생활 일정 ──
+// 일정 버튼: 데이터가 늦게 와도 한 번 누르면 달력으로 이동
+let CAL_WANT = location.hash === "#sec-cal";
+function goCal() {
+  const el = $("sec-cal");
+  if (!el || el.hidden) return false;
+  el.scrollIntoView({block: "start"});
+  setTimeout(() => el.scrollIntoView({block: "start"}), 600);   // 위쪽 사진·광고가 늦게 떠서 밀린 만큼 다시 맞춤
+  CAL_WANT = false;
+  return true;
+}
+document.addEventListener("click", e => {
+  const a = e.target.closest && e.target.closest('a[href="#sec-cal"]');
+  if (!a) return;
+  e.preventDefault();
+  try { history.replaceState(null, "", "#sec-cal"); } catch (_) {}
+  if (!goCal()) CAL_WANT = true;
+});
 function renderCal() {
   const c = DATA?.calendar || [];
   $("sec-cal").hidden = !c.length;
   if (!c.length) return;
-  $("cal").innerHTML = c.map(it => `<a class="box ctile" href="m/${esc(it.month)}.html#${encodeURIComponent(it.anchor || "")}">
-      <span class="ct"><b class="dd ${/^D-[0-7]$|오늘/.test(it.dday) ? "hot" : ""}">${esc(it.dday)}</b><span class="dt">${/중$/.test(it.when) ? "이달 중" : esc(it.when)}</span></span>
+  const base = new Date(DATA.updated || Date.now());
+  const Y = base.getFullYear(), Mo = base.getMonth();
+  const ym = `${Y}-${String(Mo + 1).padStart(2, "0")}`;
+  const dayOf = it => { const m = /(\d{1,2})월\s*(\d{1,2})일/.exec(it.when || ""); return m && it.month === ym && +m[1] === Mo + 1 ? +m[2] : 0; };
+  const ev = {}; c.forEach(it => { const d = dayOf(it); if (d) (ev[d] = ev[d] || []).push(it); });
+  $("cal-mo").textContent = ["January","February","March","April","May","June","July","August","September","October","November","December"][Mo];
+  const first = new Date(Y, Mo, 1).getDay(), last = new Date(Y, Mo + 1, 0).getDate(), today = base.getDate();
+  let cells = "SMTWTFS".split("").map((w, i) => `<span class="cw${i === 0 ? " sun" : ""}">${w}</span>`).join("");
+  for (let i = 0; i < first; i++) cells += '<span class="cd blank"></span>';
+  for (let d = 1; d <= last; d++) {
+    const e = ev[d], cls = ["cd", e ? "on" : "", d < today ? "past" : "", d === today ? "today" : "", (first + d - 1) % 7 === 0 ? "sun" : ""].filter(Boolean).join(" ");
+    cells += `<span class="${cls}"><b>${d}</b>${e ? `<small>${esc(e[0].cat || "일정")}</small>` : ""}</span>`;
+  }
+  $("cal-month").innerHTML = cells;
+  $("cal").innerHTML = c.map(it => { const d = dayOf(it), mm = /(\d{1,2})월/.exec(it.when || ""), md = /(\d{1,2})월\s*(\d{1,2})일/.exec(it.when || "");
+    const num = d || (md ? `${md[1]}.${md[2]}` : (mm ? `${mm[1]}월` : esc(it.when)));
+    return `<a class="ctile" href="m/${esc(it.month)}.html#${encodeURIComponent(it.anchor || "")}">
+      <span class="ct"><b class="num">${num}</b><b class="dd ${/^D-[0-7]$|오늘/.test(it.dday) ? "hot" : ""}">${esc(it.dday)}</b></span>
+      <span class="dt">${/중$/.test(it.when) ? `${mm ? mm[1] + "월 " : ""}중` : esc(it.when)}</span>
       <span class="kw">${esc(it.title)}</span>
-      ${it.cat ? `<span class="cc">${esc(it.cat)}</span>` : ""}</a>`).join("");
+      ${it.cat ? `<span class="cc">${esc(it.cat)}</span>` : ""}</a>`; }).join("");
+  if (CAL_WANT) requestAnimationFrame(goCal);
 }
 
 // ── 커뮤니티 화제 ──

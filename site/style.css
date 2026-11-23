@@ -444,3 +444,20 @@ mark.warn{background:linear-gradient(transparent 84%,rgba(229,72,77,.55) 84%);co
 .nlist.blist .bt{flex:1;min-width:0}
 .nlist.blist .tt{font-weight:600;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
 .nlist.blist .go{flex:none;color:var(--sub);font-size:1.25rem;line-height:1}
+
+/* ── 홈 B (2026-11): 굵은 선으로 구역 나누기 · 지금 뜨는 이슈 10개를 두 줄로 ── */
+#sec-top,.ip-original{border-top:3px solid var(--text);padding-top:.625rem}
+#sec-top .box{border:0;box-shadow:none;background:transparent}
+#top{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));grid-template-rows:repeat(5,auto);grid-auto-flow:column;column-gap:1rem}
+#top>li+li{border-top:0}
+#top>li{border-bottom:1px solid var(--line)}
+#top .row{grid-template-columns:1.25rem minmax(0,1fr);gap:.5rem;padding:.625rem 0;border-radius:0!important}
+#top .row.has-img{grid-template-columns:1.25rem minmax(0,1fr)}
+#top .th,#top .hl,#top .meta,#top .end,#top .chg,#top .lbl.cat,#top .lbl.new{display:none}
+#top .row .rank{font-size:.9375rem;text-align:left}
+#top>li:nth-child(-n+3) .rank{color:var(--text)}
+#top>li:nth-child(n+4) .rank{color:var(--sub)}
+#top .row .kw{font-size:.9375rem}
+#top .lbl.ex{font-size:.625rem;padding:0 .3rem}
+#top .l1{display:flex;align-items:center;min-width:0}
+#top .kw{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;min-width:0}

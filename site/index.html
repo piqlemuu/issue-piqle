@@ -48,6 +48,11 @@
 .ip-original-list span{font-size:.84rem;line-height:1.65;color:var(--sub,#64748b)}
 @media(max-width:650px){.ip-original-list{grid-template-columns:1fr}}
 </style>
+<style>/* HOME_BG: 홈만 흰 배경 */:root{--bg:#FFFFFF}</style>
+<style>/* BRAND_LOGO: 로고 (이 페이지만) */
+html:not([data-theme=dark]) .logo a{color:#1F2A30}
+html:not([data-theme=dark]) .logo span{color:#0B74B8;background:linear-gradient(transparent 58%,#FFF06A 58%);padding:0 1px}
+</style>
 </head>
 <body>
 <header class="top">
@@ -259,9 +264,9 @@ function row(it, i, opt = {}) {
 
 function renderTop() {
   const list = DATA?.top || [];
-  const TOP_SHOW = 5, TOP_MAX = 10;                      // 처음엔 5위까지, '더 보기'를 누르면 10위까지
+  const TOP_SHOW = 10, TOP_MAX = 10;                      // 처음엔 5위까지, '더 보기'를 누르면 10위까지
   $("top").innerHTML = list.length ? list.slice(0, topOpen ? TOP_MAX : TOP_SHOW).map((it, i) => row(it, i + 1, {thumb: true})).join("") : stateMsg("이슈");
-  $("top-more").hidden = list.length <= TOP_SHOW;
+  $("top-more").hidden = list.length <= TOP_SHOW || TOP_SHOW >= TOP_MAX;
   $("top-more").setAttribute("aria-expanded", topOpen);
   $("top-more").textContent = topOpen ? "접기" : `실시간 이슈 ${Math.min(list.length, TOP_MAX)}위까지 더 보기`;
 }
